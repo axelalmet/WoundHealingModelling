@@ -11,7 +11,7 @@
 #include "CheckpointArchiveTypes.hpp" //Needed if we use GetIdentifier() method (which we do)
 #include "HoneycombMeshGenerator.hpp" //Generates mesh
 #include "DifferentiatedCellProliferativeType.hpp" //Stops cells from proliferating
-#include "FixedRegionPlaneBoundaryCondition.hpp" // Fixed-position boundary condition
+// #include "FixedRegionPlaneBoundaryCondition.hpp" // Fixed-position boundary condition
 #include "HoneycombMeshGenerator.hpp" //Generates mesh
 #include "NoCellCycleModel.hpp"
 #include "NodeBasedCellPopulation.hpp"
@@ -25,7 +25,7 @@
 
 #include "Debug.hpp"
 
-static const std::string M_OUTPUT_DIRECTORY = "MeasuringOSStresses";
+static const std::string M_OUTPUT_DIRECTORY = "WoundHealingModel";
 static const double M_DT = 0.05;
 static const double M_END_TIME = 1.0;
 //static const double M_SECOND_END_TIME = 1.0;
@@ -38,9 +38,9 @@ public:
     {
 
         //Set all the spring stiffness variables
-        double epithelial_epithelial_stiffness = 45.0;
-        double epithelial_stromal_stiffness = 45.0;
-        double stromal_stromal_stiffness = 45.0;
+        // double epithelial_epithelial_stiffness = 45.0;
+        // double epithelial_stromal_stiffness = 45.0;
+        // double stromal_stromal_stiffness = 45.0;
 
         //Set the number of cells across and down for the array
         unsigned cells_across = 20;
@@ -48,7 +48,7 @@ public:
 
         //Set the basement membrane force parameters
 
-        double epithelial_epithelial_resting_spring_length = 1.0;
+        // double epithelial_epithelial_resting_spring_length = 1.0;
 
         double radius_of_interaction = 1.5;
         double division_separation = 0.1;
@@ -57,6 +57,7 @@ public:
         MutableMesh<2, 2>* p_generating_mesh = generator.GetMesh(); //Generate mesh
 
         // Construct the mesh that we'll actually use.
+		NodesOnlyMesh<2> mesh;
         mesh.ConstructNodesWithoutMesh(*p_generating_mesh, radius_of_interaction); //Construct mesh
 
         //Get the real indices
@@ -141,4 +142,4 @@ public:
     }
 };
 
-#endif /* TESTWOUNDHEALINGINCROSSSECTIONALGEOMETRY
+#endif /* TESTWOUNDHEALINGINCROSSSECTIONALGEOMETRY */
