@@ -9,7 +9,7 @@
 	</OffLatticeSimulation-2-2>
 
 	<NodeBasedCellPopulation-2>
-		<MechanicsCutOffLength>1.5</MechanicsCutOffLength>
+		<MechanicsCutOffLength>30</MechanicsCutOffLength>
 		<UseVariableRadii>0</UseVariableRadii>
 		<MeinekeDivisionSeparation>0.1</MeinekeDivisionSeparation>
 		<CentreBasedDivisionRule>
@@ -38,6 +38,13 @@
 	</SimulationModifiers>
 
 	<Forces>
+		<RepulsionForce-2>
+			<MeinekeSpringStiffness>30</MeinekeSpringStiffness>
+			<MeinekeDivisionRestingSpringLength>0.5</MeinekeDivisionRestingSpringLength>
+			<MeinekeSpringGrowthDuration>1</MeinekeSpringGrowthDuration>
+			<UseCutOffLength>0</UseCutOffLength>
+			<CutOffLength>1.79769e+308</CutOffLength>
+		</RepulsionForce-2>
 	</Forces>
 
 	<CellPopulationBoundaryConditions>
