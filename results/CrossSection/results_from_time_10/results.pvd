@@ -6,5 +6,9 @@
         <DataSet timestep="1000" group="" part="0" file="results_1000.vtu"/>
         <DataSet timestep="1500" group="" part="0" file="results_1500.vtu"/>
         <DataSet timestep="2000" group="" part="0" file="results_2000.vtu"/>
+        <DataSet timestep="2500" group="" part="0" file="results_2500.vtu"/>
+        <DataSet timestep="3000" group="" part="0" file="results_3000.vtu"/>
+        <DataSet timestep="3500" group="" part="0" file="results_3500.vtu"/>
+        <DataSet timestep="4000" group="" part="0" file="results_4000.vtu"/>
     </Collection>
 </VTKFile>

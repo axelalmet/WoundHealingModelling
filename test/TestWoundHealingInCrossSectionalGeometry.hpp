@@ -222,16 +222,16 @@ public:
             {
                 cell_iter->Kill();
             }
-            else // Add a nutrient-gradient due to fibrin clot formation
-            {
-                double nutrient = exp(-(pow((x - wound_centre)/(0.1*max_width), 2.0)));
-                cell_iter->GetCellData()->SetItem("nutrient", nutrient);
-            }
+            // else // Add a nutrient-gradient due to fibrin clot formation
+            // {
+            //     double nutrient = exp(-(pow((x - wound_centre)/(0.1*max_width), 2.0)));
+            //     cell_iter->GetCellData()->SetItem("nutrient", nutrient);
+            // }
         }
 
-        // Add chemotaxis-based force.
-        MAKE_PTR(WoundBasedChemotacticForce<2>, p_chemotactic_force);
-        simulator.AddForce(p_chemotactic_force);
+        // // Add chemotaxis-based force.
+        // MAKE_PTR(WoundBasedChemotacticForce<2>, p_chemotactic_force);
+        // simulator.AddForce(p_spring_force);
 
         simulator.SetSamplingTimestepMultiple(0.25*M_SAMPLING_TIMESTEP);
         simulator.SetEndTime(3.0*M_END_TIME);
