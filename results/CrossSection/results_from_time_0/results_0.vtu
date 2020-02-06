@@ -3,25 +3,26 @@
   <UnstructuredGrid>
     <Piece NumberOfPoints="300"                  NumberOfCells="0"                   >
       <PointData>
-        <DataArray type="Float64" Name="Cell types" format="appended" RangeMin="1"                    RangeMax="5"                    offset="0"                   />
-        <DataArray type="Float64" Name="Process rank" format="appended" RangeMin="0"                    RangeMax="0"                    offset="72"                  />
+        <DataArray type="Float64" Name="Cell types" format="appended" RangeMin="0"                    RangeMax="1"                    offset="0"                   />
+        <DataArray type="Float64" Name="Process rank" format="appended" RangeMin="0"                    RangeMax="0"                    offset="68"                  />
+        <DataArray type="Float64" Name="volume" format="appended" RangeMin="0.7853981634"         RangeMax="0.7853981634"         offset="128"                 />
       </PointData>
       <CellData>
       </CellData>
       <Points>
-        <DataArray type="Float64" Name="Vertex positions" NumberOfComponents="3" format="appended" RangeMin="0"                    RangeMax="30.512292605"         offset="132"                 />
+        <DataArray type="Float64" Name="Vertex positions" NumberOfComponents="3" format="appended" RangeMin="0"                    RangeMax="30.512292605"         offset="200"                 />
       </Points>
       <Cells>
-        <DataArray type="Int64" Name="connectivity" format="appended" RangeMin=""                     RangeMax=""                     offset="1092"                />
-        <DataArray type="Int64" Name="offsets" format="appended" RangeMin=""                     RangeMax=""                     offset="1108"                />
-        <DataArray type="UInt8" Name="types" format="appended" RangeMin=""                     RangeMax=""                     offset="1124"                />
+        <DataArray type="Int64" Name="connectivity" format="appended" RangeMin=""                     RangeMax=""                     offset="1160"                />
+        <DataArray type="Int64" Name="offsets" format="appended" RangeMin=""                     RangeMax=""                     offset="1176"                />
+        <DataArray type="UInt8" Name="types" format="appended" RangeMin=""                     RangeMax=""                     offset="1192"                />
       </Cells>
     </Piece>
   </UnstructuredGrid>
   <AppendedData encoding="base64">
-   _AQAAAACAAABgCQAAIwAAAA==eJxjYAABEQeGEUV/sB+lR+lRepQepUfpUXqUphUNAFxBSXo=AQAAAACAAABgCQAAGQAAAA==eJztwTEBAAAAwqD1T20JT6AAAHgaCWAAAQ==AQAAAACAAAAgHAAAvQIAAA==eJx92LuqM1UYBuAUKTaYIoYYQgwx5/M5M5mZZIYJio1oYyH23oXV33sn2nsNtvYWKUWbXQZs3D+SwnEeV/msYsHL4uXjq1T+77zmuLiV8wu8Dm/C2/AuvA8fwsfwKXwOX8LX8C18Dz/Aj/ATPICH8DM8gsfwBH6BX+EpPIPf8x+//Pb373/+s/B/H/Dqrdxr8Aa8Be/Ae/ABfASfwGfwBXwF38B35f5uDz/Aj/ATPICH8DM8gsfwBH6BX+EpPEPOlco//lfBX/Nyr9zK/QVehzfhbXgX3ocP4WP4FD6HL+Fr+Ba+hx/gR/gJHsBD+BkewWN4Ar/Ar/AUnsHv+bvk0+1vv1Rv//YHvHor9xq8AW/BO/AefAAfwSfwGXwBX8E38F25v/VzuR/gR/gJHsBD+BkewWN4Ar/Ar/AUniHnZz9/UPBnPxf92c9Ff4HX4U14G96F9+FD+Bg+hc/hS/gavoXv4Qf4EX6CB/AQfoZH8BiewC/wKzyFZ/B7/scu+rX29YcFf8Crt3KvwRvwFrwD78EH8BF8Ap/BF/AVfAPflftbP5f7AX6En+ABPISf4RE8hifwC/wKT+EZcn7/9PveLu4bXvNyr9zK/QVehzfhbXgX3ocP4WP4FD6HL+Fr+Ba+hx/gR/gJHsBD+BkewWN4Ar/Ar/AUnsHv+UefffXDT3lxT/aAV2/lXoM34C14B96DD+Aj+AQ+gy/gK/gGviv3t34u9wP8CD/BA3gIP8MjeAxP4Bf4FZ7CM+T8nJ8/Lvhzfi76c34u+gu8Dm/C2/AuvA8fwsfwKXwOX8LX8C18Dz/Aj/ATPICH8DM8gsfwBH6BX+EpPIPf8/yb7z7/YvNJwR/w6q3ca/AGvAXvwHvwAXwEn8Bn8AV8Bd/Ad+X+1s/lfoAf4Sd4AA/hZ3gEj+EJ/AK/wlN49h//GyhwMdo=AAAAAACAAAAAAAAAAAAAAACAAAAAAAAAAAAAAACAAAAAAAAA
+   _AQAAAACAAABgCQAAIQAAAA==eJxjYACBD/YMo/QoPUqP0qP0KD1K05keBcMVAADNpRwgAQAAAACAAABgCQAAGQAAAA==eJztwTEBAAAAwqD1T20JT6AAAHgaCWAAAQ==AQAAAACAAABgCQAAIwAAAA==eJyT0HUJ+a340l5ilB6lR+lRepQepUfpUXqUpgoNAPulqto=AQAAAACAAAAgHAAAvQIAAA==eJx92LuqM1UYBuAUKTaYIoYYQgwx5/M5M5mZZIYJio1oYyH23oXV33sn2nsNtvYWKUWbXQZs3D+SwnEeV/msYsHL4uXjq1T+77zmuLiV8wu8Dm/C2/AuvA8fwsfwKXwOX8LX8C18Dz/Aj/ATPICH8DM8gsfwBH6BX+EpPIPf8x+//Pb373/+s/B/H/Dqrdxr8Aa8Be/Ae/ABfASfwGfwBXwF38B35f5uDz/Aj/ATPICH8DM8gsfwBH6BX+EpPEPOlco//lfBX/Nyr9zK/QVehzfhbXgX3ocP4WP4FD6HL+Fr+Ba+hx/gR/gJHsBD+BkewWN4Ar/Ar/AUnsHv+bvk0+1vv1Rv//YHvHor9xq8AW/BO/AefAAfwSfwGXwBX8E38F25v/VzuR/gR/gJHsBD+BkewWN4Ar/Ar/AUniHnZz9/UPBnPxf92c9Ff4HX4U14G96F9+FD+Bg+hc/hS/gavoXv4Qf4EX6CB/AQfoZH8BiewC/wKzyFZ/B7/scu+rX29YcFf8Crt3KvwRvwFrwD78EH8BF8Ap/BF/AVfAPflftbP5f7AX6En+ABPISf4RE8hifwC/wKT+EZcn7/9PveLu4bXvNyr9zK/QVehzfhbXgX3ocP4WP4FD6HL+Fr+Ba+hx/gR/gJHsBD+BkewWN4Ar/Ar/AUnsHv+UefffXDT3lxT/aAV2/lXoM34C14B96DD+Aj+AQ+gy/gK/gGviv3t34u9wP8CD/BA3gIP8MjeAxP4Bf4FZ7CM+T8nJ8/Lvhzfi76c34u+gu8Dm/C2/AuvA8fwsfwKXwOX8LX8C18Dz/Aj/ATPICH8DM8gsfwBH6BX+EpPIPf8/yb7z7/YvNJwR/w6q3ca/AGvAXvwHvwAXwEn8Bn8AV8Bd/Ad+X+1s/lfoAf4Sd4AA/hZ3gEj+EJ/AK/wlN49h//GyhwMdo=AAAAAACAAAAAAAAAAAAAAACAAAAAAAAAAAAAAACAAAAAAAAA
   </AppendedData>
 </VTKFile>
 
-<!-- Created by Chaste version 2019.1.79285 (with uncommitted modifications) on Thu, 30 Jan 2020 23:32:17 +0000.  Chaste was built on Wed, 29 Jan 2020 15:43:32 +0000 by machine (uname) 'Linux' using settings: Debug.  Checked-out project versions: AxelA=58358c550748fedf6088863782fdd77870262cc6; MorphoCellBasedComparison=16de33a9744c65327e83bc3f0c912a1b99f2ee7d; WoundHealingModelling=a8ba18fd9431ce9051ec6f1fab78ce1356254f3d.
+<!-- Created by Chaste version 2019.1.79285 (with uncommitted modifications) on Thu, 06 Feb 2020 01:19:49 +0000.  Chaste was built on Wed, 05 Feb 2020 16:55:22 +0000 by machine (uname) 'Linux' using settings: Debug.  Checked-out project versions: AxelA=58358c550748fedf6088863782fdd77870262cc6; MorphoCellBasedComparison=16de33a9744c65327e83bc3f0c912a1b99f2ee7d; WoundHealingModelling=34dd230c02c642fe8eb34ff2d2beda49cf96588e.
 -->
