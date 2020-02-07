@@ -2,8 +2,8 @@
 
 	<OffLatticeSimulation-2-2>
 		<Dt>0.005</Dt>
-		<EndTime>10</EndTime>
-		<SamplingTimestepMultiple>2000</SamplingTimestepMultiple>
+		<EndTime>2</EndTime>
+		<SamplingTimestepMultiple>200</SamplingTimestepMultiple>
 		<OutputDivisionLocations>0</OutputDivisionLocations>
 		<OutputCellVelocities>0</OutputCellVelocities>
 	</OffLatticeSimulation-2-2>
@@ -42,6 +42,8 @@
 	</CellKillers>
 
 	<SimulationModifiers>
+		<ParabolicGrowingDomainPdeModifier-2>
+		</ParabolicGrowingDomainPdeModifier-2>
 	</SimulationModifiers>
 
 	<Forces>

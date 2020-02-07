@@ -18,10 +18,13 @@
 #include "HoneycombMeshGenerator.hpp" //Generates mesh
 #include "NoCellCycleModel.hpp"
 #include "ContactInhibitionCellCycleModel.hpp"
-#include "UniformCellCycleModel.hpp"
 #include "NodeBasedCellPopulation.hpp"
 #include "Cylindrical2dNodesOnlyMesh.hpp"
+#include "CellDataItemWriter.hpp"
 // #include "NodesOnlyMesh.hpp"
+#include "ParabolicGrowingDomainPdeModifier.hpp"
+#include "CellwiseSourceParabolicPde.hpp"
+
 #include "OffLatticeSimulation.hpp" //Simulates the evolution of the population
 #include "SmartPointers.hpp" //Enables macros to save typing
 #include "StemCellProliferativeType.hpp"
@@ -92,14 +95,19 @@ public:
             // For completeness in the stupid contact inhibition model.
             p_cell->GetCellData()->SetItem("volume", 0.25*M_PI);
 
+            //Initialise morphogen for later.
+            p_cell->GetCellData()->SetItem("morphogen",0.0);
+
             cells.push_back(p_cell);
         }
 
         //Create cell population
         NodeBasedCellPopulation<2> cell_population(*p_mesh, cells);
-
-        //Set the division separation
         cell_population.SetMeinekeDivisionSeparation(division_separation);
+
+        // Add a cell item writer to track the morphogen that we will encode to evolve due to wounding.
+        boost::shared_ptr<CellDataItemWriter<2,2> > p_cell_data_item_writer(new CellDataItemWriter<2,2>("morphogen"));
+        cell_population.AddCellWriter(p_cell_data_item_writer);
 
         //Get the maximum width so we know where to apply the right BC.
         double min_width = 0.0;
@@ -162,7 +170,7 @@ public:
         // Add linear spring force (modified to have three different spring stiffnesses, depending on the type of pair)
         MAKE_PTR(GeneralisedLinearSpringForce<2>, p_spring_force);
         // MAKE_PTR(RepulsionForce<2>, p_spring_force);
-        p_spring_force->SetMeinekeSpringStiffness(30.0);
+        p_spring_force->SetMeinekeSpringStiffness(50.0);
         p_spring_force->SetCutOffLength(radius_of_interaction);
         simulator.AddForce(p_spring_force);
 
@@ -217,24 +225,33 @@ public:
             double x = simulator.rGetCellPopulation().GetLocationOfCellCentre(*cell_iter)[0];
             double y = simulator.rGetCellPopulation().GetLocationOfCellCentre(*cell_iter)[1];
 
+            // // Add a nutrient-gradient due to fibrin clot formation
+            // double nutrient = exp(-(pow((x - wound_centre)/(0.5*wound_width), 2.0)));
+            // cell_iter->GetCellData()->SetItem("nutrient", nutrient);
+
             //If the cell is within the 'wound area', we kill it.
             if ( (x > (wound_centre - 0.5*wound_width))&&(x < (wound_centre + 0.5*wound_width))&&(y > wound_base_height) )
             {
-                cell_iter->Kill();
+                cell_iter->SetCellProliferativeType(p_diff_type);
+                cell_iter->GetCellData()->SetItem("morphogen", 1.0);
             }
-            // else // Add a nutrient-gradient due to fibrin clot formation
-            // {
-            //     double nutrient = exp(-(pow((x - wound_centre)/(0.1*max_width), 2.0)));
-            //     cell_iter->GetCellData()->SetItem("nutrient", nutrient);
-            // }
         }
+
+        // Define the reaction-diffusion PDE, using the value's from YangYang's paper.
+        MAKE_PTR_ARGS(CellwiseSourceParabolicPde<2>, p_pde, (simulator.rGetCellPopulation(), 1.0, 0.3537, -0.1));
+        MAKE_PTR_ARGS(ConstBoundaryCondition<2>, p_bc, (0.0));
+
+        // Create a PDE Modifier object using this pde and bcs object
+        MAKE_PTR_ARGS(ParabolicGrowingDomainPdeModifier<2>, p_pde_modifier, (p_pde, p_bc, true));
+        p_pde_modifier->SetDependentVariableName("morphogen");
+        simulator.AddSimulationModifier(p_pde_modifier);
 
         // // Add chemotaxis-based force.
         // MAKE_PTR(WoundBasedChemotacticForce<2>, p_chemotactic_force);
-        // simulator.AddForce(p_spring_force);
+        // simulator.AddForce(p_chemotactic_force);
 
         simulator.SetSamplingTimestepMultiple(0.25*M_SAMPLING_TIMESTEP);
-        simulator.SetEndTime(3.0*M_END_TIME);
+        simulator.SetEndTime(4.0*M_END_TIME);
 
         simulator.Solve(); // Run the simulation again
 

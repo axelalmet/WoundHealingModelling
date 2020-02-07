@@ -2,7 +2,7 @@
 
 	<OffLatticeSimulation-2-2>
 		<Dt>0.005</Dt>
-		<EndTime>30</EndTime>
+		<EndTime>40</EndTime>
 		<SamplingTimestepMultiple>500</SamplingTimestepMultiple>
 		<OutputDivisionLocations>0</OutputDivisionLocations>
 		<OutputCellVelocities>0</OutputCellVelocities>
@@ -42,11 +42,13 @@
 	</CellKillers>
 
 	<SimulationModifiers>
+		<ParabolicGrowingDomainPdeModifier-2>
+		</ParabolicGrowingDomainPdeModifier-2>
 	</SimulationModifiers>
 
 	<Forces>
 		<GeneralisedLinearSpringForce-2-2>
-			<MeinekeSpringStiffness>30</MeinekeSpringStiffness>
+			<MeinekeSpringStiffness>50</MeinekeSpringStiffness>
 			<MeinekeDivisionRestingSpringLength>0.5</MeinekeDivisionRestingSpringLength>
 			<MeinekeSpringGrowthDuration>1</MeinekeSpringGrowthDuration>
 			<UseCutOffLength>1</UseCutOffLength>
