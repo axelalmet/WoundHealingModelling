@@ -165,7 +165,7 @@ public:
 
         simulator.SetDt(M_DT);
         simulator.SetSamplingTimestepMultiple(M_SAMPLING_TIMESTEP); //Sample the simulation at every hour
-        simulator.SetEndTime(M_END_TIME); //Hopefully this is long enough for a steady state
+        simulator.SetEndTime(M_END_TIME - 1.0); //Hopefully this is long enough for a steady state
 
         // Add linear spring force (modified to have three different spring stiffnesses, depending on the type of pair)
         MAKE_PTR(GeneralisedLinearSpringForce<2>, p_spring_force);
@@ -211,10 +211,36 @@ public:
         // Save simulation in steady state
 		// CellBasedSimulationArchiver<2, OffLatticeSimulation<2> >::Save(&simulator);
 
-        // Wound the middle section now
+        // Wound the model. 
         double wound_centre = 0.5*max_width;
-        double wound_width = 0.8*max_width;
-        double wound_base_height = 0.1*max_height;
+        double wound_width = 0.5*max_width;
+        double wound_base_height = 0.4*max_height;
+
+        for (AbstractCellPopulation<2>::Iterator cell_iter = simulator.rGetCellPopulation().Begin();
+                cell_iter != simulator.rGetCellPopulation().End();
+                ++cell_iter)
+        {
+            //Get location of cell
+            double x = simulator.rGetCellPopulation().GetLocationOfCellCentre(*cell_iter)[0];
+            double y = simulator.rGetCellPopulation().GetLocationOfCellCentre(*cell_iter)[1];
+
+            //If the cell is within the 'wound area', we kill it.
+            if ( (x > (wound_centre - 0.5*wound_width))&&(x < (wound_centre + 0.5*wound_width))&&(y > wound_base_height) )
+            {
+                cell_iter->SetCellProliferativeType(p_diff_type);
+            }
+
+            //             //If the cell is within the 'wound area', we kill it.
+            // if ( y > pow(x - wound_centre, 2.0) + wound_base_height + 1.0 )
+            // {
+            //     cell_iter->Kill();
+            // }
+
+        }
+
+        simulator.SetEndTime(M_END_TIME);
+
+        simulator.Solve();
 
         //Obtain the proliferative cells
         for (AbstractCellPopulation<2>::Iterator cell_iter = simulator.rGetCellPopulation().Begin();
@@ -225,16 +251,14 @@ public:
             double x = simulator.rGetCellPopulation().GetLocationOfCellCentre(*cell_iter)[0];
             double y = simulator.rGetCellPopulation().GetLocationOfCellCentre(*cell_iter)[1];
 
-            // // Add a nutrient-gradient due to fibrin clot formation
-            // double nutrient = exp(-(pow((x - wound_centre)/(0.5*wound_width), 2.0)));
-            // cell_iter->GetCellData()->SetItem("nutrient", nutrient);
+            bool is_diff_type = cell_iter->GetCellProliferativeType()->IsType<DifferentiatedCellProliferativeType>();
 
             //If the cell is within the 'wound area', we kill it.
-            if ( (x > (wound_centre - 0.5*wound_width))&&(x < (wound_centre + 0.5*wound_width))&&(y > wound_base_height) )
+            if ( (x > (wound_centre - 0.5*wound_width))&&(x < (wound_centre + 0.5*wound_width))&&(y > wound_base_height)&&(is_diff_type) )
             {
-                cell_iter->SetCellProliferativeType(p_diff_type);
                 cell_iter->GetCellData()->SetItem("morphogen", 1.0);
             }
+
         }
 
         // Define the reaction-diffusion PDE, using the value's from YangYang's paper.

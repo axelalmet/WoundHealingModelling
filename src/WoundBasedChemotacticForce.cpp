@@ -60,7 +60,7 @@ template<unsigned DIM>
 void WoundBasedChemotacticForce<DIM>::AddForceContribution(AbstractCellPopulation<DIM>& rCellPopulation)
 {
     CellwiseDataGradient<DIM> gradients;
-    gradients.SetupGradients(rCellPopulation, "nutrient");
+    gradients.SetupGradients(rCellPopulation, "morphogen");
 
     for (typename AbstractCellPopulation<DIM>::Iterator cell_iter = rCellPopulation.Begin();
          cell_iter != rCellPopulation.End();
@@ -69,7 +69,7 @@ void WoundBasedChemotacticForce<DIM>::AddForceContribution(AbstractCellPopulatio
         unsigned node_global_index = rCellPopulation.GetLocationIndexUsingCell(*cell_iter);
 
         c_vector<double,DIM>& r_gradient = gradients.rGetGradient(node_global_index);
-        double nutrient_concentration = cell_iter->GetCellData()->GetItem("nutrient");
+        double nutrient_concentration = cell_iter->GetCellData()->GetItem("morphogen");
         double magnitude_of_gradient = norm_2(r_gradient);
 
         double force_magnitude = GetWoundBasedChemotacticForceMagnitude(nutrient_concentration, magnitude_of_gradient);
