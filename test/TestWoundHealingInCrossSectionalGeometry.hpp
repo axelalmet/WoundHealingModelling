@@ -11,7 +11,6 @@
 #include "CheckpointArchiveTypes.hpp" //Needed if we use GetIdentifier() method (which we do)
 #include "HoneycombMeshGenerator.hpp" //Generates mesh
 #include "GeneralisedLinearSpringForce.hpp"
-#include "WoundBasedChemotacticForce.hpp"
 #include "FixedRegionPlaneBoundaryCondition.hpp" // Fixed-position boundary condition
 #include "PlaneBoundaryCondition.hpp" // Plane-based boundary condition
 #include "VoronoiDataWriter.hpp" //Allows us to visualise output in Paraview
@@ -38,7 +37,7 @@
 
 static const std::string M_OUTPUT_DIRECTORY = "WoundHealingModel";
 static const double M_DT = 0.005;
-static const double M_END_TIME = 10.0;
+static const double M_END_TIME = 1.0;
 //static const double M_SECOND_END_TIME = 1.0;
 static const double M_SAMPLING_TIMESTEP = M_END_TIME / M_DT;
 
@@ -96,7 +95,7 @@ public:
             p_cell->GetCellData()->SetItem("volume", 0.25*M_PI);
 
             //Initialise morphogen for later.
-            p_cell->GetCellData()->SetItem("morphogen",0.0);
+            p_cell->GetCellData()->SetItem("morphogen", 1e-4);
 
             cells.push_back(p_cell);
         }
@@ -165,11 +164,10 @@ public:
 
         simulator.SetDt(M_DT);
         simulator.SetSamplingTimestepMultiple(M_SAMPLING_TIMESTEP); //Sample the simulation at every hour
-        simulator.SetEndTime(M_END_TIME - 1.0); //Hopefully this is long enough for a steady state
+        simulator.SetEndTime(M_END_TIME); //Hopefully this is long enough for a steady state
 
         // Add linear spring force (modified to have three different spring stiffnesses, depending on the type of pair)
         MAKE_PTR(GeneralisedLinearSpringForce<2>, p_spring_force);
-        // MAKE_PTR(RepulsionForce<2>, p_spring_force);
         p_spring_force->SetMeinekeSpringStiffness(50.0);
         p_spring_force->SetCutOffLength(radius_of_interaction);
         simulator.AddForce(p_spring_force);
@@ -205,8 +203,6 @@ public:
         // MAKE_PTR_ARGS(FixedRegionPlaneBoundaryCondition<2>, p_bc_right, (&cell_population, point, normal));
         // simulator.AddCellPopulationBoundaryCondition(p_bc_right);
 
-        simulator.Solve(); // Run the simulation
-
         // Back-up code when we need to start saving these steady states for the wounding experiments
         // Save simulation in steady state
 		// CellBasedSimulationArchiver<2, OffLatticeSimulation<2> >::Save(&simulator);
@@ -215,28 +211,6 @@ public:
         double wound_centre = 0.5*max_width;
         double wound_width = 0.5*max_width;
         double wound_base_height = 0.4*max_height;
-
-        for (AbstractCellPopulation<2>::Iterator cell_iter = simulator.rGetCellPopulation().Begin();
-                cell_iter != simulator.rGetCellPopulation().End();
-                ++cell_iter)
-        {
-            //Get location of cell
-            double x = simulator.rGetCellPopulation().GetLocationOfCellCentre(*cell_iter)[0];
-            double y = simulator.rGetCellPopulation().GetLocationOfCellCentre(*cell_iter)[1];
-
-            //If the cell is within the 'wound area', we kill it.
-            if ( (x > (wound_centre - 0.5*wound_width))&&(x < (wound_centre + 0.5*wound_width))&&(y > wound_base_height) )
-            {
-                cell_iter->SetCellProliferativeType(p_diff_type);
-            }
-
-            //             //If the cell is within the 'wound area', we kill it.
-            // if ( y > pow(x - wound_centre, 2.0) + wound_base_height + 1.0 )
-            // {
-            //     cell_iter->Kill();
-            // }
-
-        }
 
         simulator.SetEndTime(M_END_TIME);
 
@@ -251,18 +225,17 @@ public:
             double x = simulator.rGetCellPopulation().GetLocationOfCellCentre(*cell_iter)[0];
             double y = simulator.rGetCellPopulation().GetLocationOfCellCentre(*cell_iter)[1];
 
-            bool is_diff_type = cell_iter->GetCellProliferativeType()->IsType<DifferentiatedCellProliferativeType>();
-
             //If the cell is within the 'wound area', we kill it.
-            if ( (x > (wound_centre - 0.5*wound_width))&&(x < (wound_centre + 0.5*wound_width))&&(y > wound_base_height)&&(is_diff_type) )
+            if ( (x > (wound_centre - 0.5*wound_width))&&(x < (wound_centre + 0.5*wound_width))&&(y > wound_base_height) )
             {
+                cell_iter->SetCellProliferativeType(p_diff_type);
                 cell_iter->GetCellData()->SetItem("morphogen", 1.0);
             }
 
         }
 
         // Define the reaction-diffusion PDE, using the value's from YangYang's paper.
-        MAKE_PTR_ARGS(CellwiseSourceParabolicPde<2>, p_pde, (simulator.rGetCellPopulation(), 1.0, 0.3537, -0.1));
+        MAKE_PTR_ARGS(CellwiseSourceParabolicPde<2>, p_pde, (simulator.rGetCellPopulation(), 1.0, 0.1*0.3537, -0.1));
         MAKE_PTR_ARGS(ConstBoundaryCondition<2>, p_bc, (0.0));
 
         // Create a PDE Modifier object using this pde and bcs object
@@ -275,7 +248,7 @@ public:
         // simulator.AddForce(p_chemotactic_force);
 
         simulator.SetSamplingTimestepMultiple(0.25*M_SAMPLING_TIMESTEP);
-        simulator.SetEndTime(4.0*M_END_TIME);
+        simulator.SetEndTime(2.0*M_END_TIME);
 
         simulator.Solve(); // Run the simulation again
 
