@@ -20,10 +20,8 @@
 #include "NodeBasedCellPopulation.hpp"
 #include "Cylindrical2dNodesOnlyMesh.hpp"
 #include "CellDataItemWriter.hpp"
-// #include "NodesOnlyMesh.hpp"
 #include "ParabolicGrowingDomainPdeModifier.hpp"
 #include "CellwiseSourceParabolicPde.hpp"
-
 #include "OffLatticeSimulation.hpp" //Simulates the evolution of the population
 #include "SmartPointers.hpp" //Enables macros to save typing
 #include "StemCellProliferativeType.hpp"
@@ -242,10 +240,6 @@ public:
         MAKE_PTR_ARGS(ParabolicGrowingDomainPdeModifier<2>, p_pde_modifier, (p_pde, p_bc, true));
         p_pde_modifier->SetDependentVariableName("morphogen");
         simulator.AddSimulationModifier(p_pde_modifier);
-
-        // // Add chemotaxis-based force.
-        // MAKE_PTR(WoundBasedChemotacticForce<2>, p_chemotactic_force);
-        // simulator.AddForce(p_chemotactic_force);
 
         simulator.SetSamplingTimestepMultiple(0.25*M_SAMPLING_TIMESTEP);
         simulator.SetEndTime(2.0*M_END_TIME);
