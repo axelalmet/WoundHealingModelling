@@ -3,7 +3,7 @@
 	<OffLatticeSimulation-2-2>
 		<Dt>0.005</Dt>
 		<EndTime>2</EndTime>
-		<SamplingTimestepMultiple>200</SamplingTimestepMultiple>
+		<SamplingTimestepMultiple>50</SamplingTimestepMultiple>
 		<OutputDivisionLocations>0</OutputDivisionLocations>
 		<OutputCellVelocities>0</OutputCellVelocities>
 	</OffLatticeSimulation-2-2>

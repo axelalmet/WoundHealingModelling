@@ -3,28 +3,29 @@
   <UnstructuredGrid>
     <Piece NumberOfPoints="300"                  NumberOfCells="0"                   >
       <PointData>
-        <DataArray type="Float64" Name="CellData morphogen" format="appended" RangeMin="0"                    RangeMax="0"                    offset="0"                   />
-        <DataArray type="Float64" Name="Cell types" format="appended" RangeMin="0"                    RangeMax="1"                    offset="60"                  />
-        <DataArray type="Float64" Name="Process rank" format="appended" RangeMin="0"                    RangeMax="0"                    offset="128"                 />
-        <DataArray type="Float64" Name="morphogen" format="appended" RangeMin="0"                    RangeMax="0"                    offset="188"                 />
-        <DataArray type="Float64" Name="volume" format="appended" RangeMin="0.7853981634"         RangeMax="0.7853981634"         offset="248"                 />
+        <DataArray type="Float64" Name="CellData morphogen" format="appended" RangeMin="0.0001"               RangeMax="0.0001"               offset="0"                   />
+        <DataArray type="Float64" Name="Cell types" format="appended" RangeMin="0"                    RangeMax="6"                    offset="72"                  />
+        <DataArray type="Float64" Name="Process rank" format="appended" RangeMin="0"                    RangeMax="0"                    offset="224"                 />
+        <DataArray type="Float64" Name="attachment" format="appended" RangeMin="-1"                   RangeMax="1"                    offset="284"                 />
+        <DataArray type="Float64" Name="morphogen" format="appended" RangeMin="0.0001"               RangeMax="0.0001"               offset="356"                 />
+        <DataArray type="Float64" Name="volume" format="appended" RangeMin="0.7853981634"         RangeMax="0.7853981634"         offset="428"                 />
       </PointData>
       <CellData>
       </CellData>
       <Points>
-        <DataArray type="Float64" Name="Vertex positions" NumberOfComponents="3" format="appended" RangeMin="0"                    RangeMax="30.512292605"         offset="320"                 />
+        <DataArray type="Float64" Name="Vertex positions" NumberOfComponents="3" format="appended" RangeMin="0"                    RangeMax="30.512292605"         offset="500"                 />
       </Points>
       <Cells>
-        <DataArray type="Int64" Name="connectivity" format="appended" RangeMin=""                     RangeMax=""                     offset="1280"                />
-        <DataArray type="Int64" Name="offsets" format="appended" RangeMin=""                     RangeMax=""                     offset="1296"                />
-        <DataArray type="UInt8" Name="types" format="appended" RangeMin=""                     RangeMax=""                     offset="1312"                />
+        <DataArray type="Int64" Name="connectivity" format="appended" RangeMin=""                     RangeMax=""                     offset="1460"                />
+        <DataArray type="Int64" Name="offsets" format="appended" RangeMin=""                     RangeMax=""                     offset="1476"                />
+        <DataArray type="UInt8" Name="types" format="appended" RangeMin=""                     RangeMax=""                     offset="1492"                />
       </Cells>
     </Piece>
   </UnstructuredGrid>
   <AppendedData encoding="base64">
-   _AQAAAACAAABgCQAAGQAAAA==eJztwTEBAAAAwqD1T20JT6AAAHgaCWAAAQ==AQAAAACAAABgCQAAIQAAAA==eJxjYACBD/YMo/QoPUqP0qP0KD1K05keBcMVAADNpRwgAQAAAACAAABgCQAAGQAAAA==eJztwTEBAAAAwqD1T20JT6AAAHgaCWAAAQ==AQAAAACAAABgCQAAGQAAAA==eJztwTEBAAAAwqD1T20JT6AAAHgaCWAAAQ==AQAAAACAAABgCQAAIwAAAA==eJyT0HUJ+a340l5ilB6lR+lRepQepUfpUXqUpgoNAPulqto=AQAAAACAAAAgHAAAvQIAAA==eJx92LuqM1UYBuAUKTaYIoYYQgwx5/M5M5mZZIYJio1oYyH23oXV33sn2nsNtvYWKUWbXQZs3D+SwnEeV/msYsHL4uXjq1T+77zmuLiV8wu8Dm/C2/AuvA8fwsfwKXwOX8LX8C18Dz/Aj/ATPICH8DM8gsfwBH6BX+EpPIPf8x+//Pb373/+s/B/H/Dqrdxr8Aa8Be/Ae/ABfASfwGfwBXwF38B35f5uDz/Aj/ATPICH8DM8gsfwBH6BX+EpPEPOlco//lfBX/Nyr9zK/QVehzfhbXgX3ocP4WP4FD6HL+Fr+Ba+hx/gR/gJHsBD+BkewWN4Ar/Ar/AUnsHv+bvk0+1vv1Rv//YHvHor9xq8AW/BO/AefAAfwSfwGXwBX8E38F25v/VzuR/gR/gJHsBD+BkewWN4Ar/Ar/AUniHnZz9/UPBnPxf92c9Ff4HX4U14G96F9+FD+Bg+hc/hS/gavoXv4Qf4EX6CB/AQfoZH8BiewC/wKzyFZ/B7/scu+rX29YcFf8Crt3KvwRvwFrwD78EH8BF8Ap/BF/AVfAPflftbP5f7AX6En+ABPISf4RE8hifwC/wKT+EZcn7/9PveLu4bXvNyr9zK/QVehzfhbXgX3ocP4WP4FD6HL+Fr+Ba+hx/gR/gJHsBD+BkewWN4Ar/Ar/AUnsHv+UefffXDT3lxT/aAV2/lXoM34C14B96DD+Aj+AQ+gy/gK/gGviv3t34u9wP8CD/BA3gIP8MjeAxP4Bf4FZ7CM+T8nJ8/Lvhzfi76c34u+gu8Dm/C2/AuvA8fwsfwKXwOX8LX8C18Dz/Aj/ATPICH8DM8gsfwBH6BX+EpPIPf8/yb7z7/YvNJwR/w6q3ca/AGvAXvwHvwAXwEn8Bn8AV8Bd/Ad+X+1s/lfoAf4Sd4AA/hZ3gEj+EJ/AK/wlN49h//GyhwMdo=AAAAAACAAAAAAAAAAAAAAACAAAAAAAAAAAAAAACAAAAAAAAA
+   _AQAAAACAAABgCQAAIwAAAA==eJzTdZZ5/chMyl53lB6lR+lRepQepUfpUXqUpgoNAJzDaA4=AQAAAACAAABgCQAAXgAAAA==eJxjYAABCQcGsmgRNBpdHJd6Ys3DRZNqHrny1NZHaTgPlH2k8geKppY7iDWHVPvIzSfUTveDJV5w5WtqhwOl+ZxSc0gNj8Ge7mmdTqiV/6hVjtE6XEbBcAUAz0ZRuQ==AQAAAACAAABgCQAAGQAAAA==eJztwTEBAAAAwqD1T20JT6AAAHgaCWAAAQ==AQAAAACAAABgCQAAIgAAAA==eJxjYACBD/sZRulRepQepUfpUXqUpjdtP7LokQMAMHu3og==AQAAAACAAABgCQAAIwAAAA==eJzTdZZ5/chMyl53lB6lR+lRepQepUfpUXqUpgoNAJzDaA4=AQAAAACAAABgCQAAIwAAAA==eJyT0HUJ+a340l5ilB6lR+lRepQepUfpUXqUpgoNAPulqto=AQAAAACAAAAgHAAAvQIAAA==eJx92LuqM1UYBuAUKTaYIoYYQgwx5/M5M5mZZIYJio1oYyH23oXV33sn2nsNtvYWKUWbXQZs3D+SwnEeV/msYsHL4uXjq1T+77zmuLiV8wu8Dm/C2/AuvA8fwsfwKXwOX8LX8C18Dz/Aj/ATPICH8DM8gsfwBH6BX+EpPIPf8x+//Pb373/+s/B/H/Dqrdxr8Aa8Be/Ae/ABfASfwGfwBXwF38B35f5uDz/Aj/ATPICH8DM8gsfwBH6BX+EpPEPOlco//lfBX/Nyr9zK/QVehzfhbXgX3ocP4WP4FD6HL+Fr+Ba+hx/gR/gJHsBD+BkewWN4Ar/Ar/AUnsHv+bvk0+1vv1Rv//YHvHor9xq8AW/BO/AefAAfwSfwGXwBX8E38F25v/VzuR/gR/gJHsBD+BkewWN4Ar/Ar/AUniHnZz9/UPBnPxf92c9Ff4HX4U14G96F9+FD+Bg+hc/hS/gavoXv4Qf4EX6CB/AQfoZH8BiewC/wKzyFZ/B7/scu+rX29YcFf8Crt3KvwRvwFrwD78EH8BF8Ap/BF/AVfAPflftbP5f7AX6En+ABPISf4RE8hifwC/wKT+EZcn7/9PveLu4bXvNyr9zK/QVehzfhbXgX3ocP4WP4FD6HL+Fr+Ba+hx/gR/gJHsBD+BkewWN4Ar/Ar/AUnsHv+UefffXDT3lxT/aAV2/lXoM34C14B96DD+Aj+AQ+gy/gK/gGviv3t34u9wP8CD/BA3gIP8MjeAxP4Bf4FZ7CM+T8nJ8/Lvhzfi76c34u+gu8Dm/C2/AuvA8fwsfwKXwOX8LX8C18Dz/Aj/ATPICH8DM8gsfwBH6BX+EpPIPf8/yb7z7/YvNJwR/w6q3ca/AGvAXvwHvwAXwEn8Bn8AV8Bd/Ad+X+1s/lfoAf4Sd4AA/hZ3gEj+EJ/AK/wlN49h//GyhwMdo=AAAAAACAAAAAAAAAAAAAAACAAAAAAAAAAAAAAACAAAAAAAAA
   </AppendedData>
 </VTKFile>
 
-<!-- Created by Chaste version 2019.1.79285 (with uncommitted modifications) on Fri, 07 Feb 2020 00:00:52 +0000.  Chaste was built on Wed, 05 Feb 2020 16:55:22 +0000 by machine (uname) 'Linux' using settings: Debug.  Checked-out project versions: AxelA=58358c550748fedf6088863782fdd77870262cc6; MorphoCellBasedComparison=16de33a9744c65327e83bc3f0c912a1b99f2ee7d; WoundHealingModelling=34dd230c02c642fe8eb34ff2d2beda49cf96588e.
+<!-- Created by Chaste version 2019.1.79285 (with uncommitted modifications) on Fri, 14 Feb 2020 00:50:55 +0000.  Chaste was built on Thu, 13 Feb 2020 13:44:07 +0000 by machine (uname) 'Linux' using settings: Debug.  Checked-out project versions: AxelA=58358c550748fedf6088863782fdd77870262cc6; MorphoCellBasedComparison=16de33a9744c65327e83bc3f0c912a1b99f2ee7d; WoundHealingModelling=58ca82498d4f68312630a83eadab1cf5048c6f7d.
 -->

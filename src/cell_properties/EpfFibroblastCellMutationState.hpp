@@ -33,23 +33,23 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#ifndef EPFFIBROBLASTCELLPROLIFERATIVETYPE_HPP_
-#define EPFFIBROBLASTCELLPROLIFERATIVETYPE_HPP_
+#ifndef EPFFIBROBLASTCELLMUTATIONSTATE_HPP_
+#define EPFFIBROBLASTCELLMUTATIONSTATE_HPP_
 
-#include "AbstractCellProliferativeType.hpp"
+#include "AbstractCellMutationState.hpp"
 #include "ChasteSerialization.hpp"
 #include <boost/serialization/base_object.hpp>
 
 /**
- * Subclass of AbstractCellProliferativeType defining a differentiated cell.
+ * Subclass of AbstractCellMutationState defining a 'wild type' mutation state.
  */
-class EpfFibroblastCellProliferativeType : public AbstractCellProliferativeType
+class EpfFibroblastCellMutationState : public AbstractCellMutationState
 {
 private:
     /** Needed for serialization. */
     friend class boost::serialization::access;
     /**
-     * Archive the cell proliferative type.
+     * Archive the cell mutation state.
      *
      * @param archive the archive
      * @param version the current version of this class
@@ -57,18 +57,18 @@ private:
     template<class Archive>
     void serialize(Archive & archive, const unsigned int version)
     {
-        archive & boost::serialization::base_object<AbstractCellProliferativeType>(*this);
+        archive & boost::serialization::base_object<AbstractCellMutationState>(*this);
     }
 
 public:
     /**
      * Constructor.
      */
-    EpfFibroblastCellProliferativeType();
+    EpfFibroblastCellMutationState();
 };
 
 #include "SerializationExportWrapper.hpp"
 // Declare identifier for the serializer
-CHASTE_CLASS_EXPORT(EpfFibroblastCellProliferativeType)
+CHASTE_CLASS_EXPORT(EpfFibroblastCellMutationState)
 
-#endif /*EPFFIBROBLASTCELLPROLIFERATIVETYPE_HPP_*/
+#endif /* EPFFIBROBLASTCELLMUTATIONSTATE_HPP_ */

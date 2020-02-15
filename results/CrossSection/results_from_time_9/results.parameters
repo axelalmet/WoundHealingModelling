@@ -2,8 +2,8 @@
 
 	<OffLatticeSimulation-2-2>
 		<Dt>0.005</Dt>
-		<EndTime>1</EndTime>
-		<SamplingTimestepMultiple>200</SamplingTimestepMultiple>
+		<EndTime>10</EndTime>
+		<SamplingTimestepMultiple>2000</SamplingTimestepMultiple>
 		<OutputDivisionLocations>0</OutputDivisionLocations>
 		<OutputCellVelocities>0</OutputCellVelocities>
 	</OffLatticeSimulation-2-2>
@@ -22,8 +22,15 @@
 	</NodeBasedCellPopulation-2>
 
 	<CellCycleModels>
-		<NoCellCycleModel>
-		</NoCellCycleModel>
+		<ContactInhibitionCellCycleModel>
+			<QuiescentVolumeFraction>0.8</QuiescentVolumeFraction>
+			<EquilibriumVolume>0.785398</EquilibriumVolume>
+			<StemCellG1Duration>14</StemCellG1Duration>
+			<TransitCellG1Duration>2</TransitCellG1Duration>
+			<SDuration>5</SDuration>
+			<G2Duration>4</G2Duration>
+			<MDuration>1</MDuration>
+		</ContactInhibitionCellCycleModel>
 	</CellCycleModels>
 
 	<SrnModels>
@@ -35,8 +42,6 @@
 	</CellKillers>
 
 	<SimulationModifiers>
-		<BasementMembraneAttachmentTrackingModifier-2>
-		</BasementMembraneAttachmentTrackingModifier-2>
 	</SimulationModifiers>
 
 	<Forces>

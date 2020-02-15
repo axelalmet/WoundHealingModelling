@@ -33,12 +33,12 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include "EnfFibroblastCellProliferativeType.hpp"
+#include "FibroblastCellProliferativeType.hpp"
 
-EnfFibroblastCellProliferativeType::EnfFibroblastCellProliferativeType()
+FibroblastCellProliferativeType::FibroblastCellProliferativeType()
     : AbstractCellProliferativeType(3)
 {}
 
 #include "SerializationExportWrapperForCpp.hpp"
 // Declare identifier for the serializer
-CHASTE_CLASS_EXPORT(EnfFibroblastCellProliferativeType)
+CHASTE_CLASS_EXPORT(FibroblastCellProliferativeType)

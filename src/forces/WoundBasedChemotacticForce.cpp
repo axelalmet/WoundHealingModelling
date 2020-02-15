@@ -34,13 +34,14 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "WoundBasedChemotacticForce.hpp"
-
-#include "CellwiseDataGradient.hpp"
-#include "CellLabel.hpp"
+#include "NodeBasedCellPopulation.hpp"
+#include "RandomNumberGenerator.hpp"
 
 template<unsigned DIM>
 WoundBasedChemotacticForce<DIM>::WoundBasedChemotacticForce()
-    : AbstractForce<DIM>()
+    : AbstractForce<DIM>(),
+    mChemotacticStrength(DOUBLE_UNSET),
+    mNeighbourhoodRadius(DOUBLE_UNSET)
 {
 }
 
@@ -49,38 +50,137 @@ WoundBasedChemotacticForce<DIM>::~WoundBasedChemotacticForce()
 {
 }
 
+// Method to get the chemotactic strength parameter, i.e. chi
 template<unsigned DIM>
-double WoundBasedChemotacticForce<DIM>::GetWoundBasedChemotacticForceMagnitude(const double concentration, const double concentrationGradientMagnitude)
+double WoundBasedChemotacticForce<DIM>::GetChemotacticStrength()
 {
-    return concentration; // temporary force law - can be changed to something realistic
-                          // without tests failing
+    return mChemotacticStrength;
 }
+
+// Method to set the chemotactic strength parameter, chi
+template<unsigned DIM>
+void WoundBasedChemotacticForce<DIM>::SetChemotacticStrength(double chemotacticStrength)
+{
+    mChemotacticStrength = chemotacticStrength;
+}
+
+// Method to get the neighbourhood radius of interaction
+template<unsigned DIM>
+double WoundBasedChemotacticForce<DIM>::GetNeighbourhoodRadius()
+{
+    return mNeighbourhoodRadius;
+}
+
+// Method to set the neighbourhood radius of interaction
+template<unsigned DIM>
+void WoundBasedChemotacticForce<DIM>::SetNeighbourhoodRadius(double neighbourhoodRadius)
+{
+    mNeighbourhoodRadius = neighbourhoodRadius;
+}
+
 
 template<unsigned DIM>
 void WoundBasedChemotacticForce<DIM>::AddForceContribution(AbstractCellPopulation<DIM>& rCellPopulation)
 {
-    CellwiseDataGradient<DIM> gradients;
-    gradients.SetupGradients(rCellPopulation, "morphogen");
+
+    // For now, this will only apply to node-based cell populations
+    assert(dynamic_cast<NodeBasedCellPopulation<DIM>*>(&rCellPopulation));
+
+	NodeBasedCellPopulation<DIM>* p_tissue = static_cast<NodeBasedCellPopulation<DIM>*>(&rCellPopulation);
+    double neighbourhood_radius = GetNeighbourhoodRadius();
 
     for (typename AbstractCellPopulation<DIM>::Iterator cell_iter = rCellPopulation.Begin();
          cell_iter != rCellPopulation.End();
          ++cell_iter)
     {
-        unsigned node_global_index = rCellPopulation.GetLocationIndexUsingCell(*cell_iter);
+        // Get the node index
+        unsigned current_index = rCellPopulation.GetLocationIndexUsingCell(*cell_iter);
 
-        c_vector<double,DIM>& r_gradient = gradients.rGetGradient(node_global_index);
-        double nutrient_concentration = cell_iter->GetCellData()->GetItem("morphogen");
-        double magnitude_of_gradient = norm_2(r_gradient);
+        // Get the location of the node
+        c_vector<double, DIM> current_location = rCellPopulation.GetNode(current_index)->rGetLocation();
 
-        double force_magnitude = GetWoundBasedChemotacticForceMagnitude(nutrient_concentration, magnitude_of_gradient);
+        // Get the current morphogen concentration that we will compare for chemotaxis.
+        double current_morphogen_concentration = cell_iter->GetCellData()->GetItem("morphogen");
 
-        // force += chi * gradC/|gradC|
-        if (magnitude_of_gradient > 0)
+        // Get the neighbouring node indices
+		std::set<unsigned> neighbouring_indices = p_tissue->GetNodesWithinNeighbourhoodRadius(current_index, neighbourhood_radius);
+
+        // We determine which neighbours result in a direction of maximal change. There may be more than one, in which case
+        // we will pick one at random.
+
+        // First figure out what the maximal change in morphogen is. 
+        double morphogen_max_grad = 0.0;
+
+        // Iterate over these elements
+		for (std::set<unsigned>::iterator elem_iter = neighbouring_indices.begin();
+				elem_iter != neighbouring_indices.end();
+				++elem_iter)
+		{
+			// Get the cell according to the index
+			CellPtr neighbour_cell_iter = rCellPopulation.GetCellUsingLocationIndex(*elem_iter);
+
+			// Get the neighbouring concentration
+            double neighbour_morphogen_concentration = neighbour_cell_iter->GetCellData()->GetItem("morphogen");
+
+            // Get the neighbour's location
+            c_vector<double, DIM> neighbour_location = rCellPopulation.GetNode(*elem_iter)->rGetLocation();
+
+            double grad = (neighbour_morphogen_concentration - current_morphogen_concentration)/norm_2(neighbour_location - current_location);
+
+            if (grad > morphogen_max_grad)
+            {
+                morphogen_max_grad = grad;
+           }
+		}
+
+        // Iterate again, now determining which neighbours have a grad equal to max grad.
+        std::vector<unsigned> maximal_gradient_indices; 
+
+        // Iterate over these elements
+		for (std::set<unsigned>::iterator elem_iter = neighbouring_indices.begin();
+				elem_iter != neighbouring_indices.end();
+				++elem_iter)
+		{
+			// Get the cell according to the index
+			CellPtr neighbour_cell_iter = rCellPopulation.GetCellUsingLocationIndex(*elem_iter);
+
+			// Get the neighbouring concentration
+            double neighbour_morphogen_concentration = neighbour_cell_iter->GetCellData()->GetItem("morphogen");
+
+            // Get the neighbour's location
+            c_vector<double, DIM> neighbour_location = rCellPopulation.GetNode(*elem_iter)->rGetLocation();
+
+            double grad = (neighbour_morphogen_concentration - current_morphogen_concentration)/norm_2(neighbour_location - current_location);
+
+            if (grad == morphogen_max_grad)
+            {
+                maximal_gradient_indices.push_back(*elem_iter);
+           }
+		}
+
+        if (!maximal_gradient_indices.empty())
         {
-            c_vector<double,DIM> force = (force_magnitude/magnitude_of_gradient)*r_gradient;
-            rCellPopulation.GetNode(node_global_index)->AddAppliedForceContribution(force);
+            // Now choose an index at random
+            unsigned chosen_index = floor(RandomNumberGenerator::Instance()->ranf() * maximal_gradient_indices.size());
+
+            unsigned chosen_node_index = maximal_gradient_indices[chosen_index];
+            
+            c_vector<double, DIM> chosen_neighbour_location = rCellPopulation.GetNode(chosen_node_index)->rGetLocation();
+
+            c_vector<double, DIM> gradient_direction = rCellPopulation.rGetMesh().GetVectorFromAtoB(current_location, chosen_neighbour_location);
+
+            // Only add the chemotactic force when the change is positive
+            if (morphogen_max_grad > 0.0)
+            {
+                // Get the chemotactic strength parameter 
+                double chemotactic_strength = GetChemotacticStrength();
+
+                // F += chi * gradC/|gradC|
+                c_vector<double, DIM> force = chemotactic_strength * morphogen_max_grad * gradient_direction / norm_2(gradient_direction);
+                rCellPopulation.GetNode(current_index)->AddAppliedForceContribution(force);
+            }
+            // else Fc=0
         }
-        // else Fc=0
     }
 }
 
@@ -88,6 +188,8 @@ template<unsigned DIM>
 void WoundBasedChemotacticForce<DIM>::OutputForceParameters(out_stream& rParamsFile)
 {
     // No parameters to include
+	*rParamsFile <<  "\t\t\t<ChemotacticStrength>"<<  mChemotacticStrength << "</ChemotacticStrength> \n" ;
+	*rParamsFile <<  "\t\t\t<NeighbourhoodRadius>" << mNeighbourhoodRadius << "</NeighbourhoodRadius> \n";
 
     // Call method on direct parent class
     AbstractForce<DIM>::OutputForceParameters(rParamsFile);

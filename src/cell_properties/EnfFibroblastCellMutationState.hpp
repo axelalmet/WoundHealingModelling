@@ -1,4 +1,4 @@
-\/*
+/*
 
 Copyright (c) 2005-2020, University of Oxford.
 All rights reserved.
@@ -33,12 +33,42 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#include "EpfFibroblastCellProliferativeType.hpp"
+#ifndef ENFFIBROBLASTCELLMUTATIONSTATE_HPP_
+#define ENFFIBROBLASTCELLMUTATIONSTATE_HPP_
 
-EpfFibroblastCellProliferativeType::EpfFibroblastCellProliferativeType()
-    : AbstractCellProliferativeType(4)
-{}
+#include "AbstractCellMutationState.hpp"
+#include "ChasteSerialization.hpp"
+#include <boost/serialization/base_object.hpp>
 
-#include "SerializationExportWrapperForCpp.hpp"
+/**
+ * Subclass of AbstractCellMutationState defining a 'wild type' mutation state.
+ */
+class EnfFibroblastCellMutationState : public AbstractCellMutationState
+{
+private:
+    /** Needed for serialization. */
+    friend class boost::serialization::access;
+    /**
+     * Archive the cell mutation state.
+     *
+     * @param archive the archive
+     * @param version the current version of this class
+     */
+    template<class Archive>
+    void serialize(Archive & archive, const unsigned int version)
+    {
+        archive & boost::serialization::base_object<AbstractCellMutationState>(*this);
+    }
+
+public:
+    /**
+     * Constructor.
+     */
+    EnfFibroblastCellMutationState();
+};
+
+#include "SerializationExportWrapper.hpp"
 // Declare identifier for the serializer
-CHASTE_CLASS_EXPORT(EpfFibroblastCellProliferativeType)
+CHASTE_CLASS_EXPORT(EnfFibroblastCellMutationState)
+
+#endif /* ENFFIBROBLASTCELLMUTATIONSTATE_HPP_ */

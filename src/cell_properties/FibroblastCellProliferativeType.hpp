@@ -33,17 +33,17 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#ifndef ENFFIBROBLASTCELLPROLIFERATIVETYPE_HPP_
-#define ENFFIBROBLASTCELLPROLIFERATIVETYPE_HPP_
+#ifndef FIBROBLASTCELLPROLIFERATIVETYPE_HPP_
+#define FIBROBLASTCELLPROLIFERATIVETYPE_HPP_
 
 #include "AbstractCellProliferativeType.hpp"
 #include "ChasteSerialization.hpp"
 #include <boost/serialization/base_object.hpp>
 
 /**
- * Subclass of AbstractCellProliferativeType defining a differentiated cell.
+ * Subclass of AbstractCellProliferativeType defining a dermal fibroblast cell.
  */
-class EnfFibroblastCellProliferativeType : public AbstractCellProliferativeType
+class FibroblastCellProliferativeType : public AbstractCellProliferativeType
 {
 private:
     /** Needed for serialization. */
@@ -64,11 +64,11 @@ public:
     /**
      * Constructor.
      */
-    EnfFibroblastCellProliferativeType();
+    FibroblastCellProliferativeType();
 };
 
 #include "SerializationExportWrapper.hpp"
 // Declare identifier for the serializer
-CHASTE_CLASS_EXPORT(EnfFibroblastCellProliferativeType)
+CHASTE_CLASS_EXPORT(FibroblastCellProliferativeType)
 
-#endif /*ENFFIBROBLASTCELLPROLIFERATIVETYPE_HPP_*/
+#endif /*FIBROBLASTCELLPROLIFERATIVETYPE_HPP_*/

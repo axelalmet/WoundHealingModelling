@@ -11,12 +11,14 @@
 #include "CheckpointArchiveTypes.hpp" //Needed if we use GetIdentifier() method (which we do)
 #include "HoneycombMeshGenerator.hpp" //Generates mesh
 #include "GeneralisedLinearSpringForce.hpp"
+#include "GeneralisedLinearSpringForce.hpp"
+#include "WoundBasedChemotacticForce.hpp"
 #include "FixedRegionPlaneBoundaryCondition.hpp" // Fixed-position boundary condition
 #include "PlaneBoundaryCondition.hpp" // Plane-based boundary condition
-#include "VoronoiDataWriter.hpp" //Allows us to visualise output in Paraview
 #include "HoneycombMeshGenerator.hpp" //Generates mesh
 #include "NoCellCycleModel.hpp"
-#include "ContactInhibitionCellCycleModel.hpp"
+#include "BasementMembraneBasedContactInhibitionCellCycleModel.hpp"
+#include "GrowthFactorBasedContactInhibitionCellCycleModel.hpp"
 #include "NodeBasedCellPopulation.hpp"
 #include "Cylindrical2dNodesOnlyMesh.hpp"
 #include "CellDataItemWriter.hpp"
@@ -25,9 +27,12 @@
 #include "OffLatticeSimulation.hpp" //Simulates the evolution of the population
 #include "SmartPointers.hpp" //Enables macros to save typing
 #include "StemCellProliferativeType.hpp"
-#include "TransitCellProliferativeType.hpp"
+#include "FibroblastCellProliferativeType.hpp"
 #include "DifferentiatedCellProliferativeType.hpp" //Stops cells from proliferating
+#include "EnfFibroblastCellMutationState.hpp"
+#include "EpfFibroblastCellMutationState.hpp"
 #include "WildTypeCellMutationState.hpp"
+#include "BasementMembraneAttachmentTrackingModifier.hpp"
 #include "FakePetscSetup.hpp" //Forbids tests running in parallel
 #include "PetscSetupAndFinalize.hpp"
 
@@ -68,34 +73,65 @@ public:
         //Create shared pointers for cell and mutation states
         boost::shared_ptr<AbstractCellProperty> p_diff_type(CellPropertyRegistry::Instance()->Get<DifferentiatedCellProliferativeType>());
         boost::shared_ptr<AbstractCellProperty> p_stem_type(CellPropertyRegistry::Instance()->Get<StemCellProliferativeType>());
-        boost::shared_ptr<AbstractCellProperty> p_transit_type(CellPropertyRegistry::Instance()->Get<TransitCellProliferativeType>());        
+        boost::shared_ptr<AbstractCellProperty> p_fibroblast_type(CellPropertyRegistry::Instance()->Get<FibroblastCellProliferativeType>());        
         boost::shared_ptr<AbstractCellProperty> p_wildtype_state(CellPropertyRegistry::Instance()->Get<WildTypeCellMutationState>());
-        
+        boost::shared_ptr<AbstractCellProperty> p_enf_state(CellPropertyRegistry::Instance()->Get<EnfFibroblastCellMutationState>());
+        boost::shared_ptr<AbstractCellProperty> p_epf_state(CellPropertyRegistry::Instance()->Get<EpfFibroblastCellMutationState>());
+
         //Create tissue of cells. Initially we set them all to be differentiated
         std::vector<CellPtr> cells; //Create vector of cells
 
         for (unsigned i = 0; i < p_mesh->GetNumNodes(); i++)
         {
             //Set stochastic duration based cell cycle
-            ContactInhibitionCellCycleModel* p_cycle_model = new ContactInhibitionCellCycleModel(); //Contact-inhibition-based cycle model yet.
-            p_cycle_model->SetEquilibriumVolume(0.25*M_PI);
-            p_cycle_model->SetQuiescentVolumeFraction(0.8);
+            NoCellCycleModel* p_cycle_model = new NoCellCycleModel(); //Contact-inhibition-based cycle model yet.
+            // p_cycle_model->SetEquilibriumVolume(0.25*M_PI);
+            // p_cycle_model->SetQuiescentVolumeFraction(0.8);
             p_cycle_model->SetDimension(2);
 
-            CellPtr p_cell(new Cell(p_wildtype_state, p_cycle_model));
-            p_cell->SetCellProliferativeType(p_transit_type); //Make cell differentiated
+            // Randomly fill the fibroblast population with EPF and ENF fibroblasts, according to proportions
+            // from the Rinkevich et al. (2018) paper.
+            double fibroblast_state =RandomNumberGenerator::Instance()->ranf();
+            if (fibroblast_state < 0.75) // Roughly in line with the Rinkevich et al. (2018) paper.
+            {
+                CellPtr p_cell(new Cell(p_epf_state, p_cycle_model));
+                p_cell->SetCellProliferativeType(p_fibroblast_type); //Make cell differentiated
 
-            // Set a random birth time for each cell so that you don't get synchronised division.
-            double birth_time = - RandomNumberGenerator::Instance()->ranf() * 12.0;
-            p_cell->SetBirthTime(birth_time);
+                // Set a random birth time for each cell so that you don't get synchronised division.
+                double birth_time = - RandomNumberGenerator::Instance()->ranf() * 12.0;
+                p_cell->SetBirthTime(birth_time);
 
-            // For completeness in the stupid contact inhibition model.
-            p_cell->GetCellData()->SetItem("volume", 0.25*M_PI);
+                // For completeness in the stupid contact inhibition model.
+                p_cell->GetCellData()->SetItem("volume", 0.25*M_PI);
 
-            //Initialise morphogen for later.
-            p_cell->GetCellData()->SetItem("morphogen", 1e-4);
+                // Initialise morphogen for later.
+                p_cell->GetCellData()->SetItem("morphogen", 1e-4);
 
-            cells.push_back(p_cell);
+                // Initialise cell data to describe BM attachment.
+                p_cell->GetCellData()->SetItem("attachment", -1.0);
+
+                cells.push_back(p_cell);
+            }
+            else
+            {
+                CellPtr p_cell(new Cell(p_enf_state, p_cycle_model));
+                p_cell->SetCellProliferativeType(p_fibroblast_type); //Make cell differentiated
+
+                // Set a random birth time for each cell so that you don't get synchronised division.
+                double birth_time = - RandomNumberGenerator::Instance()->ranf() * 12.0;
+                p_cell->SetBirthTime(birth_time);
+
+                // For completeness in the stupid contact inhibition model.
+                p_cell->GetCellData()->SetItem("volume", 0.25*M_PI);
+
+                //Initialise morphogen for later.
+                p_cell->GetCellData()->SetItem("morphogen", 1e-4);
+
+                // Initialise cell data to describe BM attachment.
+                p_cell->GetCellData()->SetItem("attachment", -1.0);
+
+                cells.push_back(p_cell);
+            }
         }
 
         //Create cell population
@@ -147,7 +183,9 @@ public:
             // Turn the 'upper' part of the tissuo epidermis
             if (y > (max_height - 1.25))
             {
+
                 cell_iter->SetCellProliferativeType(p_stem_type);
+                cell_iter->SetMutationState(p_wildtype_state);
             }
 
         }
@@ -170,12 +208,11 @@ public:
         p_spring_force->SetCutOffLength(radius_of_interaction);
         simulator.AddForce(p_spring_force);
 
-        // Define the bottom, left, and right fixed boundaries.
+        // Define a plane boundary condition so that cells can't move past y = 0.
         c_vector<double, 2> point, normal;
 
         // Bottom boundary
         point(0) = 0.0;
-        // point(1) =  min_height + 0.25;
         point(1) = 0.0;
         normal(0) = 0.0;
         normal(1) = -1.0;
@@ -183,72 +220,57 @@ public:
         MAKE_PTR_ARGS(PlaneBoundaryCondition<2>, p_bc_bottom, (&cell_population, point, normal));
         simulator.AddCellPopulationBoundaryCondition(p_bc_bottom);
 
-        // // Left boundary
-        // point(0) = min_width + 0.75;
-        // point(1) = 0.0;
-        // normal(0) = -1.0;
-        // normal(1) = 0.0;
-        
-        // MAKE_PTR_ARGS(FixedRegionPlaneBoundaryCondition<2>, p_bc_left, (&cell_population, point, normal));
-        // simulator.AddCellPopulationBoundaryCondition(p_bc_left);
+        // Create a modifier to track which cells are attached to the basement membrane.
+        MAKE_PTR(BasementMembraneAttachmentTrackingModifier<2>, p_bm_attachment_tracking_modifier);
+        p_bm_attachment_tracking_modifier->SetNeighbourhoodRadius(radius_of_interaction);
+		simulator.AddSimulationModifier(p_bm_attachment_tracking_modifier);
 
-        // // Right boundary
-        // point(0) = max_width - 0.75;
-        // point(1) =  0.0;
-        // normal(0) = 1.0;
-        // normal(1) = 0.0;
-        
-        // MAKE_PTR_ARGS(FixedRegionPlaneBoundaryCondition<2>, p_bc_right, (&cell_population, point, normal));
-        // simulator.AddCellPopulationBoundaryCondition(p_bc_right);
+        simulator.Solve(); // Run the simulation.
 
         // Back-up code when we need to start saving these steady states for the wounding experiments
         // Save simulation in steady state
 		// CellBasedSimulationArchiver<2, OffLatticeSimulation<2> >::Save(&simulator);
 
         // Wound the model. 
-        double wound_centre = 0.5*max_width;
-        double wound_width = 0.5*max_width;
-        double wound_base_height = 0.4*max_height;
+        // double wound_centre = 0.5*max_width;
+        // double wound_width = 0.5*max_width;
+        // double wound_base_height = 0.4*max_height;
 
-        simulator.SetEndTime(M_END_TIME);
+        // //Obtain the proliferative cells
+        // for (AbstractCellPopulation<2>::Iterator cell_iter = simulator.rGetCellPopulation().Begin();
+        //         cell_iter != simulator.rGetCellPopulation().End();
+        //         ++cell_iter)
+        // {
+        //     //Get location of cell
+        //     double x = simulator.rGetCellPopulation().GetLocationOfCellCentre(*cell_iter)[0];
+        //     double y = simulator.rGetCellPopulation().GetLocationOfCellCentre(*cell_iter)[1];
 
-        simulator.Solve();
+        //     //If the cell is within the 'wound area', we kill it.
+        //     if ( (x > (wound_centre - 0.5*wound_width))&&(x < (wound_centre + 0.5*wound_width))&&(y > wound_base_height) )
+        //     {
+        //         cell_iter->SetCellProliferativeType(p_diff_type);
+        //         cell_iter->GetCellData()->SetItem("morphogen", 1.0);
+        //     }
 
-        //Obtain the proliferative cells
-        for (AbstractCellPopulation<2>::Iterator cell_iter = simulator.rGetCellPopulation().Begin();
-                cell_iter != simulator.rGetCellPopulation().End();
-                ++cell_iter)
-        {
-            //Get location of cell
-            double x = simulator.rGetCellPopulation().GetLocationOfCellCentre(*cell_iter)[0];
-            double y = simulator.rGetCellPopulation().GetLocationOfCellCentre(*cell_iter)[1];
+        // }
 
-            //If the cell is within the 'wound area', we kill it.
-            if ( (x > (wound_centre - 0.5*wound_width))&&(x < (wound_centre + 0.5*wound_width))&&(y > wound_base_height) )
-            {
-                cell_iter->SetCellProliferativeType(p_diff_type);
-                cell_iter->GetCellData()->SetItem("morphogen", 1.0);
-            }
+        // // Define the reaction-diffusion PDE, using the value's from YangYang's paper.
+        // MAKE_PTR_ARGS(CellwiseSourceParabolicPde<2>, p_pde, (simulator.rGetCellPopulation(), 1.0, 0.1*0.3537, -0.1));
+        // MAKE_PTR_ARGS(ConstBoundaryCondition<2>, p_bc, (0.0));
 
-        }
+        // // Create a PDE Modifier object using this pde and bcs object
+        // MAKE_PTR_ARGS(ParabolicGrowingDomainPdeModifier<2>, p_pde_modifier, (p_pde, p_bc, true));
+        // p_pde_modifier->SetDependentVariableName("morphogen");
+        // simulator.AddSimulationModifier(p_pde_modifier);
 
-        // Define the reaction-diffusion PDE, using the value's from YangYang's paper.
-        MAKE_PTR_ARGS(CellwiseSourceParabolicPde<2>, p_pde, (simulator.rGetCellPopulation(), 1.0, 0.1*0.3537, -0.1));
-        MAKE_PTR_ARGS(ConstBoundaryCondition<2>, p_bc, (0.0));
+        // simulator.SetSamplingTimestepMultiple(0.25*M_SAMPLING_TIMESTEP);
+        // simulator.SetEndTime(2.0*M_END_TIME);
 
-        // Create a PDE Modifier object using this pde and bcs object
-        MAKE_PTR_ARGS(ParabolicGrowingDomainPdeModifier<2>, p_pde_modifier, (p_pde, p_bc, true));
-        p_pde_modifier->SetDependentVariableName("morphogen");
-        simulator.AddSimulationModifier(p_pde_modifier);
+        // simulator.Solve(); // Run the simulation again
 
-        simulator.SetSamplingTimestepMultiple(0.25*M_SAMPLING_TIMESTEP);
-        simulator.SetEndTime(2.0*M_END_TIME);
-
-        simulator.Solve(); // Run the simulation again
-
-        // Tidying up
-        SimulationTime::Instance()->Destroy();
-        SimulationTime::Instance()->SetStartTime(0.0);
+        // // Tidying up
+        // SimulationTime::Instance()->Destroy();
+        // SimulationTime::Instance()->SetStartTime(0.0);
     }
 };
 
