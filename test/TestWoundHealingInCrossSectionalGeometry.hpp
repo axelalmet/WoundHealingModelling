@@ -23,6 +23,7 @@
 #include "Cylindrical2dNodesOnlyMesh.hpp"
 #include "CellDataItemWriter.hpp"
 #include "ParabolicGrowingDomainPdeModifier.hpp"
+#include "EpfFibroblastCollagenSourceParabolicPde.hpp"
 #include "CellwiseSourceParabolicPde.hpp"
 #include "OffLatticeSimulation.hpp" //Simulates the evolution of the population
 #include "SmartPointers.hpp" //Enables macros to save typing
@@ -59,6 +60,9 @@ public:
         double radius_of_interaction = 1.5;
         double division_separation = 0.1;
 
+        // Set the probability of being an EPF fibroblast.
+        double epf_fibroblast_probability = 0.5;
+
         HoneycombMeshGenerator generator(cells_across, cells_up, 0); //Create mesh
         MutableMesh<2, 2>* p_generating_mesh = generator.GetMesh(); //Generate mesh
 
@@ -91,8 +95,12 @@ public:
 
             // Randomly fill the fibroblast population with EPF and ENF fibroblasts, according to proportions
             // from the Rinkevich et al. (2018) paper.
-            double fibroblast_state =RandomNumberGenerator::Instance()->ranf();
-            if (fibroblast_state < 0.75) // Roughly in line with the Rinkevich et al. (2018) paper.
+            double fibroblast_state = RandomNumberGenerator::Instance()->ranf();
+
+            // Randomly initiate a collagen orientation
+            double collagen_orientation = 2.0* M_PI * RandomNumberGenerator::Instance()->ranf();
+
+            if (fibroblast_state < epf_fibroblast_probability) // Roughly in line with the Rinkevich et al. (2018) paper.
             {
                 CellPtr p_cell(new Cell(p_epf_state, p_cycle_model));
                 p_cell->SetCellProliferativeType(p_fibroblast_type); //Make cell differentiated
@@ -105,10 +113,13 @@ public:
                 p_cell->GetCellData()->SetItem("volume", 0.25*M_PI);
 
                 // Initialise morphogen for later.
-                p_cell->GetCellData()->SetItem("morphogen", 1e-4);
+                p_cell->GetCellData()->SetItem("morphogen", 1.0);
 
                 // Initialise cell data to describe BM attachment.
                 p_cell->GetCellData()->SetItem("attachment", -1.0);
+
+                // Initialise collagen orientation
+                p_cell->GetCellData()->SetItem("orientation", collagen_orientation);
 
                 cells.push_back(p_cell);
             }
@@ -129,6 +140,9 @@ public:
 
                 // Initialise cell data to describe BM attachment.
                 p_cell->GetCellData()->SetItem("attachment", -1.0);
+
+                // Initialise collagen orientation
+                p_cell->GetCellData()->SetItem("orientation", collagen_orientation);
 
                 cells.push_back(p_cell);
             }
@@ -224,6 +238,15 @@ public:
         MAKE_PTR(BasementMembraneAttachmentTrackingModifier<2>, p_bm_attachment_tracking_modifier);
         p_bm_attachment_tracking_modifier->SetNeighbourhoodRadius(radius_of_interaction);
 		simulator.AddSimulationModifier(p_bm_attachment_tracking_modifier);
+
+        // // Define the reaction-diffusion PDE, using the value's from YangYang's paper.
+        // MAKE_PTR_ARGS(EpfFibroblastCollagenSourceParabolicPde<2>, p_pde, (simulator.rGetCellPopulation(), 1.0, 0.3537, 1.0));
+        // MAKE_PTR_ARGS(ConstBoundaryCondition<2>, p_bc, (0.0));
+
+        // // Create a PDE Modifier object using this pde and bcs object
+        // MAKE_PTR_ARGS(ParabolicGrowingDomainPdeModifier<2>, p_pde_modifier, (p_pde, p_bc, true));
+        // p_pde_modifier->SetDependentVariableName("morphogen");
+        // simulator.AddSimulationModifier(p_pde_modifier);
 
         simulator.Solve(); // Run the simulation.
 
