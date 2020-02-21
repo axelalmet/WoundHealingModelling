@@ -7,33 +7,33 @@
 #include "CellBasedEventHandler.hpp"
 #include "CellBasedSimulationArchiver.hpp"
 
-#include "CellLabel.hpp"
-#include "CheckpointArchiveTypes.hpp" //Needed if we use GetIdentifier() method (which we do)
+#include "CheckpointArchiveTypes.hpp" // Needed if we use GetIdentifier() method (which we do)
 #include "HoneycombMeshGenerator.hpp" //Generates mesh
-#include "GeneralisedLinearSpringForce.hpp"
-#include "GeneralisedLinearSpringForce.hpp"
-#include "WoundBasedChemotacticForce.hpp"
+#include "GeneralisedLinearSpringForce.hpp" // Standard spring force that implements logarithmic repulsion and exponential attraction for OS models
+#include "EpidermalBasementMembraneForce.hpp" // Force to anchor basal stem cells to dermis
+#include "WoundBasedChemotacticForce.hpp" // Individual-based chemotactic force to induce migration.
 #include "FixedRegionPlaneBoundaryCondition.hpp" // Fixed-position boundary condition
 #include "PlaneBoundaryCondition.hpp" // Plane-based boundary condition
-#include "HoneycombMeshGenerator.hpp" //Generates mesh
-#include "NoCellCycleModel.hpp"
-#include "BasementMembraneBasedContactInhibitionCellCycleModel.hpp"
-#include "GrowthFactorBasedContactInhibitionCellCycleModel.hpp"
-#include "NodeBasedCellPopulation.hpp"
-#include "Cylindrical2dNodesOnlyMesh.hpp"
-#include "CellDataItemWriter.hpp"
-#include "ParabolicGrowingDomainPdeModifier.hpp"
-#include "EpfFibroblastCollagenSourceParabolicPde.hpp"
-#include "CellwiseSourceParabolicPde.hpp"
+#include "HoneycombMeshGenerator.hpp" // Generates mesh
+#include "NoCellCycleModel.hpp" // Useful for running tests where cell proliferation isn't needed.
+#include "BasementMembraneBasedContactInhibitionCellCycleModel.hpp" // Cell cycle for epidermal cell, where proliferative capacity is determined by attachment to the basement membrane
+#include "GrowthFactorBasedContactInhibitionCellCycleModel.hpp" // Cell cycle for fibroblasts that is dependent on exposure to wound-derived growth factors
+#include "NodeBasedCellPopulation.hpp" // Overlapping spheres centre-based population
+#include "Cylindrical2dNodesOnlyMesh.hpp" // Mesh with periodic vertical boundaries
+#include "CellDataItemWriter.hpp" // Allows us to track different cell data items
+#include "ParabolicGrowingDomainPdeModifier.hpp" // Modifier to track PDE solutions
+#include "EpfFibroblastCollagenSourceParabolicPde.hpp" // Cellwise-source-based PDE to simulate collagen production due to EPF fibroblasts
 #include "OffLatticeSimulation.hpp" //Simulates the evolution of the population
 #include "SmartPointers.hpp" //Enables macros to save typing
-#include "StemCellProliferativeType.hpp"
-#include "FibroblastCellProliferativeType.hpp"
-#include "DifferentiatedCellProliferativeType.hpp" //Stops cells from proliferating
-#include "EnfFibroblastCellMutationState.hpp"
-#include "EpfFibroblastCellMutationState.hpp"
-#include "WildTypeCellMutationState.hpp"
+#include "CellLabel.hpp" // What we use to mark cells along the bottom boundary
+#include "StemCellProliferativeType.hpp" // Epidermal basal stem cell type
+#include "FibroblastCellProliferativeType.hpp" // Dermal cell type
+#include "DifferentiatedCellProliferativeType.hpp" // Differentiated cell type
+#include "EnfFibroblastCellMutationState.hpp" // ENF fibroblast mutation state
+#include "EpfFibroblastCellMutationState.hpp" // EPF fibroblast mutation state
+#include "WildTypeCellMutationState.hpp" // Epidermal mutation state
 #include "BasementMembraneAttachmentTrackingModifier.hpp"
+#include "VolumeTrackingModifier.hpp"
 #include "FakePetscSetup.hpp" //Forbids tests running in parallel
 #include "PetscSetupAndFinalize.hpp"
 
@@ -41,9 +41,8 @@
 
 static const std::string M_OUTPUT_DIRECTORY = "WoundHealingModel";
 static const double M_DT = 0.005;
-static const double M_END_TIME = 1.0;
-//static const double M_SECOND_END_TIME = 1.0;
-static const double M_SAMPLING_TIMESTEP = M_END_TIME / M_DT;
+static const double M_END_TIME = 50.0;
+static const double M_SAMPLING_TIMESTEP = 0.01 * M_END_TIME / M_DT;
 
 class TestCrossSectionalWoundHealing : public AbstractCellBasedTestSuite
 {
@@ -87,10 +86,10 @@ public:
 
         for (unsigned i = 0; i < p_mesh->GetNumNodes(); i++)
         {
-            //Set stochastic duration based cell cycle
-            NoCellCycleModel* p_cycle_model = new NoCellCycleModel(); //Contact-inhibition-based cycle model yet.
-            // p_cycle_model->SetEquilibriumVolume(0.25*M_PI);
-            // p_cycle_model->SetQuiescentVolumeFraction(0.8);
+            // Set contact inhibition based cell cycle
+            GrowthFactorBasedContactInhibitionCellCycleModel* p_cycle_model = new GrowthFactorBasedContactInhibitionCellCycleModel(); //Contact-inhibition-based cycle model yet.
+            p_cycle_model->SetEquilibriumVolume(0.25*M_PI);
+            p_cycle_model->SetQuiescentVolumeFraction(0.8);
             p_cycle_model->SetDimension(2);
 
             // Randomly fill the fibroblast population with EPF and ENF fibroblasts, according to proportions
@@ -188,6 +187,9 @@ public:
         }
 
         // Let's set the cell populations for the boundary cells and the epithelium
+
+        boost::shared_ptr<AbstractCellProperty> p_cell_label(CellPropertyRegistry::Instance()->Get<CellLabel>());
+
         for (AbstractCellPopulation<2>::Iterator cell_iter = cell_population.Begin();
         cell_iter != cell_population.End(); ++cell_iter)
         {
@@ -197,9 +199,19 @@ public:
             // Turn the 'upper' part of the tissuo epidermis
             if (y > (max_height - 1.25))
             {
-
+                //Change the cell cycle to one that is based on the basement membrane attachment
+                BasementMembraneBasedContactInhibitionCellCycleModel* p_cycle_model = new BasementMembraneBasedContactInhibitionCellCycleModel(); //Contact-inhibition-based cycle model yet.
+                p_cycle_model->SetEquilibriumVolume(0.25*M_PI);
+                p_cycle_model->SetQuiescentVolumeFraction(0.8);
+                p_cycle_model->SetDimension(2);
+            
+                cell_iter->SetCellCycleModel(p_cycle_model);
                 cell_iter->SetCellProliferativeType(p_stem_type);
                 cell_iter->SetMutationState(p_wildtype_state);
+            }
+            if (y == min_height)
+            {
+                cell_iter->AddCellProperty(p_cell_label);
             }
 
         }
@@ -222,22 +234,35 @@ public:
         p_spring_force->SetCutOffLength(radius_of_interaction);
         simulator.AddForce(p_spring_force);
 
+        // Add basement membrane force
+        MAKE_PTR(EpidermalBasementMembraneForce, p_bm_force);
+        p_bm_force->SetBasementMembraneParameter(5.0);
+        p_bm_force->SetTargetCurvature(0.0);
+        simulator.AddForce(p_bm_force);
+
         // Define a plane boundary condition so that cells can't move past y = 0.
         c_vector<double, 2> point, normal;
 
         // Bottom boundary
         point(0) = 0.0;
-        point(1) = 0.0;
+        point(1) = 0.25;
         normal(0) = 0.0;
         normal(1) = -1.0;
 
-        MAKE_PTR_ARGS(PlaneBoundaryCondition<2>, p_bc_bottom, (&cell_population, point, normal));
+        // MAKE_PTR_ARGS(PlaneBoundaryCondition<2>, p_bc_bottom, (&cell_population, point, normal));
+        // simulator.AddCellPopulationBoundaryCondition(p_bc_bottom);
+
+        MAKE_PTR_ARGS(FixedRegionPlaneBoundaryCondition<2>, p_bc_bottom, (&cell_population, point, normal));
         simulator.AddCellPopulationBoundaryCondition(p_bc_bottom);
 
         // Create a modifier to track which cells are attached to the basement membrane.
         MAKE_PTR(BasementMembraneAttachmentTrackingModifier<2>, p_bm_attachment_tracking_modifier);
         p_bm_attachment_tracking_modifier->SetNeighbourhoodRadius(radius_of_interaction);
 		simulator.AddSimulationModifier(p_bm_attachment_tracking_modifier);
+
+        // Create a modifier to track which cells are attached to the basement membrane.
+        MAKE_PTR(VolumeTrackingModifier<2>, p_volume_tracking_modifier);
+		simulator.AddSimulationModifier(p_volume_tracking_modifier);
 
         // // Define the reaction-diffusion PDE, using the value's from YangYang's paper.
         // MAKE_PTR_ARGS(EpfFibroblastCollagenSourceParabolicPde<2>, p_pde, (simulator.rGetCellPopulation(), 1.0, 0.3537, 1.0));

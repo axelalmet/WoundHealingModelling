@@ -133,6 +133,11 @@ public:
     void UpdateCellCyclePhase();
 
     /**
+     * Overriden SetG1Duration method to account for fibroblasts and platelets.
+     */
+    void SetG1Duration();
+
+    /**
      * Overridden builder method to create new instances of
      * the cell-CycleModel model.
      *

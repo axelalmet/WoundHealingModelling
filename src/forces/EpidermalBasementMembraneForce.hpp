@@ -1,11 +1,12 @@
 #ifndef _HPP_
-#define OverlappingSpheresBasedBasementMembraneForce_HPP_
+#define EpidermalBasementMembraneForce_HPP_
 
 #include "ChasteSerialization.hpp"
 #include <boost/serialization/base_object.hpp>
 
 #include "AbstractForce.hpp"
 #include "MeshBasedCellPopulation.hpp"
+#include "NodeBasedCellPopulation.hpp"
 
 #include "RandomNumberGenerator.hpp"
 
@@ -18,7 +19,7 @@
  * A force class that defines the force due to the basement membrane.
  */
 
-class OverlappingSpheresBasedBasementMembraneForce : public AbstractForce<2>
+class EpidermalBasementMembraneForce : public AbstractForce<2>
 {
     friend class TestCrossSectionModelInteractionForce;
 
@@ -80,12 +81,12 @@ public :
     /**
      * Constructor.
      */
-	OverlappingSpheresBasedBasementMembraneForce();
+	EpidermalBasementMembraneForce();
 
     /**
      * Destructor.
      */
-    ~OverlappingSpheresBasedBasementMembraneForce();
+    ~EpidermalBasementMembraneForce();
 
     /* Set method for Basement Membrane Parameter
      */
@@ -133,16 +134,16 @@ public :
     c_vector<double, 2> GetCosineBasedTangentVector(AbstractCellPopulation<2>& rCellPopulation, c_vector<double, 2> point);
 
     /*
-     * Return vector of epithelial indices that are close to the considered epithelial node,
+     * Return vector of Epidermal indices that are close to the considered Epidermal node,
      * but based on an approximated cosine approximation
      */
-    std::vector<unsigned> GetClosestNeighboursBasedOnCosineApproximation(AbstractCellPopulation<2>& rCellPopulation, unsigned epithelialIndex);
+    std::vector<unsigned> GetClosestNeighboursBasedOnCosineApproximation(AbstractCellPopulation<2>& rCellPopulation, unsigned EpidermalIndex);
 
     /*
      * Return the nearest neighbour based on vector projections from the tangent vector
      * at a point along the cosine approximation of the epithelium.
      */
-    unsigned GetNearestNeighboursAlongCosineApproximation(AbstractCellPopulation<2>& rCellPopulation, unsigned epithelialIndex);
+    unsigned GetNearestNeighboursAlongCosineApproximation(AbstractCellPopulation<2>& rCellPopulation, unsigned EpidermalIndex);
 
     /*
      * Set method for geometry-dependent basement membrane for application, i.e.crypt or organoid
@@ -188,18 +189,18 @@ public :
     /*
      * Method to get the indices of the monolayer
      */
-    std::vector<unsigned> GetEpithelialIndices(AbstractCellPopulation<2>& rCellPopulation);
+    std::vector<unsigned> GetEpidermalIndices(AbstractCellPopulation<2>& rCellPopulation);
 
     /*
      * Method to return the nodes connected to a particular node within a defined cut-off
      * radius
      */
-    std::vector<unsigned> GetNeighbouringEpithelialIndices(AbstractCellPopulation<2>& rCellPopulation, unsigned nodeIndex);
+    std::vector<unsigned> GetNeighbouringEpidermalIndices(AbstractCellPopulation<2>& rCellPopulation, unsigned nodeIndex);
 
     /*
-     * Method to get the epithelial nodes and their left and right neighbours, if they have any
+     * Method to get the Epidermal nodes and their left and right neighbours, if they have any
      */
-    std::map<unsigned, std::pair<unsigned, unsigned> > GetEpithelialIndicesAndTheirLeftAndRightEpithelialNeighbours(AbstractCellPopulation<2>& rCellPopulation);
+    std::map<unsigned, std::pair<unsigned, unsigned> > GetEpidermalIndicesAndTheirLeftAndRightEpidermalNeighbours(AbstractCellPopulation<2>& rCellPopulation);
 
     /*
      * Method to check whether or not node is on the left or right boundary (and hence should have zero force).
@@ -207,9 +208,9 @@ public :
     bool IsBoundaryNode(AbstractCellPopulation<2>& rCellPopulation, unsigned nodeIndex);
 
     /*
-     * Method to calculate the force due to basement membrane on an epithelial cell
+     * Method to calculate the force due to basement membrane on an Epidermal cell
      */
-    c_vector<double, 2> CalculateForceDueToBasementMembrane(AbstractCellPopulation<2>& rCellPopulation, std::map<unsigned, std::pair<unsigned, unsigned > > epithelialIndicesAndNeighbours, unsigned nodeIndex);
+    c_vector<double, 2> CalculateForceDueToBasementMembrane(AbstractCellPopulation<2>& rCellPopulation, std::map<unsigned, std::pair<unsigned, unsigned > > EpidermalIndicesAndNeighbours, unsigned nodeIndex);
 
     /**
      * Overridden AddForceContribution method.
@@ -231,6 +232,6 @@ public :
 };
 
 #include "SerializationExportWrapper.hpp"
-CHASTE_CLASS_EXPORT(OverlappingSpheresBasedBasementMembraneForce)
+CHASTE_CLASS_EXPORT(EpidermalBasementMembraneForce)
 
-#endif /*OVERLAPPINGSPHERESBASEDBASEMENTMEMBRANEFORCE_HPP_*/
+#endif /*EPIDERMALBASEMENTMEMBRANEFORCE_HPP_*/

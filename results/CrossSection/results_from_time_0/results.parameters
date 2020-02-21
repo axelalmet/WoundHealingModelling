@@ -2,7 +2,7 @@
 
 	<OffLatticeSimulation-2-2>
 		<Dt>0.005</Dt>
-		<EndTime>1</EndTime>
+		<EndTime>50</EndTime>
 		<SamplingTimestepMultiple>200</SamplingTimestepMultiple>
 		<OutputDivisionLocations>0</OutputDivisionLocations>
 		<OutputCellVelocities>0</OutputCellVelocities>
@@ -22,8 +22,25 @@
 	</NodeBasedCellPopulation-2>
 
 	<CellCycleModels>
-		<NoCellCycleModel>
-		</NoCellCycleModel>
+		<GrowthFactorBasedContactInhibitionCellCycleModel>
+			<QuiescentVolumeFraction>0.8</QuiescentVolumeFraction>
+			<EquilibriumVolume>0.785398</EquilibriumVolume>
+			<GrowthFactorThreshold>0.5</GrowthFactorThresholde>
+			<StemCellG1Duration>14</StemCellG1Duration>
+			<TransitCellG1Duration>2</TransitCellG1Duration>
+			<SDuration>5</SDuration>
+			<G2Duration>4</G2Duration>
+			<MDuration>1</MDuration>
+		</GrowthFactorBasedContactInhibitionCellCycleModel>
+		<BasementMembraneBasedContactInhibitionCellCycleModel>
+			<QuiescentVolumeFraction>0.8</QuiescentVolumeFraction>
+			<EquilibriumVolume>0.785398</EquilibriumVolume>
+			<StemCellG1Duration>14</StemCellG1Duration>
+			<TransitCellG1Duration>2</TransitCellG1Duration>
+			<SDuration>5</SDuration>
+			<G2Duration>4</G2Duration>
+			<MDuration>1</MDuration>
+		</BasementMembraneBasedContactInhibitionCellCycleModel>
 	</CellCycleModels>
 
 	<SrnModels>
@@ -37,6 +54,8 @@
 	<SimulationModifiers>
 		<BasementMembraneAttachmentTrackingModifier-2>
 		</BasementMembraneAttachmentTrackingModifier-2>
+		<VolumeTrackingModifier-2>
+		</VolumeTrackingModifier-2>
 	</SimulationModifiers>
 
 	<Forces>
@@ -50,11 +69,11 @@
 	</Forces>
 
 	<CellPopulationBoundaryConditions>
-		<PlaneBoundaryCondition-2-2>
-			<PointOnPlane>0,0</PointOnPlane>
+		<FixedRegionPlaneBoundaryCondition-2>
+			<PointOnPlane>0,0.25</PointOnPlane>
 			<NormalToPlane>0,-1</NormalToPlane>
 			<UseJiggledNodesOnPlane>0</UseJiggledNodesOnPlane>
-		</PlaneBoundaryCondition-2-2>
+		</FixedRegionPlaneBoundaryCondition-2>
 	</CellPopulationBoundaryConditions>
 
 	<NumericalMethod>

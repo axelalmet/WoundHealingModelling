@@ -35,7 +35,11 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BasementMembraneBasedContactInhibitionCellCycleModel.hpp"
 #include "CellLabel.hpp"
+#include "StemCellProliferativeType.hpp"
+#include "TransitCellProliferativeType.hpp"
 #include "DifferentiatedCellProliferativeType.hpp"
+#include "FibroblastCellProliferativeType.hpp"
+#include "PlateletCellProliferativeType.hpp"
 
 BasementMembraneBasedContactInhibitionCellCycleModel::BasementMembraneBasedContactInhibitionCellCycleModel()
     : AbstractSimplePhaseBasedCellCycleModel(),
@@ -98,9 +102,9 @@ void BasementMembraneBasedContactInhibitionCellCycleModel::UpdateCellCyclePhase(
              * a new CellPropertyRegistry. In this case the CellLabel's cell count would be incorrect.
              * We must therefore access the CellLabel via the cell's CellPropertyCollection.
              */
-            boost::shared_ptr<AbstractCellProperty> p_label =
-                mpCell->rGetCellPropertyCollection().GetCellPropertyRegistry()->Get<CellLabel>();
-            mpCell->AddCellProperty(p_label);
+            // boost::shared_ptr<AbstractCellProperty> p_label =
+            //     mpCell->rGetCellPropertyCollection().GetCellPropertyRegistry()->Get<CellLabel>();
+            // mpCell->AddCellProperty(p_label);
         }
         else
         {
@@ -143,6 +147,38 @@ void BasementMembraneBasedContactInhibitionCellCycleModel::UpdateCellCyclePhase(
     else if (time_since_birth < GetMDuration() + mG1Duration + GetSDuration() + GetG2Duration())
     {
         mCurrentCellCyclePhase = G_TWO_PHASE;
+    }
+}
+
+void BasementMembraneBasedContactInhibitionCellCycleModel::SetG1Duration()
+{
+    // We need to override this inherited function to account for fibroblasts and platelets.
+
+    assert(mpCell != nullptr);
+
+    if (mpCell->GetCellProliferativeType()->IsType<StemCellProliferativeType>())
+    {
+        mG1Duration = GetStemCellG1Duration();
+    }
+    else if (mpCell->GetCellProliferativeType()->IsType<TransitCellProliferativeType>())
+    {
+        mG1Duration = GetTransitCellG1Duration();
+    }
+    else if (mpCell->GetCellProliferativeType()->IsType<FibroblastCellProliferativeType>())
+    {
+        mG1Duration = DBL_MAX;
+    }
+    else if (mpCell->GetCellProliferativeType()->IsType<PlateletCellProliferativeType>())
+    {
+        mG1Duration = DBL_MAX;
+    }
+    else if (mpCell->GetCellProliferativeType()->IsType<DifferentiatedCellProliferativeType>())
+    {
+        mG1Duration = DBL_MAX;
+    }
+    else
+    {
+        NEVER_REACHED;
     }
 }
 

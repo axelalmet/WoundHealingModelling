@@ -36,7 +36,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "EnfFibroblastCellMutationState.hpp"
 
 EnfFibroblastCellMutationState::EnfFibroblastCellMutationState()
-    : AbstractCellMutationState(5)
+    : AbstractCellMutationState(7)
 {}
 
 #include "SerializationExportWrapperForCpp.hpp"
