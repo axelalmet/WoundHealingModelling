@@ -3,7 +3,7 @@
 	<OffLatticeSimulation-2-2>
 		<Dt>0.005</Dt>
 		<EndTime>50</EndTime>
-		<SamplingTimestepMultiple>200</SamplingTimestepMultiple>
+		<SamplingTimestepMultiple>100</SamplingTimestepMultiple>
 		<OutputDivisionLocations>0</OutputDivisionLocations>
 		<OutputCellVelocities>0</OutputCellVelocities>
 	</OffLatticeSimulation-2-2>
@@ -66,6 +66,15 @@
 			<UseCutOffLength>1</UseCutOffLength>
 			<CutOffLength>1.5</CutOffLength>
 		</GeneralisedLinearSpringForce-2-2>
+		<EpidermalBasementMembraneForce>
+			<BasementMembraneParameter>5</BasementMembraneParameter> 
+			<TargetCurvature>0</TargetCurvature> 
+			<LeftBoundary>1.79769e+308</LeftBoundary> 
+			<RightBoundary>1.79769e+308</RightBoundary> 
+			<UsePositionDependentMembraneForce>0</UsePositionDependentMembraneForce> 
+			<MembraneForceMultiplier>1.79769e+308</MembraneForceMultiplier> 
+			<ApplyPeriodicForce>0</ApplyPeriodicForce> 
+		</EpidermalBasementMembraneForce>
 	</Forces>
 
 	<CellPopulationBoundaryConditions>
