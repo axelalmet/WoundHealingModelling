@@ -4,6 +4,7 @@
 #include "NodeBasedCellPopulation.hpp"
 #include "RandomNumberGenerator.hpp"
 #include "AbstractCellProperty.hpp"
+#include "StemCellProliferativeType.hpp"
 #include "DifferentiatedCellProliferativeType.hpp"
 #include "CellLabel.hpp"
 #include "Debug.hpp"
@@ -98,6 +99,11 @@ void FixedRegionPlaneBoundaryCondition<DIM>::ImposeBoundaryCondition(const std::
 							//Assign nearest point, which is just the old location
 							nearest_point = previous_location;
 
+							if (cell_iter->GetCellProliferativeType()-> template IsType<StemCellProliferativeType>())
+							{
+								boost::shared_ptr<AbstractCellProperty> p_diff_type = CellPropertyRegistry::Instance()->Get<DifferentiatedCellProliferativeType>();
+								cell_iter->SetCellProliferativeType(p_diff_type);
+							}
 //							//Differentiate cell, otherwise something weird will happen with proliferation
 //							boost::shared_ptr<AbstractCellProperty> p_diff_type = CellPropertyRegistry::Instance()->Get<DifferentiatedCellProliferativeType>();
 //							cell_iter->SetCellProliferativeType(p_diff_type);
@@ -111,6 +117,11 @@ void FixedRegionPlaneBoundaryCondition<DIM>::ImposeBoundaryCondition(const std::
 							//Assign nearest point, which is just the current location
 							nearest_point = previous_location;
 
+							if (cell_iter->GetCellProliferativeType()-> template IsType<StemCellProliferativeType>())
+							{
+								boost::shared_ptr<AbstractCellProperty> p_diff_type = CellPropertyRegistry::Instance()->Get<DifferentiatedCellProliferativeType>();
+								cell_iter->SetCellProliferativeType(p_diff_type);
+							}
 							//Differentiate cell, otherwise something weird will happen with proliferation
 //							boost::shared_ptr<AbstractCellProperty> p_diff_type = CellPropertyRegistry::Instance()->Get<DifferentiatedCellProliferativeType>();
 //							cell_iter->SetCellProliferativeType(p_diff_type);
@@ -203,6 +214,12 @@ void FixedRegionPlaneBoundaryCondition<DIM>::ImposeBoundaryCondition(const std::
 							//Assign nearest point, which is just the current location
 							nearest_point = current_location;
 
+							if (cell_iter->GetCellProliferativeType()-> template IsType<StemCellProliferativeType>())
+							{
+								boost::shared_ptr<AbstractCellProperty> p_diff_type = CellPropertyRegistry::Instance()->Get<DifferentiatedCellProliferativeType>();
+								cell_iter->SetCellProliferativeType(p_diff_type);
+							}
+
 							//Differentiate cell, otherwise something weird will happen with proliferation
 							// boost::shared_ptr<AbstractCellProperty> p_diff_type = CellPropertyRegistry::Instance()->Get<DifferentiatedCellProliferativeType>();
 							// cell_iter->SetCellProliferativeType(p_diff_type);
@@ -215,6 +232,12 @@ void FixedRegionPlaneBoundaryCondition<DIM>::ImposeBoundaryCondition(const std::
 						{
 							//Assign nearest point, which is just the urrnt
 							nearest_point = current_location;
+
+							if (cell_iter->GetCellProliferativeType()-> template IsType<StemCellProliferativeType>())
+							{
+								boost::shared_ptr<AbstractCellProperty> p_diff_type = CellPropertyRegistry::Instance()->Get<DifferentiatedCellProliferativeType>();
+								cell_iter->SetCellProliferativeType(p_diff_type);
+							}
 
 							//Differentiate cell, otherwise something weird will happen with proliferation
 							// boost::shared_ptr<AbstractCellProperty> p_diff_type = CellPropertyRegistry::Instance()->Get<DifferentiatedCellProliferativeType>();
@@ -314,6 +337,12 @@ void FixedRegionPlaneBoundaryCondition<DIM>::ImposeBoundaryCondition(const std::
 							//Assign nearest point, which is just the current
 							nearest_point = current_location;
 
+							if (cell_iter->GetCellProliferativeType()-> template IsType<StemCellProliferativeType>())
+							{
+								boost::shared_ptr<AbstractCellProperty> p_diff_type = CellPropertyRegistry::Instance()->Get<DifferentiatedCellProliferativeType>();
+								cell_iter->SetCellProliferativeType(p_diff_type);
+							}
+
 							// //Differentiate cell, otherwise something weird will happen with proliferation
 							// boost::shared_ptr<AbstractCellProperty> p_diff_type = CellPropertyRegistry::Instance()->Get<DifferentiatedCellProliferativeType>();
 							// cell_iter->SetCellProliferativeType(p_diff_type);
@@ -327,6 +356,11 @@ void FixedRegionPlaneBoundaryCondition<DIM>::ImposeBoundaryCondition(const std::
 							//Assign nearest point, which is just the old location
 							nearest_point = current_location;
 
+							if (cell_iter->GetCellProliferativeType()-> template IsType<StemCellProliferativeType>())
+							{
+								boost::shared_ptr<AbstractCellProperty> p_diff_type = CellPropertyRegistry::Instance()->Get<DifferentiatedCellProliferativeType>();
+								cell_iter->SetCellProliferativeType(p_diff_type);
+							}
 							// //Differentiate cell, otherwise something weird will happen with proliferation
 							// boost::shared_ptr<AbstractCellProperty> p_diff_type = CellPropertyRegistry::Instance()->Get<DifferentiatedCellProliferativeType>();
 							// cell_iter->SetCellProliferativeType(p_diff_type);

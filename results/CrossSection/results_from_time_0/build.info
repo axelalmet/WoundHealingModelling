@@ -1,10 +1,10 @@
 <ChasteBuildInfo>
 	<ProvenanceInfo>
-		<VersionString>2019.1.79285</VersionString> <!-- build specific -->
+		<VersionString>2019.1.f4f9636</VersionString> <!-- build specific -->
 		<IsWorkingCopyModified>1</IsWorkingCopyModified>
 		<BuildInformation>Debug</BuildInformation>
-		<BuildTime>Thu, 20 Feb 2020 17:38:12 +0000</BuildTime>
-		<CurrentTime>Fri, 21 Feb 2020 01:55:34 +0000</CurrentTime>
+		<BuildTime>Fri, 21 Feb 2020 10:43:06 +0000</BuildTime>
+		<CurrentTime>Sat, 22 Feb 2020 00:20:37 +0000</CurrentTime>
 		<BuilderUnameInfo>Linux</BuilderUnameInfo>
 		<Projects>
 			<Project>
@@ -19,7 +19,7 @@
 			</Project>
 			<Project>
 				<Name>WoundHealingModelling</Name>
-				<Version>7fb0b4f6d9d2e1338b2cb32fe3e2a3ab2ec88128</Version>
+				<Version>19b952a157207592aa8d17f24a43057163eb8942</Version>
 				<Modified>True</Modified>
 			</Project>
 		</Projects>

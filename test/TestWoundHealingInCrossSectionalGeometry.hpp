@@ -41,8 +41,9 @@
 
 static const std::string M_OUTPUT_DIRECTORY = "WoundHealingModel";
 static const double M_DT = 0.005;
-static const double M_END_TIME = 50.0;
-static const double M_SAMPLING_TIMESTEP = 0.01 * M_END_TIME / M_DT;
+static const double M_END_TIME = 30.0;
+// static const double M_SAMPLING_TIMESTEP = M_END_TIME / M_DT;
+static const double M_SAMPLING_TIMESTEP = 1.0/M_DT;
 
 class TestCrossSectionalWoundHealing : public AbstractCellBasedTestSuite
 {
@@ -51,13 +52,17 @@ public:
     {
 
         //Set the number of cells across and down for the array
-        unsigned cells_across = 30;
+        unsigned cells_across = 20;
         unsigned cells_up = 10;
 
-        // double epithelial_epithelial_resting_spring_length = 1.0;
+        // Set some parameters for node-based cell populations
+        double radius_of_interaction = 1.5; // Radius of interaction to determine neighbourhoods
+        double division_separation = 0.1; // Initial resting length upon division
 
-        double radius_of_interaction = 1.5;
-        double division_separation = 0.1;
+        // Mechanical parameters
+        double spring_stiffness = 60.0; // Spring stiffness
+        double bm_stiffness = 6.0; // Basement membrane attachment strength
+        double target_curvature = 0.0; // Target curvature
 
         // Set the probability of being an EPF fibroblast.
         double epf_fibroblast_probability = 0.5;
@@ -69,9 +74,9 @@ public:
         Cylindrical2dNodesOnlyMesh* p_mesh = new Cylindrical2dNodesOnlyMesh(1.0*cells_across);
 		p_mesh->ConstructNodesWithoutMesh(*p_generating_mesh, 2.0); //Construct mesh
 
-        // // Construct the mesh that we'll actually use.
+        // Create a non-periodic mesh.
 		// NodesOnlyMesh<2> mesh;
-        // mesh.ConstructNodesWithoutMesh(*p_generating_mesh, radius_of_interaction); //Construct mesh
+        // mesh.ConstructNodesWithoutMesh(*p_generating_mesh, 2.0); //Construct mesh
 
         //Create shared pointers for cell and mutation states
         boost::shared_ptr<AbstractCellProperty> p_diff_type(CellPropertyRegistry::Instance()->Get<DifferentiatedCellProliferativeType>());
@@ -84,7 +89,8 @@ public:
         //Create tissue of cells. Initially we set them all to be differentiated
         std::vector<CellPtr> cells; //Create vector of cells
 
-        for (unsigned i = 0; i < p_mesh->GetNumNodes(); i++)
+        for (unsigned i = 0; i < p_mesh->GetNumNodes(); i++) // Iterator for periodic mesh
+        // for (unsigned i = 0; i < mesh.GetNumNodes(); i++) // Iterator for non-periodic mesh
         {
             // Set contact inhibition based cell cycle
             GrowthFactorBasedContactInhibitionCellCycleModel* p_cycle_model = new GrowthFactorBasedContactInhibitionCellCycleModel(); //Contact-inhibition-based cycle model yet.
@@ -148,7 +154,8 @@ public:
         }
 
         //Create cell population
-        NodeBasedCellPopulation<2> cell_population(*p_mesh, cells);
+        NodeBasedCellPopulation<2> cell_population(*p_mesh, cells); // Used for periodic
+        // NodeBasedCellPopulation<2> cell_population(mesh, cells); // Used for non-periodic
         cell_population.SetMeinekeDivisionSeparation(division_separation);
 
         // Add a cell item writer to track the morphogen that we will encode to evolve due to wounding.
@@ -192,12 +199,11 @@ public:
 
         for (AbstractCellPopulation<2>::Iterator cell_iter = cell_population.Begin();
         cell_iter != cell_population.End(); ++cell_iter)
-        {
-            // double x = cell_population.GetLocationOfCellCentre(*cell_iter)[0];
-            double y = cell_population.GetLocationOfCellCentre(*cell_iter)[1];
+        {            double y = cell_population.GetLocationOfCellCentre(*cell_iter)[1];
             
-            // Turn the 'upper' part of the tissuo epidermis
+            // Turn the 'upper' part of the tissue epidermis
             if (y > (max_height - 1.25))
+            // if (y == max_height)
             {
                 //Change the cell cycle to one that is based on the basement membrane attachment
                 BasementMembraneBasedContactInhibitionCellCycleModel* p_cycle_model = new BasementMembraneBasedContactInhibitionCellCycleModel(); //Contact-inhibition-based cycle model yet.
@@ -230,17 +236,18 @@ public:
 
         // Add linear spring force (modified to have three different spring stiffnesses, depending on the type of pair)
         MAKE_PTR(GeneralisedLinearSpringForce<2>, p_spring_force);
-        p_spring_force->SetMeinekeSpringStiffness(50.0);
+        p_spring_force->SetMeinekeSpringStiffness(spring_stiffness);
         p_spring_force->SetCutOffLength(radius_of_interaction);
         simulator.AddForce(p_spring_force);
 
         // Add basement membrane force
         MAKE_PTR(EpidermalBasementMembraneForce, p_bm_force);
-        p_bm_force->SetBasementMembraneParameter(5.0);
-        p_bm_force->SetTargetCurvature(0.0);
+        p_bm_force->SetBasementMembraneParameter(bm_stiffness);
+        p_bm_force->SetTargetCurvature(target_curvature);
+        p_bm_force->ApplyPeriodicForce(false);
         simulator.AddForce(p_bm_force);
 
-        // Define a plane boundary condition so that cells can't move past y = 0.
+        // Define a fixed-regions boundary condition so that cells can't move past y = 0
         c_vector<double, 2> point, normal;
 
         // Bottom boundary
@@ -248,12 +255,11 @@ public:
         point(1) = 0.25;
         normal(0) = 0.0;
         normal(1) = -1.0;
+        MAKE_PTR_ARGS(FixedRegionPlaneBoundaryCondition<2>, p_bc_bottom, (&cell_population, point, normal));
+        simulator.AddCellPopulationBoundaryCondition(p_bc_bottom);
 
         // MAKE_PTR_ARGS(PlaneBoundaryCondition<2>, p_bc_bottom, (&cell_population, point, normal));
         // simulator.AddCellPopulationBoundaryCondition(p_bc_bottom);
-
-        MAKE_PTR_ARGS(FixedRegionPlaneBoundaryCondition<2>, p_bc_bottom, (&cell_population, point, normal));
-        simulator.AddCellPopulationBoundaryCondition(p_bc_bottom);
 
         // Create a modifier to track which cells are attached to the basement membrane.
         MAKE_PTR(BasementMembraneAttachmentTrackingModifier<2>, p_bm_attachment_tracking_modifier);

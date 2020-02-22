@@ -301,10 +301,10 @@ unsigned EpidermalBasementMembraneForce::GetNearestNeighboursAlongCosineApproxim
 	std::vector<unsigned> closest_neighbours = GetClosestNeighboursBasedOnCosineApproximation(rCellPopulation, epidermalIndex);
 
 	// Get the location of the considered Epidermal node
-	c_vector<double, 2> Epidermal_location = rCellPopulation.GetNode(epidermalIndex)->rGetLocation();
+	c_vector<double, 2> epidermal_location = rCellPopulation.GetNode(epidermalIndex)->rGetLocation();
 
 	// Calculate the tangent vector at the Epidermal node
-	c_vector<double, 2> tangent_vector = GetCosineBasedTangentVector(rCellPopulation, Epidermal_location);
+	c_vector<double, 2> tangent_vector = GetCosineBasedTangentVector(rCellPopulation, epidermal_location);
 
 	for (unsigned i = 0; i < closest_neighbours.size(); i++)
 	{
@@ -313,7 +313,7 @@ unsigned EpidermalBasementMembraneForce::GetNearestNeighboursAlongCosineApproxim
 		c_vector<double, 2> neighbour_location = rCellPopulation.GetNode(neighbour_index)->rGetLocation();
 
 		// Get the scalar projection of the relative position vector onto the tangent vector
-		double scalar_projection = inner_prod(neighbour_location - Epidermal_location, tangent_vector)/norm_2(tangent_vector);
+		double scalar_projection = inner_prod(neighbour_location - epidermal_location, tangent_vector)/norm_2(tangent_vector);
 
 		if (scalar_projection < min_scalar_projection)
 		{
@@ -457,11 +457,11 @@ std::map<unsigned, std::pair<unsigned, unsigned> > EpidermalBasementMembraneForc
 
 		for (unsigned i = 0; i < epidermal_indices.size(); i++)
 		{
-			unsigned Epidermal_index = epidermal_indices[i]; //Get node index
-			double Epidermal_x_coordinate = rCellPopulation.GetNode(Epidermal_index)->rGetLocation()[0]; //Get x-coordinate of node location
+			unsigned epidermal_index = epidermal_indices[i]; //Get node index
+			double epidermal_x_coordinate = rCellPopulation.GetNode(epidermal_index)->rGetLocation()[0]; //Get x-coordinate of node location
 
 			//Make pair
-			std::pair<double, unsigned> x_coordinate_and_index = std::make_pair(Epidermal_x_coordinate, Epidermal_index);
+			std::pair<double, unsigned> x_coordinate_and_index = std::make_pair(epidermal_x_coordinate, epidermal_index);
 
 			epidermal_indices_and_x_coordinates.push_back(x_coordinate_and_index);
 		}
@@ -470,7 +470,7 @@ std::map<unsigned, std::pair<unsigned, unsigned> > EpidermalBasementMembraneForc
 		std::sort(epidermal_indices_and_x_coordinates.begin(), epidermal_indices_and_x_coordinates.end());
 
 		//We now define the nodes and their left and right neighbours in the layer
-		for (unsigned i = 0; i < epidermal_indices_and_x_coordinates.size(); i++) // Do not apply the force to the left-most and right-most cells
+		for (unsigned i = 0; i < epidermal_indices_and_x_coordinates.size(); i++)
 		{
 
 			unsigned centre_node_index = epidermal_indices_and_x_coordinates[i].second; //Get index of centre node
@@ -482,10 +482,12 @@ std::map<unsigned, std::pair<unsigned, unsigned> > EpidermalBasementMembraneForc
 			{
 				left_neighbour_index = epidermal_indices_and_x_coordinates[epidermal_indices_and_x_coordinates.size() - 1].second;
 				right_neighbour_index = epidermal_indices_and_x_coordinates[i + 1].second;
+				// left_neighbour_index = right_neighbour_index;
 			}
 			else if (i == (epidermal_indices_and_x_coordinates.size() - 1) )
 			{
 				left_neighbour_index = epidermal_indices_and_x_coordinates[i - 1].second;
+				// right_neighbour_index = left_neighbour_index;
 				right_neighbour_index = 0;
 			}
 			else
@@ -507,10 +509,10 @@ std::map<unsigned, std::pair<unsigned, unsigned> > EpidermalBasementMembraneForc
 
 		for (unsigned i = 0; i < epidermal_indices.size(); i++)
 		{
-			unsigned Epidermal_index = epidermal_indices[i]; //Get node index
-			c_vector<double, 2> Epidermal_location = rCellPopulation.GetNode(Epidermal_index)->rGetLocation(); //Get x-coordinate of node location
+			unsigned epidermal_index = epidermal_indices[i]; //Get node index
+			c_vector<double, 2> epidermal_location = rCellPopulation.GetNode(epidermal_index)->rGetLocation(); //Get x-coordinate of node location
 
-			centre_of_mass += Epidermal_location;
+			centre_of_mass += epidermal_location;
 		}
 
 		//Average centre of mass
@@ -596,11 +598,11 @@ bool EpidermalBasementMembraneForce::IsBoundaryNode(AbstractCellPopulation<2>& r
 
 	for (unsigned i = 0; i < epidermal_indices.size(); i++)
 	{
-		unsigned Epidermal_index = epidermal_indices[i]; //Get node index
-		double Epidermal_x_coordinate = rCellPopulation.GetNode(Epidermal_index)->rGetLocation()[0]; //Get x-coordinate of node location
+		unsigned epidermal_index = epidermal_indices[i]; //Get node index
+		double epidermal_x_coordinate = rCellPopulation.GetNode(epidermal_index)->rGetLocation()[0]; //Get x-coordinate of node location
 
 		//Make pair
-		std::pair<double, unsigned> x_coordinate_and_index = std::make_pair(Epidermal_x_coordinate, Epidermal_index);
+		std::pair<double, unsigned> x_coordinate_and_index = std::make_pair(epidermal_x_coordinate, epidermal_index);
 
 		epidermal_indices_and_x_coordinates.push_back(x_coordinate_and_index);
 	}
@@ -735,6 +737,7 @@ c_vector<double, 2> EpidermalBasementMembraneForce::CalculateForceDueToBasementM
 	}
 	else
 	{
+
 		double curvature = FindParametricCurvature(rCellPopulation, left_point, centre_point, right_point);
 
 		//Get the unit vectors from the centre points to its left and right neighbours
@@ -743,6 +746,15 @@ c_vector<double, 2> EpidermalBasementMembraneForce::CalculateForceDueToBasementM
 
 		c_vector<double, 2> centre_to_right = rCellPopulation.rGetMesh().GetVectorFromAtoB(centre_point, right_point);
 		centre_to_right /= norm_2(centre_to_right); //Normalise vector
+		
+
+		// if (IsBoundaryNode(rCellPopulation, nodeIndex))
+		// {
+		// 	PRINT_2_VARIABLES(centre_point[0], centre_point[1])
+		// 	PRINT_2_VARIABLES(centre_to_left[0], centre_to_left[1]);
+		// 	PRINT_2_VARIABLES(centre_to_right[0], centre_to_right[1]);
+
+		// }
 
 		/* Define direction using a formula derived (essentially solve for the vector w such that u.w = v.w, where w is the force direction
 		 * and u = unit vector to the left and v = unit vector pointing to the right)
