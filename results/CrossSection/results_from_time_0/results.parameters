@@ -2,7 +2,7 @@
 
 	<OffLatticeSimulation-2-2>
 		<Dt>0.005</Dt>
-		<EndTime>30</EndTime>
+		<EndTime>1</EndTime>
 		<SamplingTimestepMultiple>200</SamplingTimestepMultiple>
 		<OutputDivisionLocations>0</OutputDivisionLocations>
 		<OutputCellVelocities>0</OutputCellVelocities>
@@ -32,15 +32,6 @@
 			<G2Duration>4</G2Duration>
 			<MDuration>1</MDuration>
 		</GrowthFactorBasedContactInhibitionCellCycleModel>
-		<BasementMembraneBasedContactInhibitionCellCycleModel>
-			<QuiescentVolumeFraction>0.8</QuiescentVolumeFraction>
-			<EquilibriumVolume>0.785398</EquilibriumVolume>
-			<StemCellG1Duration>14</StemCellG1Duration>
-			<TransitCellG1Duration>2</TransitCellG1Duration>
-			<SDuration>5</SDuration>
-			<G2Duration>4</G2Duration>
-			<MDuration>1</MDuration>
-		</BasementMembraneBasedContactInhibitionCellCycleModel>
 	</CellCycleModels>
 
 	<SrnModels>
@@ -49,32 +40,30 @@
 	</SrnModels>
 
 	<CellKillers>
+		<PlateletCellKiller>
+			<CellsRemovedByFibroblasts>0</CellsRemovedByFibroblasts> 
+			<CutOffRadius>1.5</CutOffRadius> 
+			<GrowthFactorThreshold>0.5</GrowthFactorThreshold> 
+		</PlateletCellKiller>
 	</CellKillers>
 
 	<SimulationModifiers>
-		<BasementMembraneAttachmentTrackingModifier-2>
-		</BasementMembraneAttachmentTrackingModifier-2>
 		<VolumeTrackingModifier-2>
 		</VolumeTrackingModifier-2>
 	</SimulationModifiers>
 
 	<Forces>
 		<GeneralisedLinearSpringForce-2-2>
-			<MeinekeSpringStiffness>60</MeinekeSpringStiffness>
+			<MeinekeSpringStiffness>50</MeinekeSpringStiffness>
 			<MeinekeDivisionRestingSpringLength>0.5</MeinekeDivisionRestingSpringLength>
 			<MeinekeSpringGrowthDuration>1</MeinekeSpringGrowthDuration>
 			<UseCutOffLength>1</UseCutOffLength>
 			<CutOffLength>1.5</CutOffLength>
 		</GeneralisedLinearSpringForce-2-2>
-		<EpidermalBasementMembraneForce>
-			<BasementMembraneParameter>5</BasementMembraneParameter> 
-			<TargetCurvature>0</TargetCurvature> 
-			<LeftBoundary>1.79769e+308</LeftBoundary> 
-			<RightBoundary>1.79769e+308</RightBoundary> 
-			<UsePositionDependentMembraneForce>0</UsePositionDependentMembraneForce> 
-			<MembraneForceMultiplier>1.79769e+308</MembraneForceMultiplier> 
-			<ApplyPeriodicForce>0</ApplyPeriodicForce> 
-		</EpidermalBasementMembraneForce>
+		<WoundBasedChemotacticForce-2>
+			<ChemotacticStrength>2</ChemotacticStrength> 
+			<NeighbourhoodRadius>1.5</NeighbourhoodRadius> 
+		</WoundBasedChemotacticForce-2>
 	</Forces>
 
 	<CellPopulationBoundaryConditions>

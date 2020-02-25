@@ -40,6 +40,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DifferentiatedCellProliferativeType.hpp"
 #include "FibroblastCellProliferativeType.hpp"
 #include "PlateletCellProliferativeType.hpp"
+#include "Debug.hpp"
 
 GrowthFactorBasedContactInhibitionCellCycleModel::GrowthFactorBasedContactInhibitionCellCycleModel()
     : AbstractSimplePhaseBasedCellCycleModel(),
@@ -88,6 +89,7 @@ void GrowthFactorBasedContactInhibitionCellCycleModel::UpdateCellCyclePhase()
     // Get the growth factor level and threshold
     double growth_factor_level = mpCell->GetCellData()->GetItem("morphogen");
 
+    // Get the threshold to determine proliferation
     double growth_factor_threshold = GetGrowthFactorThreshold();
 
     if (mCurrentCellCyclePhase == G_ONE_PHASE)
@@ -103,6 +105,8 @@ void GrowthFactorBasedContactInhibitionCellCycleModel::UpdateCellCyclePhase()
             // Update the duration of the current period of contact inhibition.
             mCurrentQuiescentDuration = SimulationTime::Instance()->GetTime() - mCurrentQuiescentOnsetTime;
             mG1Duration += dt;
+
+            PRINT_VARIABLE(1.0);
 
             /*
              * This method is usually called within a CellBasedSimulation, after the CellPopulation
@@ -127,7 +131,11 @@ void GrowthFactorBasedContactInhibitionCellCycleModel::UpdateCellCyclePhase()
     double time_since_birth = GetAge();
     assert(time_since_birth >= 0);
 
-    if (mpCell->GetCellProliferativeType()->IsType<DifferentiatedCellProliferativeType>())
+    // Differentiated cells, platelet cells, or labelled cells (which represent fixed boundary cells)
+    // don't proliferate
+    if ((mpCell->GetCellProliferativeType()->IsType<DifferentiatedCellProliferativeType>())
+        ||(mpCell->GetCellProliferativeType()->IsType<PlateletCellProliferativeType>())
+        ||(mpCell->HasCellProperty<CellLabel>()) )
     {
         mCurrentCellCyclePhase = G_ZERO_PHASE;
     }
@@ -165,13 +173,17 @@ void GrowthFactorBasedContactInhibitionCellCycleModel::SetG1Duration()
     }
     else if (mpCell->GetCellProliferativeType()->IsType<FibroblastCellProliferativeType>())
     {
-        mG1Duration = DBL_MAX;
+        mG1Duration = GetTransitCellG1Duration();
     }
     else if (mpCell->GetCellProliferativeType()->IsType<PlateletCellProliferativeType>())
     {
         mG1Duration = DBL_MAX;
     }
     else if (mpCell->GetCellProliferativeType()->IsType<DifferentiatedCellProliferativeType>())
+    {
+        mG1Duration = DBL_MAX;
+    }
+    else if (mpCell->HasCellProperty<CellLabel>()) // Labelled boundary cells need to be accounted for.
     {
         mG1Duration = DBL_MAX;
     }

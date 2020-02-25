@@ -29,11 +29,15 @@
 #include "StemCellProliferativeType.hpp" // Epidermal basal stem cell type
 #include "FibroblastCellProliferativeType.hpp" // Dermal cell type
 #include "DifferentiatedCellProliferativeType.hpp" // Differentiated cell type
+#include "PlateletCellProliferativeType.hpp" // Blood platelet cell type
 #include "EnfFibroblastCellMutationState.hpp" // ENF fibroblast mutation state
 #include "EpfFibroblastCellMutationState.hpp" // EPF fibroblast mutation state
 #include "WildTypeCellMutationState.hpp" // Epidermal mutation state
-#include "BasementMembraneAttachmentTrackingModifier.hpp"
-#include "VolumeTrackingModifier.hpp"
+#include "PlateletCellMutationState.hpp" //Platelet cell mutation state
+#include "BasementMembraneAttachmentTrackingModifier.hpp" // Modifier to track stem cell attachment to the basement membrane
+#include "CollagenAlignmentTrackingModifier.hpp" // Modifier to align fibroblasts with local collagen fibre orientation
+#include "VolumeTrackingModifier.hpp" // Modifier to track cell volume
+#include "PlateletCellKiller.hpp" // Cell killer to remove platelets upon wound healing
 #include "FakePetscSetup.hpp" //Forbids tests running in parallel
 #include "PetscSetupAndFinalize.hpp"
 
@@ -41,7 +45,7 @@
 
 static const std::string M_OUTPUT_DIRECTORY = "WoundHealingModel";
 static const double M_DT = 0.005;
-static const double M_END_TIME = 30.0;
+static const double M_END_TIME = 1.0;
 // static const double M_SAMPLING_TIMESTEP = M_END_TIME / M_DT;
 static const double M_SAMPLING_TIMESTEP = 1.0/M_DT;
 
@@ -60,9 +64,9 @@ public:
         double division_separation = 0.1; // Initial resting length upon division
 
         // Mechanical parameters
-        double spring_stiffness = 60.0; // Spring stiffness
-        double bm_stiffness = 6.0; // Basement membrane attachment strength
-        double target_curvature = 0.0; // Target curvature
+        double spring_stiffness = 50.0; // Spring stiffness
+        // double bm_stiffness = 6.0; // Basement membrane attachment strength
+        // double target_curvature = 0.0; // Target curvature
 
         // Set the probability of being an EPF fibroblast.
         double epf_fibroblast_probability = 0.5;
@@ -111,14 +115,14 @@ public:
                 p_cell->SetCellProliferativeType(p_fibroblast_type); //Make cell differentiated
 
                 // Set a random birth time for each cell so that you don't get synchronised division.
-                double birth_time = - RandomNumberGenerator::Instance()->ranf() * 12.0;
+                double birth_time = - RandomNumberGenerator::Instance()->ranf() * 0.0;
                 p_cell->SetBirthTime(birth_time);
 
                 // For completeness in the stupid contact inhibition model.
                 p_cell->GetCellData()->SetItem("volume", 0.25*M_PI);
 
                 // Initialise morphogen for later.
-                p_cell->GetCellData()->SetItem("morphogen", 1.0);
+                p_cell->GetCellData()->SetItem("morphogen", 1e-4);
 
                 // Initialise cell data to describe BM attachment.
                 p_cell->GetCellData()->SetItem("attachment", -1.0);
@@ -134,7 +138,7 @@ public:
                 p_cell->SetCellProliferativeType(p_fibroblast_type); //Make cell differentiated
 
                 // Set a random birth time for each cell so that you don't get synchronised division.
-                double birth_time = - RandomNumberGenerator::Instance()->ranf() * 12.0;
+                double birth_time = - RandomNumberGenerator::Instance()->ranf() * 0.0;
                 p_cell->SetBirthTime(birth_time);
 
                 // For completeness in the stupid contact inhibition model.
@@ -158,9 +162,9 @@ public:
         // NodeBasedCellPopulation<2> cell_population(mesh, cells); // Used for non-periodic
         cell_population.SetMeinekeDivisionSeparation(division_separation);
 
-        // Add a cell item writer to track the morphogen that we will encode to evolve due to wounding.
-        boost::shared_ptr<CellDataItemWriter<2,2> > p_cell_data_item_writer(new CellDataItemWriter<2,2>("morphogen"));
-        cell_population.AddCellWriter(p_cell_data_item_writer);
+        // // Add a cell item writer to track the morphogen that we will encode to evolve due to wounding.
+        // boost::shared_ptr<CellDataItemWriter<2,2> > p_cell_data_item_writer(new CellDataItemWriter<2,2>("morphogen"));
+        // cell_population.AddCellWriter(p_cell_data_item_writer);
 
         //Get the maximum width so we know where to apply the right BC.
         double min_width = 0.0;
@@ -201,20 +205,20 @@ public:
         cell_iter != cell_population.End(); ++cell_iter)
         {            double y = cell_population.GetLocationOfCellCentre(*cell_iter)[1];
             
-            // Turn the 'upper' part of the tissue epidermis
-            if (y > (max_height - 1.25))
-            // if (y == max_height)
-            {
-                //Change the cell cycle to one that is based on the basement membrane attachment
-                BasementMembraneBasedContactInhibitionCellCycleModel* p_cycle_model = new BasementMembraneBasedContactInhibitionCellCycleModel(); //Contact-inhibition-based cycle model yet.
-                p_cycle_model->SetEquilibriumVolume(0.25*M_PI);
-                p_cycle_model->SetQuiescentVolumeFraction(0.8);
-                p_cycle_model->SetDimension(2);
+            // // Turn the 'upper' part of the tissue epidermis
+            // if (y > (max_height - 1.25))
+            // // if (y == max_height)
+            // {
+            //     //Change the cell cycle to one that is based on the basement membrane attachment
+            //     BasementMembraneBasedContactInhibitionCellCycleModel* p_cycle_model = new BasementMembraneBasedContactInhibitionCellCycleModel(); //Contact-inhibition-based cycle model yet.
+            //     p_cycle_model->SetEquilibriumVolume(0.25*M_PI);
+            //     p_cycle_model->SetQuiescentVolumeFraction(0.8);
+            //     p_cycle_model->SetDimension(2);
             
-                cell_iter->SetCellCycleModel(p_cycle_model);
-                cell_iter->SetCellProliferativeType(p_stem_type);
-                cell_iter->SetMutationState(p_wildtype_state);
-            }
+            //     cell_iter->SetCellCycleModel(p_cycle_model);
+            //     cell_iter->SetCellProliferativeType(p_stem_type);
+            //     cell_iter->SetMutationState(p_wildtype_state);
+            // }
             if (y == min_height)
             {
                 cell_iter->AddCellProperty(p_cell_label);
@@ -241,11 +245,11 @@ public:
         simulator.AddForce(p_spring_force);
 
         // Add basement membrane force
-        MAKE_PTR(EpidermalBasementMembraneForce, p_bm_force);
-        p_bm_force->SetBasementMembraneParameter(bm_stiffness);
-        p_bm_force->SetTargetCurvature(target_curvature);
-        p_bm_force->ApplyPeriodicForce(false);
-        simulator.AddForce(p_bm_force);
+        // MAKE_PTR(EpidermalBasementMembraneForce, p_bm_force);
+        // p_bm_force->SetBasementMembraneParameter(bm_stiffness);
+        // p_bm_force->SetTargetCurvature(target_curvature);
+        // p_bm_force->ApplyPeriodicForce(false);
+        // simulator.AddForce(p_bm_force);
 
         // Define a fixed-regions boundary condition so that cells can't move past y = 0
         c_vector<double, 2> point, normal;
@@ -262,9 +266,9 @@ public:
         // simulator.AddCellPopulationBoundaryCondition(p_bc_bottom);
 
         // Create a modifier to track which cells are attached to the basement membrane.
-        MAKE_PTR(BasementMembraneAttachmentTrackingModifier<2>, p_bm_attachment_tracking_modifier);
-        p_bm_attachment_tracking_modifier->SetNeighbourhoodRadius(radius_of_interaction);
-		simulator.AddSimulationModifier(p_bm_attachment_tracking_modifier);
+        // MAKE_PTR(BasementMembraneAttachmentTrackingModifier<2>, p_bm_attachment_tracking_modifier);
+        // p_bm_attachment_tracking_modifier->SetNeighbourhoodRadius(radius_of_interaction);
+		// simulator.AddSimulationModifier(p_bm_attachment_tracking_modifier);
 
         // Create a modifier to track which cells are attached to the basement membrane.
         MAKE_PTR(VolumeTrackingModifier<2>, p_volume_tracking_modifier);
@@ -278,6 +282,49 @@ public:
         // MAKE_PTR_ARGS(ParabolicGrowingDomainPdeModifier<2>, p_pde_modifier, (p_pde, p_bc, true));
         // p_pde_modifier->SetDependentVariableName("morphogen");
         // simulator.AddSimulationModifier(p_pde_modifier);
+
+        // Wound the model. 
+        double wound_centre = 0.5*max_width;
+        double wound_width = 0.5*max_width;
+        double wound_base_height = 0.4*max_height;
+
+        boost::shared_ptr<AbstractCellProperty> p_platelet_type(CellPropertyRegistry::Instance()->Get<PlateletCellProliferativeType>());
+        boost::shared_ptr<AbstractCellProperty> p_platelet_state(CellPropertyRegistry::Instance()->Get<PlateletCellMutationState>());
+
+        //Obtain the proliferative cells
+        for (AbstractCellPopulation<2>::Iterator cell_iter = simulator.rGetCellPopulation().Begin();
+                cell_iter != simulator.rGetCellPopulation().End();
+                ++cell_iter)
+        {
+            //Get location of cell
+            double x = simulator.rGetCellPopulation().GetLocationOfCellCentre(*cell_iter)[0];
+            double y = simulator.rGetCellPopulation().GetLocationOfCellCentre(*cell_iter)[1];
+
+            //If the cell is within the 'wound area', we kill it.
+            if ( (x > (wound_centre - 0.5*wound_width))&&(x < (wound_centre + 0.5*wound_width))&&(y > wound_base_height) )
+            {
+                cell_iter->SetMutationState(p_platelet_state);
+                cell_iter->SetCellProliferativeType(p_platelet_type);
+                cell_iter->GetCellData()->SetItem("morphogen", 1.0);
+            }
+            else
+            {
+                cell_iter->GetCellData()->SetItem("morphogen", 0.0);
+            }
+        
+        }
+
+        // Add the platelet cell killer
+        MAKE_PTR_ARGS(PlateletCellKiller, p_platelet_cell_killer, (&cell_population));
+        p_platelet_cell_killer->SetCutOffRadius(radius_of_interaction);
+        p_platelet_cell_killer->SetGrowthFactorThreshold(0.5);
+        simulator.AddCellKiller(p_platelet_cell_killer);
+
+        // Add a chemotactic force
+        MAKE_PTR(WoundBasedChemotacticForce<2>, p_chemotactic_force);
+        p_chemotactic_force->SetChemotacticStrength(2.0);
+        p_chemotactic_force->SetNeighbourhoodRadius(radius_of_interaction);
+        simulator.AddForce(p_chemotactic_force);
 
         simulator.Solve(); // Run the simulation.
 

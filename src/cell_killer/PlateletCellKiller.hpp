@@ -1,5 +1,5 @@
-#ifndef PlateletCELLKILLER_HPP_
-#define PlateletCELLKILLER_HPP_
+#ifndef PLATELETCELLKILLER_HPP_
+#define PLATELETCELLKILLER_HPP_
 #include "CheckpointArchiveTypes.hpp"
 
 #include <boost/archive/text_oarchive.hpp>
@@ -8,9 +8,8 @@
 #include "AbstractCellKiller.hpp"
 
 /*
- * Cell killer that removes any epithelial cell that has popped out from the ring
- * and entered the inner hole of ghost nodes. Adapted from SJD's
- * CrossSectionModelRandomCellKiller
+ * Cell killer that removes platelet cells due to contact with
+ * activated fibroblasts during wound healing.
  */
 
 class PlateletCellKiller : public AbstractCellKiller<2>
@@ -25,6 +24,9 @@ private:
     //Cut off radius for NodeBasedCellPopulations
     double mCutOffRadius;
 
+    // Growth factor threshold in order to induce anoikis
+    double mGrowthFactorThreshold;
+
     // The output file directory for the simulation data that corresponds to the number of cells
     // killed by Platelet
     out_stream mCellKillerOutputFile;
@@ -38,6 +40,7 @@ private:
         archive & boost::serialization::base_object<AbstractCellKiller<2> >(*this);
         archive & mCellsRemovedByFibroblasts;
         archive & mCutOffRadius;
+        archive & mGrowthFactorThreshold;
         archive & mOutputDirectory;
     }
 
@@ -55,6 +58,16 @@ public:
     std::string GetOutputDirectory();
 
     /*
+     * @return mGrowthFactorThreshold for cell killing
+     */
+    double GetGrowthFactorThreshold();
+
+    /*
+     * Method to set the growth factor threshold that determines platelet cell degradation
+     */
+    void SetGrowthFactorThreshold(double growthFactorThreshold);
+
+    /*
      * @return mCutOffRadius
      */
     double GetCutOffRadius();
@@ -67,9 +80,9 @@ public:
 
     std::set<unsigned> GetNeighbouringNodeIndices(unsigned nodeIndex);
 
-    bool IsCellInContactWithFibroblasts(unsigned nodeIndex);
+    bool ShouldCellBeRemoved(unsigned nodeIndex);
 
-    std::vector<c_vector<unsigned,2> > RemoveByApoptosis();
+    std::vector<c_vector<unsigned,2> > RemoveByFibroblasts();
 
     /**
      *  Loops over and kills cells by Platelet or at the orifice if instructed.
