@@ -36,6 +36,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CollagenAlignmentTrackingModifier.hpp"
 #include "FibroblastCellProliferativeType.hpp"
 #include "NodeBasedCellPopulation.hpp"
+#include "Debug.hpp"
 
 template<unsigned DIM>
 CollagenAlignmentTrackingModifier<DIM>::CollagenAlignmentTrackingModifier()
@@ -136,11 +137,14 @@ void CollagenAlignmentTrackingModifier<DIM>::UpdateCellData(AbstractCellPopulati
                     // Only look at fibroblast neighbours.
                     if (p_neighbour_cell_type->template IsType<FibroblastCellProliferativeType>())
                     {
-                        double neighbour_collagen = cell_iter->GetCellData()->GetItem("collagen");
+                        double neighbour_collagen = p_cell->GetCellData()->GetItem("collagen");
 
-                        std::pair<double, unsigned> collagen_index = std::make_pair(neighbour_collagen, *iter);
+                        if (neighbour_collagen > 0.0) // We should only orient towards neighbours which actually are enriched with collagen
+                        {
+                            std::pair<double, unsigned> collagen_index = std::make_pair(neighbour_collagen, *iter);
+                            sorted_neighbours_by_collagen.push_back(collagen_index); //Add the collagen amount and index
+                        }
 
-					    sorted_neighbours_by_collagen.push_back(collagen_index); //Add the collagen amount and index
                     }
                 }
             }
@@ -166,6 +170,63 @@ void CollagenAlignmentTrackingModifier<DIM>::UpdateCellData(AbstractCellPopulati
 
                 // Determine the collagen direction
                 c_vector<double, DIM> collagen_direction = rCellPopulation.rGetMesh().GetVectorFromAtoB(second_neighbour_location, first_neighbour_location);
+                
+                // Compare this to the considered node location
+                double orientation = cell_iter->GetCellData()->GetItem("orientation");
+
+                c_vector<double, DIM> current_orientation;
+                current_orientation[0] = cos(orientation);
+                current_orientation[1] = sin(orientation);
+
+                // If the inner product is negative, reverse the collagen direction, so as to minimise the change in orientation
+                if (inner_prod(collagen_direction, current_orientation) < 0.0)
+                {
+                    collagen_direction *= -1.0;
+                }
+
+                collagen_direction /= norm_2(collagen_direction);
+
+                // Get the current node location
+                c_vector<double, DIM> current_location = rCellPopulation.GetNode(node_index)->rGetLocation();
+
+                PRINT_2_VARIABLES(current_location[0], current_location[1]);
+                PRINT_2_VARIABLES(collagen_direction[0], collagen_direction[1]);
+
+                // Get the orientation of the constructed collagen fibre.
+                double collagen_orientation = atan(collagen_direction[1]/collagen_direction[0]); //Get initial angle argument
+
+                if (collagen_direction[0] < 0.0) //If the point is in the second quadrant or third quadrant
+                {
+                    collagen_orientation += M_PI;
+                }
+                else if ((collagen_direction[0]>=0.0)&&(collagen_direction[1]<0.0)) //Fourth quadrant
+                {
+                    collagen_orientation += M_PI;
+                }
+
+                // Finally, calculate the new orientation
+                double reorientation_strength = GetReorientationStrength();
+                double new_orientation = orientation + reorientation_strength * sin(collagen_orientation - orientation);
+                
+                // Update the cell data
+                cell_iter->GetCellData()->SetItem("orientation", new_orientation);
+            }
+            else if (sorted_neighbours_by_collagen.size() == 1)
+            {
+                // Get the one collagen-expressing neighbour
+                std::pair<double, unsigned> neighbour = sorted_neighbours_by_collagen[0];
+
+                // Get the neighbour indices
+                unsigned neighbour_index = neighbour.second;
+
+                // Get their locations
+                c_vector<double, DIM> neighbour_location = rCellPopulation.GetNode(neighbour_index)->rGetLocation();
+
+                // Get the current node location
+                c_vector<double, DIM> current_location = rCellPopulation.GetNode(node_index)->rGetLocation();
+
+                // Determine the collagen direction
+                c_vector<double, DIM> collagen_direction = rCellPopulation.rGetMesh().GetVectorFromAtoB(current_location, neighbour_location);
 
                 // Compare this to the considered node location
                 double orientation = cell_iter->GetCellData()->GetItem("orientation");
@@ -180,16 +241,21 @@ void CollagenAlignmentTrackingModifier<DIM>::UpdateCellData(AbstractCellPopulati
                     collagen_direction *= -1.0;
                 }
 
+                collagen_direction /= norm_2(collagen_direction);
+
+                PRINT_2_VARIABLES(current_location[0], current_location[1]);
+                PRINT_2_VARIABLES(collagen_direction[0], collagen_direction[1]);
+
                 // Get the orientation of the constructed collagen fibre.
                 double collagen_orientation = atan(collagen_direction[1]/collagen_direction[0]); //Get initial angle argument
 
-                if (collagen_direction[0] < 0.0) //If the point is in the second quadrant or third quadrant
+                if ((collagen_direction[0] < 0.0)&&(collagen_direction[1] >= 0.0) ) //If the point is in the second quadrant or third quadrant
                 {
                     collagen_orientation += M_PI;
                 }
                 else if ((collagen_direction[0]>=0.0)&&(collagen_direction[1]<0.0)) //Fourth quadrant
                 {
-                    collagen_orientation += 2*M_PI;
+                    collagen_orientation += M_PI;
                 }
 
                 // Finally, calculate the new orientation

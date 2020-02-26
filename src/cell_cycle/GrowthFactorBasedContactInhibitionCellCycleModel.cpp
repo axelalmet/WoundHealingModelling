@@ -105,9 +105,7 @@ void GrowthFactorBasedContactInhibitionCellCycleModel::UpdateCellCyclePhase()
             // Update the duration of the current period of contact inhibition.
             mCurrentQuiescentDuration = SimulationTime::Instance()->GetTime() - mCurrentQuiescentOnsetTime;
             mG1Duration += dt;
-
-            PRINT_VARIABLE(1.0);
-
+            
             /*
              * This method is usually called within a CellBasedSimulation, after the CellPopulation
              * has called CellPropertyRegistry::TakeOwnership(). This means that were we to call
