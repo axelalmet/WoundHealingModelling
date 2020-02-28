@@ -40,8 +40,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 template<unsigned DIM>
 CollagenAlignmentBasedForce<DIM>::CollagenAlignmentBasedForce()
     : AbstractForce<DIM>(),
-    mForceMagnitude(DOUBLE_UNSET),
-    mNeighbourhoodRadius(DOUBLE_UNSET)
+    mForceMagnitude(DOUBLE_UNSET)
 {
 }
 
@@ -68,17 +67,19 @@ template<unsigned DIM>
 void CollagenAlignmentBasedForce<DIM>::AddForceContribution(AbstractCellPopulation<DIM>& rCellPopulation)
 {
 
-    // For now, this will only apply to node-based cell populations
-    assert(dynamic_cast<NodeBasedCellPopulation<DIM>*>(&rCellPopulation));
+    // // For now, this will only apply to node-based cell populations
+    // assert(dynamic_cast<NodeBasedCellPopulation<DIM>*>(&rCellPopulation));
 
-	NodeBasedCellPopulation<DIM>* p_tissue = static_cast<NodeBasedCellPopulation<DIM>*>(&rCellPopulation);
+	// NodeBasedCellPopulation<DIM>* p_tissue = static_cast<NodeBasedCellPopulation<DIM>*>(&rCellPopulation);
     for (typename AbstractCellPopulation<DIM>::Iterator cell_iter = rCellPopulation.Begin();
          cell_iter != rCellPopulation.End();
          ++cell_iter)
     {
 
         // Only look at fibroblasts
-        if (cell_iter->GetCellProliferativeType()->IsType<FibroblastCellProliferativeType>())
+        boost::shared_ptr<AbstractCellProperty> p_cell_type = cell_iter->GetCellProliferativeType();
+
+        if (p_cell_type->IsType<FibroblastCellProliferativeType>())
         {
             // Get the node index
             unsigned current_index = rCellPopulation.GetLocationIndexUsingCell(*cell_iter);
