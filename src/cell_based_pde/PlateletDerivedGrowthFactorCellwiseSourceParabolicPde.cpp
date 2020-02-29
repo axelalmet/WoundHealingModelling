@@ -80,15 +80,14 @@ double PlateletDerivedGrowthFactorCellwiseSourceParabolicPde<DIM>::ComputeSource
 
     unsigned node_index = rNode.GetIndex();
     
-    // NodeBasedCellPopulation<DIM>* p_cell_population = static_cast<NodeBasedCellPopulation<DIM>*>(&this->mrCellPopulation);
-
     if (mrCellPopulation.IsPdeNodeAssociatedWithNonApoptoticCell(node_index))
     {
+
         // Get the cell proliferative type
         CellPtr p_cell = mrCellPopulation.GetCellUsingLocationIndex(node_index); // Get the cell
         boost::shared_ptr<AbstractCellProperty> p_cell_type = p_cell->GetCellProliferativeType(); // Get the mutation state
-        
-        if (p_cell_type->template IsType<PlateletCellProliferativeType>())
+
+        if (p_cell_type->IsType<PlateletCellProliferativeType>())
         {
             source_coefficient = mProductionCoefficient - mDegradationCoefficient;
         }
@@ -97,7 +96,6 @@ double PlateletDerivedGrowthFactorCellwiseSourceParabolicPde<DIM>::ComputeSource
             source_coefficient = -mDegradationCoefficient;
         }
     }
-    // }
 
     // The source term is C*u
     return source_coefficient*u;

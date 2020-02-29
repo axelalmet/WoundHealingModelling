@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<VTKFile type="UnstructuredGrid" version="0.1" byte_order="LittleEndian" header_type="UInt32" compressor="vtkZLibDataCompressor">
+  <UnstructuredGrid>
+    <Piece NumberOfPoints="115"                  NumberOfCells="186"                 >
+      <PointData>
+        <DataArray type="Float64" Name="morphogen" format="appended" RangeMin="-7.1796542889e-06"    RangeMax="0.0031730233837"      offset="0"                   />
+      </PointData>
+      <CellData>
+      </CellData>
+      <Points>
+        <DataArray type="Float64" Name="Vertex positions" NumberOfComponents="3" format="appended" RangeMin="0"                    RangeMax="19.974984355"         offset="1268"                />
+      </Points>
+      <Cells>
+        <DataArray type="Int64" Name="connectivity" format="appended" RangeMin=""                     RangeMax=""                     offset="1716"                />
+        <DataArray type="Int64" Name="offsets" format="appended" RangeMin=""                     RangeMax=""                     offset="2728"                />
+        <DataArray type="UInt8" Name="types" format="appended" RangeMin=""                     RangeMax=""                     offset="3224"                />
+      </Cells>
+    </Piece>
+  </UnstructuredGrid>
+  <AppendedData encoding="base64">
+   _AQAAAACAAACYAwAAowMAAA==eJwBmANn/NDDkI1CfWE/LXm1UuA5YT8K+KP5uRdiP9zcT8tbcWM/nc77YMcdZT+F9u2jOt9mP1vXQpF5Z2g/cGMeZS59aT8acDH1T/5pP+VvfG4mz2k/XOD7UbfZaD+3/eUAhxFnP6p6myZVeWQ/XGgjb2EqYT9WRV8/LsZaP7IXmR2FS1M/rBjGFXtdSj9u+10E2Q9CP/m+taXiKzo/FQsUgmN8NT++cFIeHI1eP+QoVPzYF2A/P0jKEqAsYT82kWpXKaFiPwyQIN3EVWQ/0XklFOj2ZT8SxQFvDjdnP7aCMph5+Gc/Tn1FWdQkaD+DwqjdLKJnP6BeJc5+X2Y/HB/botdUZD9GBiwKfoxhP6ZjCuv4RFw/6T0d4X26VD+5USJGX9NLP0vtpztNdkI//+mIRwDVOT944Ns12mIzP38UB7bzEzA/cVds7OcrVz/y/bDqqWxXP71sZNBls1g/QK9VbmylWj8feVGzwnpdP5ni3AFIa2A/RkZAGaaoYT+TByFXPWtiP74FeqpQ12I/ReeEO1+/Yj9j8GqjKBpiPyXKeYEi1mA/MQXqk6nQXT+mxezo28xYP5wSqWEbYVI/BTW9SI1+RT8tAPZ0IFE2P5+CuJDgSzA/ntmbheJxJj+zPHiMs78hP9oVyWK82UY/OHRz3K9RRz8Hubs6jkJJP6SOg9oU5ko/0fTA93L+UD8llhFG8j5TPweFqV4QI1M/AZoSsS1SVD+jHI6WCoNUPzk1zTJsQ1Q/arZbLY9qUz9o8SMQcr1RPzGrSLz+7U0/bsTsiVGaSD88eGOzcePwPvScmsZKP/I+8ixjUtIv9T60ESguzK/4PksxPoGnffo+xxk/mOibAD+RBLmAMv0EP5v1SHdQ9Ak/0raIi2gTDT+UrMTYc2cUP4xjE1cZxBk/qYm8/Xrz7z7yFnrm/tgcP+oV+sjpTwE/BpmMlH+GHz/0PYo3/j0JP/eSGy4TtyA/jkPseDChET9D6I3rgrwgP3vhfjkNSRA/kUhGuA7NyD7qXH528RQgP4DvXCVq8g4/M/43J6pguD4ZB3mcxA4ePz4U1M62ZA0/yGslFTwNzb69mHpBCpEcP7tZm/vXlwg/GD81lYGs2b6HRRgl7sEZP65xns3VJcq+Ahyw5OEBBT84yvBXGB3evsGQQIgrXBc/eSjhOmLUx75jsQGRRn8GPz6XORbw89K+WO/qJAnKFj/gVk7wkJXIPmYW2ij9zr0+zmmcJA==AQAAAACAAADICgAAPQEAAA==eJx906tOxFAQgOGKiiZUlGazaZqm6f26tD2tIKieoFEongW1z8MD8AxYPKKSgFnZBMMmpILD+Rn5jRgx+Q3jvznNsJB6tsAd8B24Bx6AR+AJeAZegFfgDfgBvAMfwAX4CD6BL/PT3cP74/On8s8V3JR6t8Fd8D24Dx6Cx+ApeA5egtfgLfgVeK/34wAuwEfwCe4axo9/KX6a9W5IvVvgDvgO3AMPwCPwBDwDL8Ar8Ab8AN6BD+ACfASfwJf5eHPbvb2Y8rev4KbUuw3ugu/BffAQPAZPwXPwErwGb8F7vZ871bsAH8EnuLt1eqH41qnqW6eqW+AOuAcegEfgCXgGXoBX4A14Bz6AC/ARfAJf5o/++tW+v1R8BTel3m1wF9wHD8Fj8BQ8By/Ba/AWvNf7uS+9C/ARfPrj39lAn0A=AQAAAACAAABwEQAA4wIAAA==eJx1lutbC2AYxsdSQimFjMqhdJo5tGZJto4TE0tFSRMSUQ7//wcfPL8Pftf17st93c99v8/hPWzLZP59TgT2ColfzPz/QR+VfjLwUuDlwGxgi3xZ+YmTz30RH1N9+GPFe6WD5BlXHD6bmGNCHD0rPR9YEff6vHif8uIfVxzuOfA/UV72vU94KvCKOHpLQm+VD/2OOL5c4NXAtsDT0lulX5OvXfkLqluQnlMcfjexbk46/d5TP8Tp6770fvmIO097wk/9nLBNvoL888p7Rvk5L+bOC4lXA18G8q5eiaOPJvRZ+dD3xPE1xLnX3Oc18YqQOeh/QjrrXIf4mOLM8Vp5yE//HwP3xNEbisM/BTIXdT6Lo1ekp9bvy7cmf0Po/a0qD3l5H9yzdcUL0kHu54Li8I1A3gfvaVHc7wd9KfCNuNcviT9QXvz0VQ3kXcxJx78ZyH4wzxdx9Hnp+9LxH8i3Lj/9UJ/5v4qjL0o/kI7/m3yb8m8IF+Rjn98qL/3SfzWQ+8E5kI9z4vuL8+J77WzggJD4oOKs75d+LvB64I3AjsBO+TrkJ04+90V8Un3AlxUfkA6Sp6g4vJaYY0ocvUN6KXBF3OtL4jeVF39RcbjnwP9Uedl38nOv2Kdl6ecDb4mjdyb0LvnQH4rjGwocDuwOvCC9S/pt+XqUv6y6ZelDik8HPhcvy+9+8bnOM/no95E4OnPMSB8RR3eeHvmH5aNP+u+Wb1r+eiDnyHwlIfGdQL6nuE9bii8ldHhNfvRD6dzvbcWL0t+JryR08kwlfDX56GtSuufC/z2Q3wPmOxRuyU8fR+r3SPqO4j/kRz9O+Ki3rTicPJw7+ajPXPw+MR/vgHf1XvGy9F35vI7+qc99fRFYF/o9N6WzblV8RjgiH32Sn3y8B+ajzw+Jesz1M/BYHJ16v6TvCpvywan/Wxydvv4kfOCqfE35qUs/dfmYh31hnzhH9pt++H/B/xR+z/8CLkh9UA==AQAAAACAAADQBQAAYgEAAA==eJwtxVtoDQAAANA9bMZmtnkNM8xszDMimibLIqItoi1ri8jaItqyaLKItiyaiMiyiCwiiyxrIqItmqzJmogmmoi2aGIf95yfExoUEO5hjvJIx3mM4z3RiZ7qZKc6zXM83wu92Eu9zMud6Syv9lqvd443erPznO9Cb/MOF7nEu73XZS73AR90pY/4mKtd45M+5TM+5wuuc72v+JobfNO33eh7bnKzH/qxn/q52/zSr9zhN+7yO3/wJ3/2V3/zD/9yv//4r/87JDhwmCMc6WjHerTHeYIneYqnOcUzPdvzvMCLvMTpzvAKr/Qqr/E6Z3uDNznXW1zgrd7unS72Lu9xqfd5vyt8yId91FU+7hOu9Wmf9Xlf9CVf9lVf9w3f8h3f9X0/cIsf+YmfudUv3O7X7vRbd/u9P7rHX9zr7/7pPv/2gP85OCTwEA/1cI9wjEd5rMc7wZOd5Ome4Vme60GcaVdDAQAAAACAAAC6AAAADAAAAA==eJxjZR2qAABUdAOj
+  </AppendedData>
+</VTKFile>
+
+<!-- Created by Chaste version 2019.1.f4f9636 (with uncommitted modifications) on Fri, 28 Feb 2020 22:47:50 +0000.  Chaste was built on Thu, 27 Feb 2020 17:42:07 +0000 by machine (uname) 'Linux' using settings: Debug.  Checked-out project versions: AxelA=58358c550748fedf6088863782fdd77870262cc6; MorphoCellBasedComparison=16de33a9744c65327e83bc3f0c912a1b99f2ee7d; WoundHealingModelling=a02b10a3829c900c9eae94d6f3e7b475fb30458d.
+-->

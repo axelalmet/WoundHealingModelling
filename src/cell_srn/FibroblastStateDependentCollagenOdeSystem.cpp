@@ -48,7 +48,7 @@ FibroblastStateDependentCollagenOdeSystem::FibroblastStateDependentCollagenOdeSy
      * 
      */
 
-//    SetDefaultInitialCondition(0, 0.01); // soon overwritten
+   SetDefaultInitialCondition(0, 0.1); // soon overwritten
 //    SetDefaultInitialCondition(1, 0.01); // soon overwritten
 //    SetDefaultInitialCondition(2, 0.01); // soon overwritten
 

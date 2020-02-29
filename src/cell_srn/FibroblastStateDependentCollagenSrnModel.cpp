@@ -37,7 +37,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "EpfFibroblastCellMutationState.hpp"
 
 FibroblastStateDependentCollagenSrnModel::FibroblastStateDependentCollagenSrnModel(boost::shared_ptr<AbstractCellCycleModelOdeSolver> pOdeSolver)
-    : AbstractOdeSrnModel(3, pOdeSolver)
+    : AbstractOdeSrnModel(1, pOdeSolver)
 {
     if (mpOdeSolver == boost::shared_ptr<AbstractCellCycleModelOdeSolver>())
     {

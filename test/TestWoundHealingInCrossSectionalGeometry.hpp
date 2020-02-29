@@ -18,6 +18,7 @@
 #include "NoCellCycleModel.hpp" // Useful for running tests where cell proliferation isn't needed.
 #include "BasementMembraneBasedContactInhibitionCellCycleModel.hpp" // Cell cycle for epidermal cell, where proliferative capacity is determined by attachment to the basement membrane
 #include "GrowthFactorBasedContactInhibitionCellCycleModel.hpp" // Cell cycle for fibroblasts that is dependent on exposure to wound-derived growth factors
+#include "FibroblastStateDependentCollagenSrnModel.hpp"
 #include "NodeBasedCellPopulation.hpp" // Overlapping spheres centre-based population
 #include "Cylindrical2dNodesOnlyMesh.hpp" // Mesh with periodic vertical boundaries
 #include "CellDataItemWriter.hpp" // Allows us to track different cell data items
@@ -45,7 +46,7 @@
 
 static const std::string M_OUTPUT_DIRECTORY = "WoundHealingModel";
 static const double M_DT = 0.005;
-static const double M_END_TIME = 1.0;
+static const double M_END_TIME = 10.0;
 // static const double M_SAMPLING_TIMESTEP = M_END_TIME / M_DT;
 static const double M_SAMPLING_TIMESTEP = 1.0/M_DT;
 
@@ -56,8 +57,8 @@ public:
     {
 
         //Set the number of cells across and down for the array
-        unsigned cells_across = 8;
-        unsigned cells_up = 5;
+        unsigned cells_across = 20;
+        unsigned cells_up = 6;
 
         // Set some parameters for node-based cell populations
         double radius_of_interaction = 1.5; // Radius of interaction to determine neighbourhoods
@@ -69,7 +70,7 @@ public:
         // double target_curvature = 0.0; // Target curvature
 
         // Set the probability of being an EPF fibroblast.
-        double epf_fibroblast_probability = 0.1;
+        double epf_fibroblast_probability = 0.5;
 
         HoneycombMeshGenerator generator(cells_across, cells_up, 0); //Create mesh
         MutableMesh<2, 2>* p_generating_mesh = generator.GetMesh(); //Generate mesh
@@ -102,6 +103,14 @@ public:
             p_cycle_model->SetQuiescentVolumeFraction(0.8);
             p_cycle_model->SetDimension(2);
 
+            // Set collagen-based SRN model
+            FibroblastStateDependentCollagenSrnModel* p_srn_model = new FibroblastStateDependentCollagenSrnModel(); //Fibroblast-state-dependent collagen SRN model
+
+            // // Create a vector of initial conditions
+            // std::vector<double> starter_conditions;
+            // starter_conditions.push_back(0.1);
+            // p_srn_model->SetInitialConditions(starter_conditions);
+
             // Randomly fill the fibroblast population with EPF and ENF fibroblasts, according to proportions
             // from the Rinkevich et al. (2018) paper.
             double fibroblast_state = RandomNumberGenerator::Instance()->ranf();
@@ -111,11 +120,13 @@ public:
 
             if (fibroblast_state < epf_fibroblast_probability) // Roughly in line with the Rinkevich et al. (2018) paper.
             {
-                CellPtr p_cell(new Cell(p_epf_state, p_cycle_model));
+                CellPtr p_cell(new Cell(p_epf_state, p_cycle_model, p_srn_model));
                 p_cell->SetCellProliferativeType(p_fibroblast_type); //Make cell differentiated
+                // p_cell->InitialiseCellCycleModel();
+                // p_cell->InitialiseSrnModel();
 
                 // Set a random birth time for each cell so that you don't get synchronised division.
-                double birth_time = - RandomNumberGenerator::Instance()->ranf() * 0.0;
+                double birth_time = - RandomNumberGenerator::Instance()->ranf() * 1.0;
                 p_cell->SetBirthTime(birth_time);
 
                 // For completeness in the stupid contact inhibition model.
@@ -130,18 +141,23 @@ public:
                 // Initialise collagen orientation
                 p_cell->GetCellData()->SetItem("orientation", collagen_orientation);
 
+                // Set EPF state
+                p_cell->GetCellData()->SetItem("epf", 1.0);
+
                 // Set collagen amount
-                // p_cell->GetCellData()->SetItem("collagen", 0.0);
+                p_cell->GetCellData()->SetItem("collagen", 0.1);
 
                 cells.push_back(p_cell);
             }
             else
             {
-                CellPtr p_cell(new Cell(p_enf_state, p_cycle_model));
+                CellPtr p_cell(new Cell(p_enf_state, p_cycle_model, p_srn_model));
                 p_cell->SetCellProliferativeType(p_fibroblast_type); //Make cell differentiated
+                // p_cell->InitialiseCellCycleModel();
+                // p_cell->InitialiseSrnModel();
 
                 // Set a random birth time for each cell so that you don't get synchronised division.
-                double birth_time = - RandomNumberGenerator::Instance()->ranf() * 0.0;
+                double birth_time = - RandomNumberGenerator::Instance()->ranf() * 1.0;
                 p_cell->SetBirthTime(birth_time);
 
                 // For completeness in the stupid contact inhibition model.
@@ -156,8 +172,11 @@ public:
                 // Initialise collagen orientation
                 p_cell->GetCellData()->SetItem("orientation", collagen_orientation);
 
+                // Set EPF state
+                p_cell->GetCellData()->SetItem("epf", 0.0);
+
                 // Set collagen amount
-                // p_cell->GetCellData()->SetItem("collagen", 0.0);
+                p_cell->GetCellData()->SetItem("collagen", 1e-2);
 
                 cells.push_back(p_cell);
             }
@@ -230,6 +249,10 @@ public:
 
         }
 
+       // Make cell data writer so can pass in variable name
+        boost::shared_ptr<CellDataItemWriter<2,2> > p_cell_data_item_writer(new CellDataItemWriter<2,2>("collagen"));
+        cell_population.AddCellWriter(p_cell_data_item_writer);
+
         OffLatticeSimulation<2> simulator(cell_population);
 
         //Set output directory
@@ -254,6 +277,7 @@ public:
         // p_bm_force->SetTargetCurvature(target_curvature);
         // p_bm_force->ApplyPeriodicForce(false);
         // simulator.AddForce(p_bm_force);
+
 
         // Define a fixed-regions boundary condition so that cells can't move past y = 0
         c_vector<double, 2> point, normal;
@@ -284,47 +308,47 @@ public:
         // p_collagen_alignment_modifier->SetReorientationStrength(1.0*M_DT);
 		// simulator.AddSimulationModifier(p_collagen_alignment_modifier);
 
-        // Define the reaction-diffusion PDE, using the value's from YangYang's paper.
-        MAKE_PTR_ARGS(PlateletDerivedGrowthFactorCellwiseSourceParabolicPde<2>, p_pde, (simulator.rGetCellPopulation(), 1.0, 0.3537, 1.0, 0.1));
-        MAKE_PTR_ARGS(ConstBoundaryCondition<2>, p_bc, (0.0));
+        // // Define the reaction-diffusion PDE, using the value's from YangYang's paper.
+        // MAKE_PTR_ARGS(PlateletDerivedGrowthFactorCellwiseSourceParabolicPde<2>, p_pde, (simulator.rGetCellPopulation(), 1.0, 0.1, 1.0, 0.0));
+        // MAKE_PTR_ARGS(ConstBoundaryCondition<2>, p_bc, (0.0));
 
-        // Create a PDE Modifier object using this pde and bcs object
-        MAKE_PTR_ARGS(ParabolicGrowingDomainWithCellDeathPdeModifier<2>, p_pde_modifier, (p_pde, p_bc, true));
-        p_pde_modifier->SetDependentVariableName("morphogen");
-        simulator.AddSimulationModifier(p_pde_modifier);
+        // // Create a PDE Modifier object using this pde and bcs object
+        // MAKE_PTR_ARGS(ParabolicGrowingDomainWithCellDeathPdeModifier<2>, p_pde_modifier, (p_pde, p_bc, true));
+        // p_pde_modifier->SetDependentVariableName("morphogen");
+        // simulator.AddSimulationModifier(p_pde_modifier);
 
-        // Wound the model. 
-        double wound_centre = 0.5*max_width;
-        double wound_width = 0.5*max_width;
-        double wound_base_height = 0.4*max_height;
+        // // Wound the model. 
+        // double wound_centre = 0.5*max_width;
+        // double wound_width = 0.5*max_width;
+        // double wound_base_height = 0.4*max_height;
 
-        boost::shared_ptr<AbstractCellProperty> p_platelet_type(CellPropertyRegistry::Instance()->Get<PlateletCellProliferativeType>());
-        boost::shared_ptr<AbstractCellProperty> p_platelet_state(CellPropertyRegistry::Instance()->Get<PlateletCellMutationState>());
+        // boost::shared_ptr<AbstractCellProperty> p_platelet_type(CellPropertyRegistry::Instance()->Get<PlateletCellProliferativeType>());
+        // boost::shared_ptr<AbstractCellProperty> p_platelet_state(CellPropertyRegistry::Instance()->Get<PlateletCellMutationState>());
 
-        //Obtain the proliferative cells
-        for (AbstractCellPopulation<2>::Iterator cell_iter = simulator.rGetCellPopulation().Begin();
-                cell_iter != simulator.rGetCellPopulation().End();
-                ++cell_iter)
-        {
-            //Get location of cell
-            double x = simulator.rGetCellPopulation().GetLocationOfCellCentre(*cell_iter)[0];
-            double y = simulator.rGetCellPopulation().GetLocationOfCellCentre(*cell_iter)[1];
+        // //Obtain the proliferative cells
+        // for (AbstractCellPopulation<2>::Iterator cell_iter = simulator.rGetCellPopulation().Begin();
+        //         cell_iter != simulator.rGetCellPopulation().End();
+        //         ++cell_iter)
+        // {
+        //     //Get location of cell
+        //     double x = simulator.rGetCellPopulation().GetLocationOfCellCentre(*cell_iter)[0];
+        //     double y = simulator.rGetCellPopulation().GetLocationOfCellCentre(*cell_iter)[1];
 
-            //If the cell is within the 'wound area', we kill it.
-            if ( (x > (wound_centre - 0.5*wound_width))&&(x < (wound_centre + 0.5*wound_width))&&(y > wound_base_height) )
-            {
-                cell_iter->SetMutationState(p_platelet_state);
-                cell_iter->SetCellProliferativeType(p_platelet_type);
-                cell_iter->GetCellData()->SetItem("morphogen", 1.0);
-            }
+        //     //If the cell is within the 'wound area', we kill it.
+        //     if ( (x > (wound_centre - 0.5*wound_width))&&(x < (wound_centre + 0.5*wound_width))&&(y > wound_base_height) )
+        //     {
+        //         cell_iter->SetMutationState(p_platelet_state);
+        //         cell_iter->SetCellProliferativeType(p_platelet_type);
+        //         cell_iter->GetCellData()->SetItem("morphogen", 1.0);
+        //     }
         
-        }
+        // }
 
-        // Add the platelet cell killer
-        MAKE_PTR_ARGS(PlateletCellKiller, p_platelet_cell_killer, (&cell_population));
-        p_platelet_cell_killer->SetCutOffRadius(radius_of_interaction);
-        p_platelet_cell_killer->SetGrowthFactorThreshold(0.5);
-        simulator.AddCellKiller(p_platelet_cell_killer);
+        // // Add the platelet cell killer
+        // MAKE_PTR_ARGS(PlateletCellKiller, p_platelet_cell_killer, (&cell_population));
+        // p_platelet_cell_killer->SetCutOffRadius(radius_of_interaction);
+        // p_platelet_cell_killer->SetGrowthFactorThreshold(0.5);
+        // simulator.AddCellKiller(p_platelet_cell_killer);
 
         // Add a chemotactic force
         // MAKE_PTR(WoundBasedChemotacticForce<2>, p_chemotactic_force);
