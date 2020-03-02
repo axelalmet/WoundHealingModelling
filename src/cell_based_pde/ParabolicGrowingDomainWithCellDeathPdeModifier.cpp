@@ -159,11 +159,12 @@ void ParabolicGrowingDomainWithCellDeathPdeModifier<DIM>::UpdateSolutionVector(A
     for (typename TetrahedralMesh<DIM,DIM>::NodeIterator node_iter = this->mpFeMesh->GetNodeIteratorBegin();
          node_iter != this->mpFeMesh->GetNodeIteratorEnd();
          ++node_iter)
-    {               
+    {          
+
         // Loop over nodes of the finite element mesh and get appropriate solution values from CellData
         for (typename TetrahedralMesh<DIM,DIM>::NodeIterator node_iter = this->mpFeMesh->GetNodeIteratorBegin();
-            node_iter != this->mpFeMesh->GetNodeIteratorEnd();
-            ++node_iter)
+        node_iter != this->mpFeMesh->GetNodeIteratorEnd();
+        ++node_iter)
         {
             unsigned node_index = node_iter->GetIndex();
 

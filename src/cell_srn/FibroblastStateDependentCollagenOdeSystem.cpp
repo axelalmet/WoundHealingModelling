@@ -72,7 +72,7 @@ void FibroblastStateDependentCollagenOdeSystem::EvaluateYDerivatives(double time
     double C = rY[0]; // collagen
 
     // Get the parameters
-    double is_epf = this->mParameters[0]; // Check whether or not cell is an EPF fibroblast
+    double is_epf = this->GetParameter("epf"); // Check whether or not cell is an EPF fibroblast
     double p_c = this->mParameters[1]; // Production rate of collagen
     double d_c = this->mParameters[2]; // Degradation rate of collagen
 

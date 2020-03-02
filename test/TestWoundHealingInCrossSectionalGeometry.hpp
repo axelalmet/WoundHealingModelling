@@ -46,9 +46,9 @@
 
 static const std::string M_OUTPUT_DIRECTORY = "WoundHealingModel";
 static const double M_DT = 0.005;
-static const double M_END_TIME = 10.0;
+static const double M_END_TIME = 5.0;
 // static const double M_SAMPLING_TIMESTEP = M_END_TIME / M_DT;
-static const double M_SAMPLING_TIMESTEP = 1.0/M_DT;
+static const double M_SAMPLING_TIMESTEP = 0.1/M_DT;
 
 class TestCrossSectionalWoundHealing : public AbstractCellBasedTestSuite
 {
@@ -101,6 +101,7 @@ public:
             GrowthFactorBasedContactInhibitionCellCycleModel* p_cycle_model = new GrowthFactorBasedContactInhibitionCellCycleModel(); //Contact-inhibition-based cycle model yet.
             p_cycle_model->SetEquilibriumVolume(0.25*M_PI);
             p_cycle_model->SetQuiescentVolumeFraction(0.8);
+            p_cycle_model->SetGrowthFactorThreshold(0.25);
             p_cycle_model->SetDimension(2);
 
             // Set collagen-based SRN model
@@ -302,55 +303,55 @@ public:
         MAKE_PTR(VolumeTrackingModifier<2>, p_volume_tracking_modifier);
 		simulator.AddSimulationModifier(p_volume_tracking_modifier);
 
-        // // Create a modifier to realign cell orientations with collagen.
-        // MAKE_PTR(CollagenAlignmentTrackingModifier<2>, p_collagen_alignment_modifier);
-        // p_collagen_alignment_modifier->SetNeighbourhoodRadius(radius_of_interaction);
-        // p_collagen_alignment_modifier->SetReorientationStrength(1.0*M_DT);
-		// simulator.AddSimulationModifier(p_collagen_alignment_modifier);
+        // Create a modifier to realign cell orientations with collagen.
+        MAKE_PTR(CollagenAlignmentTrackingModifier<2>, p_collagen_alignment_modifier);
+        p_collagen_alignment_modifier->SetNeighbourhoodRadius(radius_of_interaction);
+        p_collagen_alignment_modifier->SetReorientationStrength(2.5*M_DT);
+		simulator.AddSimulationModifier(p_collagen_alignment_modifier);
 
-        // // Define the reaction-diffusion PDE, using the value's from YangYang's paper.
-        // MAKE_PTR_ARGS(PlateletDerivedGrowthFactorCellwiseSourceParabolicPde<2>, p_pde, (simulator.rGetCellPopulation(), 1.0, 0.1, 1.0, 0.0));
-        // MAKE_PTR_ARGS(ConstBoundaryCondition<2>, p_bc, (0.0));
+        // Define the reaction-diffusion PDE, using the value's from YangYang's paper.
+        MAKE_PTR_ARGS(PlateletDerivedGrowthFactorCellwiseSourceParabolicPde<2>, p_pde, (simulator.rGetCellPopulation(), 1.0, 0.1, 1.0, 0.0));
+        MAKE_PTR_ARGS(ConstBoundaryCondition<2>, p_bc, (0.0));
 
-        // // Create a PDE Modifier object using this pde and bcs object
-        // MAKE_PTR_ARGS(ParabolicGrowingDomainWithCellDeathPdeModifier<2>, p_pde_modifier, (p_pde, p_bc, true));
-        // p_pde_modifier->SetDependentVariableName("morphogen");
-        // simulator.AddSimulationModifier(p_pde_modifier);
+        // Create a PDE Modifier object using this pde and bcs object
+        MAKE_PTR_ARGS(ParabolicGrowingDomainWithCellDeathPdeModifier<2>, p_pde_modifier, (p_pde, p_bc, true));
+        p_pde_modifier->SetDependentVariableName("morphogen");
+        simulator.AddSimulationModifier(p_pde_modifier);
 
-        // // Wound the model. 
-        // double wound_centre = 0.5*max_width;
-        // double wound_width = 0.5*max_width;
-        // double wound_base_height = 0.4*max_height;
+        // Wound the model. 
+        double wound_centre = 0.5*max_width;
+        double wound_width = 0.5*max_width;
+        double wound_base_height = 0.4*max_height;
 
-        // boost::shared_ptr<AbstractCellProperty> p_platelet_type(CellPropertyRegistry::Instance()->Get<PlateletCellProliferativeType>());
-        // boost::shared_ptr<AbstractCellProperty> p_platelet_state(CellPropertyRegistry::Instance()->Get<PlateletCellMutationState>());
+        boost::shared_ptr<AbstractCellProperty> p_platelet_type(CellPropertyRegistry::Instance()->Get<PlateletCellProliferativeType>());
+        boost::shared_ptr<AbstractCellProperty> p_platelet_state(CellPropertyRegistry::Instance()->Get<PlateletCellMutationState>());
 
-        // //Obtain the proliferative cells
-        // for (AbstractCellPopulation<2>::Iterator cell_iter = simulator.rGetCellPopulation().Begin();
-        //         cell_iter != simulator.rGetCellPopulation().End();
-        //         ++cell_iter)
-        // {
-        //     //Get location of cell
-        //     double x = simulator.rGetCellPopulation().GetLocationOfCellCentre(*cell_iter)[0];
-        //     double y = simulator.rGetCellPopulation().GetLocationOfCellCentre(*cell_iter)[1];
+        //Obtain the proliferative cells
+        for (AbstractCellPopulation<2>::Iterator cell_iter = simulator.rGetCellPopulation().Begin();
+                cell_iter != simulator.rGetCellPopulation().End();
+                ++cell_iter)
+        {
+            //Get location of cell
+            double x = simulator.rGetCellPopulation().GetLocationOfCellCentre(*cell_iter)[0];
+            double y = simulator.rGetCellPopulation().GetLocationOfCellCentre(*cell_iter)[1];
 
-        //     //If the cell is within the 'wound area', we kill it.
-        //     if ( (x > (wound_centre - 0.5*wound_width))&&(x < (wound_centre + 0.5*wound_width))&&(y > wound_base_height) )
-        //     {
-        //         cell_iter->SetMutationState(p_platelet_state);
-        //         cell_iter->SetCellProliferativeType(p_platelet_type);
-        //         cell_iter->GetCellData()->SetItem("morphogen", 1.0);
-        //     }
+            //If the cell is within the 'wound area', we kill it.
+            if ( (x > (wound_centre - 0.5*wound_width))&&(x < (wound_centre + 0.5*wound_width))&&(y > wound_base_height) )
+            {
+                cell_iter->SetMutationState(p_platelet_state);
+                cell_iter->SetCellProliferativeType(p_platelet_type);
+                cell_iter->GetCellData()->SetItem("morphogen", 1.0);
+            }
         
-        // }
+        }
 
-        // // Add the platelet cell killer
-        // MAKE_PTR_ARGS(PlateletCellKiller, p_platelet_cell_killer, (&cell_population));
-        // p_platelet_cell_killer->SetCutOffRadius(radius_of_interaction);
-        // p_platelet_cell_killer->SetGrowthFactorThreshold(0.5);
-        // simulator.AddCellKiller(p_platelet_cell_killer);
+        // Add the platelet cell killer
+        MAKE_PTR_ARGS(PlateletCellKiller, p_platelet_cell_killer, (&cell_population));
+        p_platelet_cell_killer->SetCutOffRadius(radius_of_interaction);
+        p_platelet_cell_killer->SetGrowthFactorThreshold(-1.0);
+        simulator.AddCellKiller(p_platelet_cell_killer);
 
-        // Add a chemotactic force
+        // // Add a chemotactic force
         // MAKE_PTR(WoundBasedChemotacticForce<2>, p_chemotactic_force);
         // p_chemotactic_force->SetChemotacticStrength(5.0);
         // p_chemotactic_force->SetNeighbourhoodRadius(radius_of_interaction);

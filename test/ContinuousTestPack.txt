@@ -1,2 +1,2 @@
-TestWoundHealingInCrossSectionalGeometry.hpp
-TestWoundHealingInTopDownGeometry.hpp
+TestClotFormationInCrossSectionalGeometry.hpp
+TestScarFormationInCrossSectionalGeometry.hpp

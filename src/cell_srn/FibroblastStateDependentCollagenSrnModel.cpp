@@ -83,6 +83,11 @@ void FibroblastStateDependentCollagenSrnModel::SimulateToCurrentTime()
     UpdateEpfStatus();
 
     AbstractOdeSrnModel::SimulateToCurrentTime();
+
+    // Set the collagen cell data.
+    double collagen = GetCollagen();
+
+    mpCell->GetCellData()->SetItem("collagen", collagen);
 }
 
 void FibroblastStateDependentCollagenSrnModel::Initialise()
@@ -100,7 +105,7 @@ void FibroblastStateDependentCollagenSrnModel::UpdateEpfStatus()
     // If the cell is an EPF fibroblast, we set the "epf" parameter to 1.0
     boost::shared_ptr<AbstractCellProperty> p_mutation_state = mpCell->GetMutationState();
 
-    if(p_mutation_state->template IsType<EpfFibroblastCellMutationState>())
+    if(p_mutation_state->IsType<EpfFibroblastCellMutationState>())
     {
         is_epf = 1.0;
     }

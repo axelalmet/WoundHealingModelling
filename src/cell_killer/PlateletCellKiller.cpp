@@ -188,10 +188,14 @@ void PlateletCellKiller::CheckAndLabelCellsForApoptosisOrDeath()
 		{
 			// Get cell associated to this node
 			CellPtr p_cell = this->mpCellPopulation->GetCellUsingLocationIndex(cells_to_remove[i][0]);
-			p_cell->Kill();
+
+			if (!p_cell->HasApoptosisBegun())
+			{
+				p_cell->StartApoptosis();
+			}
 		}
 	}
-	// }
+
 }
 
 void PlateletCellKiller::SetNumberCellsRemoved(std::vector<c_vector<unsigned,2> > cellsRemoved)
