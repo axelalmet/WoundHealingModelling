@@ -249,9 +249,9 @@ public:
 
         }
 
-       // Make cell data writer so can pass in variable name
-        boost::shared_ptr<CellDataItemWriter<2,2> > p_cell_data_item_writer(new CellDataItemWriter<2,2>("collagen"));
-        cell_population.AddCellWriter(p_cell_data_item_writer);
+    //    // Make cell data writer so can pass in variable name
+    //     boost::shared_ptr<CellDataItemWriter<2,2> > p_cell_data_item_writer(new CellDataItemWriter<2,2>("collagen"));
+    //     cell_population.AddCellWriter(p_cell_data_item_writer);
 
         OffLatticeSimulation<2> simulator(cell_population);
 
