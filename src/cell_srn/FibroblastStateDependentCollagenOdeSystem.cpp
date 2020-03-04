@@ -48,13 +48,13 @@ FibroblastStateDependentCollagenOdeSystem::FibroblastStateDependentCollagenOdeSy
      * 
      */
 
-   SetDefaultInitialCondition(0, 0.1); // soon overwritten
+  //  SetDefaultInitialCondition(0, 0.1); // soon overwritten
 //    SetDefaultInitialCondition(1, 0.01); // soon overwritten
 //    SetDefaultInitialCondition(2, 0.01); // soon overwritten
 
     this->mParameters.push_back(0.0); // EPF status
-    this->mParameters.push_back(1.0); // Production rate of collagen
-    this->mParameters.push_back(0.1); // Degradation rate of collagen
+    this->mParameters.push_back(0.1); // Production rate of collagen
+    this->mParameters.push_back(0.05); // Degradation rate of collagen
 
     if (stateVariables != std::vector<double>())
     {
@@ -91,7 +91,7 @@ void CellwiseOdeSystemInformation<FibroblastStateDependentCollagenOdeSystem>::In
     // State variable, which is collagen amount
     this->mVariableNames.push_back("collagen");
     this->mVariableUnits.push_back("non-dim");
-    this->mInitialConditions.push_back(0.01); // will be filled in later
+    // this->mInitialConditions.push_back(0.01); // will be filled in later
 
     // Multiplier to check whether or not cells are EPF fibroblasts
     this->mParameterNames.push_back("epf");

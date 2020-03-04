@@ -74,7 +74,7 @@ public:
         // double target_curvature = 0.0; // Target curvature
 
         // Set the probability of being an EPF fibroblast.
-        double epf_fibroblast_probability = 0.5;
+        double epf_fibroblast_probability = 0.75;
 
         HoneycombMeshGenerator generator(cells_across, cells_up, 0); //Create mesh
         MutableMesh<2, 2>* p_generating_mesh = generator.GetMesh(); //Generate mesh
@@ -233,6 +233,11 @@ public:
             // double x = cell_population.GetLocationOfCellCentre(*cell_iter)[0];
             double y = cell_population.GetLocationOfCellCentre(*cell_iter)[1];
             
+            if (y > max_height - 1.5)
+            {
+                cell_iter->SetCellProliferativeType(p_stem_type);
+                cell_iter->SetMutationState(p_wildtype_state);                       
+            }
             if (y == min_height)
             {
                 cell_iter->AddCellProperty(p_cell_label);
@@ -297,7 +302,7 @@ public:
 		simulator.AddSimulationModifier(p_collagen_alignment_modifier);
 
         // Define the reaction-diffusion PDE, using the value's from YangYang's paper.
-        MAKE_PTR_ARGS(PlateletDerivedGrowthFactorCellwiseSourceParabolicPde<2>, p_pde, (simulator.rGetCellPopulation(), 1.0, 1.0, 1.0, 0.0));
+        MAKE_PTR_ARGS(PlateletDerivedGrowthFactorCellwiseSourceParabolicPde<2>, p_pde, (simulator.rGetCellPopulation(), 1.0, 0.1, 1.0, 0.0));
         MAKE_PTR_ARGS(ConstBoundaryCondition<2>, p_bc, (0.0));
 
         // Create a PDE Modifier object using this pde and bcs object

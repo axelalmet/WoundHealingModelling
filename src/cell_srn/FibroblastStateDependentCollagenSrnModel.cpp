@@ -92,6 +92,13 @@ void FibroblastStateDependentCollagenSrnModel::SimulateToCurrentTime()
 
 void FibroblastStateDependentCollagenSrnModel::Initialise()
 {
+    // Set the collagen level to the initiated collagen level
+    double collagen = mpCell->GetCellData()->GetItem("collagen");
+
+    std::vector<double> initial_condition;
+    initial_condition.push_back(collagen);
+
+    AbstractOdeSrnModel::SetInitialConditions(initial_condition);
     AbstractOdeSrnModel::Initialise(new FibroblastStateDependentCollagenOdeSystem);
 }
 
@@ -125,6 +132,19 @@ double FibroblastStateDependentCollagenSrnModel::GetCollagen()
     assert(mpOdeSystem != nullptr);
     double val = mpOdeSystem->rGetStateVariables()[0];
     return val;
+}
+
+void FibroblastStateDependentCollagenSrnModel::SetCollagen()
+{
+    assert(mpOdeSystem != nullptr);
+
+    double collagen = mpCell->GetCellData()->GetItem("collagen");
+    
+    std::vector<double> state_variables;
+    state_variables.push_back(collagen);
+
+    mpOdeSystem->SetStateVariables(state_variables);
+
 }
 
 // Declare identifier for the serializer

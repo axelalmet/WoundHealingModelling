@@ -76,7 +76,7 @@ public:
         // double target_curvature = 0.0; // Target curvature
 
         // Set the probability of being an EPF fibroblast.
-        double epf_fibroblast_probability = 0.5;
+        double epf_fibroblast_probability = 0.8;
 
         HoneycombMeshGenerator generator(cells_across, cells_up, 0); //Create mesh
         MutableMesh<2, 2>* p_generating_mesh = generator.GetMesh(); //Generate mesh
@@ -123,7 +123,7 @@ public:
             double fibroblast_state = RandomNumberGenerator::Instance()->ranf();
 
             // Randomly initiate a collagen orientation
-            double collagen_orientation = M_PI * RandomNumberGenerator::Instance()->ranf();
+            double collagen_orientation = -0.5*M_PI + (M_PI * RandomNumberGenerator::Instance()->ranf());
 
             if (fibroblast_state < epf_fibroblast_probability) // Roughly in line with the Rinkevich et al. (2018) paper.
             {
@@ -152,7 +152,7 @@ public:
                 p_cell->GetCellData()->SetItem("epf", 1.0);
 
                 // Set collagen amount
-                p_cell->GetCellData()->SetItem("collagen", 0.1);
+                p_cell->GetCellData()->SetItem("collagen", 0.0);
 
                 cells.push_back(p_cell);
             }
@@ -161,8 +161,6 @@ public:
                 CellPtr p_cell(new Cell(p_enf_state, p_cycle_model, p_srn_model));
                 p_cell->SetCellProliferativeType(p_fibroblast_type); //Make cell differentiated
                 // p_cell->InitialiseCellCycleModel();
-                // p_cell->InitialiseSrnModel();
-
                 // Set a random birth time for each cell so that you don't get synchronised division.
                 double birth_time = - RandomNumberGenerator::Instance()->ranf() * 1.0;
                 p_cell->SetBirthTime(birth_time);
@@ -183,7 +181,7 @@ public:
                 p_cell->GetCellData()->SetItem("epf", 0.0);
 
                 // Set collagen amount
-                p_cell->GetCellData()->SetItem("collagen", 1e-2);
+                p_cell->GetCellData()->SetItem("collagen", 0.0);
 
                 cells.push_back(p_cell);
             }
@@ -280,14 +278,6 @@ public:
         MAKE_PTR_ARGS(FixedRegionPlaneBoundaryCondition<2>, p_bc_bottom, (&cell_population, point, normal));
         simulator.AddCellPopulationBoundaryCondition(p_bc_bottom);
 
-        // MAKE_PTR_ARGS(PlaneBoundaryCondition<2>, p_bc_bottom, (&cell_population, point, normal));
-        // simulator.AddCellPopulationBoundaryCondition(p_bc_bottom);
-
-        // Create a modifier to track which cells are attached to the basement membrane.
-        // MAKE_PTR(BasementMembraneAttachmentTrackingModifier<2>, p_bm_attachment_tracking_modifier);
-        // p_bm_attachment_tracking_modifier->SetNeighbourhoodRadius(radius_of_interaction);
-		// simulator.AddSimulationModifier(p_bm_attachment_tracking_modifier);
-
         // Create a modifier to track which cells are attached to the basement membrane.
         MAKE_PTR(VolumeTrackingModifier<2>, p_volume_tracking_modifier);
 		simulator.AddSimulationModifier(p_volume_tracking_modifier);
@@ -297,15 +287,6 @@ public:
         p_collagen_alignment_modifier->SetNeighbourhoodRadius(radius_of_interaction);
         p_collagen_alignment_modifier->SetReorientationStrength(2.5*M_DT);
 		simulator.AddSimulationModifier(p_collagen_alignment_modifier);
-
-        // Define the reaction-diffusion PDE, using the value's from YangYang's paper.
-        MAKE_PTR_ARGS(PlateletDerivedGrowthFactorCellwiseSourceParabolicPde<2>, p_pde, (simulator.rGetCellPopulation(), 1.0, 1.0, 1.0, 0.0));
-        MAKE_PTR_ARGS(ConstBoundaryCondition<2>, p_bc, (0.0));
-
-        // Create a PDE Modifier object using this pde and bcs object
-        MAKE_PTR_ARGS(ParabolicGrowingDomainWithCellDeathPdeModifier<2>, p_pde_modifier, (p_pde, p_bc, true));
-        p_pde_modifier->SetDependentVariableName("morphogen");
-        simulator.AddSimulationModifier(p_pde_modifier);
 
         // Wound the model. 
         double wound_centre = 0.5*max_width;
@@ -328,6 +309,9 @@ public:
             if ( (x > (wound_centre - 0.5*wound_width))&&(x < (wound_centre + 0.5*wound_width))&&(y > wound_base_height) )
             {
                 cell_iter->GetCellData()->SetItem("collagen", 1.0);
+                FibroblastStateDependentCollagenSrnModel* p_srn_model = dynamic_cast<FibroblastStateDependentCollagenSrnModel*>(cell_iter->GetSrnModel());
+                p_srn_model->SetCollagen();
+                cell_iter->SetSrnModel(p_srn_model);
             }
         
         }

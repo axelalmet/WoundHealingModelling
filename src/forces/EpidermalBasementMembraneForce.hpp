@@ -31,25 +31,8 @@ private :
     /** Target curvature for the ring of cells (NodeBased) */
     double mTargetCurvature;
 
-    /** x-coordinate that encloses the region in which to apply a non-zero target curvature */
-    double mLeftBoundary;
-
-    /** x-coordinate that encloses the region in which to apply a non-zero target curvature */
-    double mRightBoundary;
-
-    /** Make the basement membrane force dependent on the position of a cell up the crypt */
-    bool mUsePositionDependentMembraneForce;
-
-    /** Boolean to check whether force is applied to crypt-like epithelium or organoid */
-    bool mApplyForceToCrypt;
-
-    /** The multiplication factor for the basement membrane parameter */
-    double mMembraneForceMultiplier;
-
     /** The cut off radius for defining neighbouring nodes */
     double mCutOffRadius;
-
-    bool mApplyPeriodicForce;
 
     /** Needed for serialization. */
     friend class boost::serialization::access;
@@ -67,13 +50,7 @@ private :
         archive & boost::serialization::base_object<AbstractForce<2> >(*this);
         archive & mBasementMembraneParameter;
         archive & mTargetCurvature;
-        archive & mLeftBoundary;
-        archive & mRightBoundary;
-        archive & mApplyForceToCrypt;
-        archive & mUsePositionDependentMembraneForce;
-        archive & mMembraneForceMultiplier;
         archive & mCutOffRadius;
-        archive & mApplyPeriodicForce;
     }
 
 public :
@@ -96,7 +73,7 @@ public :
      */
     double GetBasementMembraneParameter();
 
-    /* Value of curvature at crypt base */
+    /* Value of curvature at Epidermis base */
     void SetTargetCurvature(double targetCurvature = 0.0);
 
     /*
@@ -104,31 +81,11 @@ public :
      */
     double GetTargetCurvature();
 
-    /*
-     * Set method for left crypt boundary
-     */
-    void SetLeftCryptBoundary(double leftBoundary);
+    /* Returns Epidermis height extremes to apply non-zero curvature to base */
+    c_vector<double, 2> GetEpidermisHeightExtremes(AbstractCellPopulation<2>& rCellPopulation);
 
-    /*
-     * Get method for Left crypt boundary parameter
-     */
-    double GetLeftCryptBoundary();
-
-    /*
-     * Set method for right crypt boundary parameter
-     */
-    void SetRightCryptBoundary(double rightBoundary);
-
-    /*
-     * Get method for right crypt boundary
-     */
-    double GetRightCryptBoundary();
-
-    /* Returns crypt height extremes to apply non-zero curvature to base */
-    c_vector<double, 2> GetCryptHeightExtremes(AbstractCellPopulation<2>& rCellPopulation);
-
-    /* Returns crypt width extremes */
-    c_vector<double, 2> GetCryptWidthExtremes(AbstractCellPopulation<2>& rCellPopulation);
+    /* Returns Epidermis width extremes */
+    c_vector<double, 2> GetEpidermisWidthExtremes(AbstractCellPopulation<2>& rCellPopulation);
 
     /* Return tangent vector at point based on cosine parametrisation */
     c_vector<double, 2> GetCosineBasedTangentVector(AbstractCellPopulation<2>& rCellPopulation, c_vector<double, 2> point);
@@ -136,50 +93,28 @@ public :
     /*
      * Return vector of Epidermal indices that are close to the considered Epidermal node,
      * but based on an approximated cosine approximation
+     * 
+     * @param rCellPopulation the cell population
+     * @param epidermalIndex the considered epidermal node index
+     * @param leftOrRight, should be 1.0 or -1.0, determines whether we consider 'left' or 'right' neighbours
      */
-    std::vector<unsigned> GetClosestNeighboursBasedOnCosineApproximation(AbstractCellPopulation<2>& rCellPopulation, unsigned EpidermalIndex);
+    std::vector<unsigned> GetClosestNeighboursBasedOnCosineApproximation(AbstractCellPopulation<2>& rCellPopulation, unsigned epidermalIndex, double leftOrRight);
 
     /*
-     * Return the nearest neighbour based on vector projections from the tangent vector
-     * at a point along the cosine approximation of the epithelium.
+     * Return closest epidermal node indice to the considered Epidermal node,
+     * 
+     * @param rCellPopulation the cell population
+     * @param epidermalIndex the considered epidermal node index
+     * @param leftOrRight, should be 1.0 or -1.0, determines whether we consider 'left' or 'right' neighbours
      */
-    unsigned GetNearestNeighboursAlongCosineApproximation(AbstractCellPopulation<2>& rCellPopulation, unsigned EpidermalIndex);
+    unsigned GetNearestNeighbourAlongCosineApproximation(AbstractCellPopulation<2>& rCellPopulation, unsigned epidermalIndex, double leftOrRight);
 
-    /*
-     * Set method for geometry-dependent basement membrane for application, i.e.crypt or organoid
-     */
-    void SetCryptGeometry(bool applyForceToCrypt = true);
-
-    /*
-     * Check to determine whether or not basement membrane force is to be applied to a crypt or organoid
-     */
-    bool GetCryptGeometryCheck();
-
-    /* Set method for position-dependent basement membrane force multiplier (i.e. if you want to apply a different
-     * basement membrane parameter in the crypt base, or at the orifice)
-     * @param usePositionDependentMembraneForce whether to multiply the basement membrane force by a factor
-     * @param membraneForceMultiplier the multiplication factor for the basement membrane force
-     */
-    void SetPositionDependentMultiplier(bool usePositionDependentMembraneForce = false, double membraneForceMultiplier = 1.0);
-
-    /* Get method for basement membrane force strength multiplier
-     */
-    double GetPositionDependentMultiplier();
 
     /*Get method for cut off radius */
     double GetCutOffRadius();
 
     /*Set method for cut off radius */
     void SetCutOffRadius(double cutOffRadius);
-
-    /* Get method for whether we apply a periodic force */
-    void ApplyPeriodicForce(bool applyPeriodicForce);
-
-    bool IsPeriodicForceApplied();
-
-    /* Removing duplicated entries of a vector
-     */
-    void RemoveDuplicates1D(std::vector<unsigned>& rVectorWithDuplicates);
 
     double FindParametricCurvature(AbstractCellPopulation<2>& rCellPopulation,
     								c_vector<double, 2> leftPoint,
@@ -198,11 +133,6 @@ public :
     std::vector<unsigned> GetNeighbouringEpidermalIndices(AbstractCellPopulation<2>& rCellPopulation, unsigned nodeIndex);
 
     /*
-     * Method to get the Epidermal nodes and their left and right neighbours, if they have any
-     */
-    std::map<unsigned, std::pair<unsigned, unsigned> > GetEpidermalIndicesAndTheirLeftAndRightEpidermalNeighbours(AbstractCellPopulation<2>& rCellPopulation);
-
-    /*
      * Method to check whether or not node is on the left or right boundary (and hence should have zero force).
      */
     bool IsBoundaryNode(AbstractCellPopulation<2>& rCellPopulation, unsigned nodeIndex);
@@ -210,7 +140,7 @@ public :
     /*
      * Method to calculate the force due to basement membrane on an Epidermal cell
      */
-    c_vector<double, 2> CalculateForceDueToBasementMembrane(AbstractCellPopulation<2>& rCellPopulation, std::map<unsigned, std::pair<unsigned, unsigned > > EpidermalIndicesAndNeighbours, unsigned nodeIndex);
+    c_vector<double, 2> CalculateForceDueToBasementMembrane(AbstractCellPopulation<2>& rCellPopulation, std::vector<unsigned> epidermalIndices, unsigned nodeIndex);
 
     /**
      * Overridden AddForceContribution method.

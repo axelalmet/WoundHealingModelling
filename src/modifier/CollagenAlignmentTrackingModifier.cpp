@@ -195,15 +195,6 @@ void CollagenAlignmentTrackingModifier<DIM>::UpdateCellData(AbstractCellPopulati
                 // Get the orientation of the constructed collagen fibre.
                 double collagen_orientation = atan(collagen_direction[1]/collagen_direction[0]); //Get initial angle argument
 
-                if (collagen_direction[0] < 0.0) //If the point is in the second quadrant or third quadrant
-                {
-                    collagen_orientation += M_PI;
-                }
-                else if ((collagen_direction[0]>=0.0)&&(collagen_direction[1]<0.0)) //Fourth quadrant
-                {
-                    collagen_orientation += M_PI;
-                }
-
                 // Finally, calculate the new orientation
                 double reorientation_strength = GetReorientationStrength();
                 double new_orientation = orientation + reorientation_strength * sin(collagen_orientation - orientation);
@@ -248,15 +239,6 @@ void CollagenAlignmentTrackingModifier<DIM>::UpdateCellData(AbstractCellPopulati
 
                 // Get the orientation of the constructed collagen fibre.
                 double collagen_orientation = atan(collagen_direction[1]/collagen_direction[0]); //Get initial angle argument
-
-                if ((collagen_direction[0] < 0.0)&&(collagen_direction[1] >= 0.0) ) //If the point is in the second quadrant or third quadrant
-                {
-                    collagen_orientation += M_PI;
-                }
-                else if ((collagen_direction[0]>=0.0)&&(collagen_direction[1]<0.0)) //Fourth quadrant
-                {
-                    collagen_orientation += M_PI;
-                }
 
                 // Finally, calculate the new orientation
                 double reorientation_strength = GetReorientationStrength();

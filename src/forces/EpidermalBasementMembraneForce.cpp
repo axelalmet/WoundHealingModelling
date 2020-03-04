@@ -1,13 +1,14 @@
 #include "EpidermalBasementMembraneForce.hpp"
 #include "NodeBasedCellPopulation.hpp"
 #include "StemCellProliferativeType.hpp"
+#include "FibroblastCellProliferativeType.hpp"
 #include "AbstractCellProperty.hpp"
 #include "Debug.hpp"
 #include "Exception.hpp"
 
 /*
- * MODIFIED FOR PERSONAL USE BY AXEL ALMET
- * Last modified: Feb 22 2016
+ * This is a force class to simulate the basement membrane,
+ * based off that originally proposed by Dunn et al. (2012).
  */
 
 
@@ -19,14 +20,7 @@ EpidermalBasementMembraneForce::EpidermalBasementMembraneForce()
 :  AbstractForce<2>(),
    mBasementMembraneParameter(DOUBLE_UNSET),
    mTargetCurvature(DOUBLE_UNSET),
-   mLeftBoundary(DOUBLE_UNSET),
-   mRightBoundary(DOUBLE_UNSET),
-   mUsePositionDependentMembraneForce(false),
-   mApplyForceToCrypt(true),
-   mMembraneForceMultiplier(DOUBLE_UNSET),
-   mCutOffRadius(1.5),
-   mApplyPeriodicForce(false)
-   {
+   mCutOffRadius(1.5)   {
 	// Sets up output file
 	//	OutputFileHandler output_file_handler("CurvatureData/", false);
 	//	mMeinekeOutputFile = output_file_handler.OpenOutputFile("results.curvature");
@@ -59,48 +53,6 @@ double EpidermalBasementMembraneForce::GetTargetCurvature()
 	return mTargetCurvature;
 }
 
-void EpidermalBasementMembraneForce::SetLeftCryptBoundary(double leftBoundary)
-{
-	mLeftBoundary = leftBoundary;
-}
-
-double EpidermalBasementMembraneForce::GetLeftCryptBoundary()
-{
-	return mLeftBoundary;
-}
-
-void EpidermalBasementMembraneForce::SetRightCryptBoundary(double rightBoundary)
-{
-	mRightBoundary = rightBoundary;
-}
-
-double EpidermalBasementMembraneForce::GetRightCryptBoundary()
-{
-	return mRightBoundary;
-}
-
-void EpidermalBasementMembraneForce::SetCryptGeometry(bool applyForceToCrypt)
-{
-	mApplyForceToCrypt = applyForceToCrypt;
-}
-
-bool EpidermalBasementMembraneForce::GetCryptGeometryCheck()
-{
-	return mApplyForceToCrypt;
-}
-
-void EpidermalBasementMembraneForce::SetPositionDependentMultiplier(bool usePositionDependentMembraneForce, double MembraneForceMultiplier)
-{
-	mUsePositionDependentMembraneForce = usePositionDependentMembraneForce;
-	mMembraneForceMultiplier = MembraneForceMultiplier;
-}
-
-
-double EpidermalBasementMembraneForce::GetPositionDependentMultiplier()
-{
-	return mMembraneForceMultiplier;
-}
-
 double EpidermalBasementMembraneForce::GetCutOffRadius()
 {
 	return mCutOffRadius;
@@ -111,56 +63,50 @@ void EpidermalBasementMembraneForce::SetCutOffRadius(double cutOffRadius)
 	mCutOffRadius = cutOffRadius;
 }
 
-void EpidermalBasementMembraneForce::ApplyPeriodicForce(bool applyPeriodicForce)
-{
-	mApplyPeriodicForce = applyPeriodicForce;
-}
-
-bool EpidermalBasementMembraneForce::IsPeriodicForceApplied()
-{
-	return mApplyPeriodicForce;
-}
-
-
-void EpidermalBasementMembraneForce::RemoveDuplicates1D(std::vector<unsigned>& rVectorWithDuplicates)
-{
-	std::sort(rVectorWithDuplicates.begin(), rVectorWithDuplicates.end());
-	rVectorWithDuplicates.erase(std::unique(rVectorWithDuplicates.begin(), rVectorWithDuplicates.end()), rVectorWithDuplicates.end());
-}
-
-c_vector<double,2> EpidermalBasementMembraneForce::GetCryptHeightExtremes(AbstractCellPopulation<2>& rCellPopulation)
+c_vector<double,2> EpidermalBasementMembraneForce::GetEpidermisHeightExtremes(AbstractCellPopulation<2>& rCellPopulation)
 {
 	NodeBasedCellPopulation<2>* p_tissue = static_cast<NodeBasedCellPopulation<2>*>(&rCellPopulation);
 
-	// Create a vector to store the y-coordinates of the lowest point of the crypt base and the highest point of the
-	// crypt orifice
+	// Create a vector to store the y-coordinates of the lowest point of the Epidermis base and the highest point of the
+	// Epidermis orifice
 	c_vector<double,2> height_extremes;
 
 	double max_height = 0.0;
-	double min_height = DBL_MAX;
+	double min_height = 0.0; // This will make sense in a bit
 
-	double current_height_coordinate;
+	// We will need the width extremes, actually
+	double max_width = GetEpidermisWidthExtremes(rCellPopulation)[0];
 
-	// We iterate over all cells in the tissue, and deal only with those that are Epidermal cells
+	// To account for injury, we will consider the dermal fibroblast positions
+	// instead. The maximum height is found by 
 	for (AbstractCellPopulation<2>::Iterator cell_iter = rCellPopulation.Begin();
 			cell_iter != rCellPopulation.End();
 			++cell_iter)
 	{
 
 		// Need these to not be labelled cells
-		if ( (cell_iter->GetCellProliferativeType()->IsType<StemCellProliferativeType>()) )
+		if ( (cell_iter->GetCellProliferativeType()->IsType<FibroblastCellProliferativeType>()) )
 		{
 			Node<2>* p_node = p_tissue->GetNodeCorrespondingToCell(*cell_iter);
 
-			current_height_coordinate = p_node->rGetLocation()[1];
+			double x = p_node->rGetLocation()[0];
+			double y = p_node->rGetLocation()[1];
 
-			if (current_height_coordinate > max_height)
+			if (y > max_height)
 			{
-				max_height = current_height_coordinate;
+				max_height = y;
 			}
-			else if (current_height_coordinate < min_height)
+
+			// We determine the minimum height by looking for the dermal cell
+			// by considering the cells around x = L/2 and taking the maximal
+			// dermal height of cells at x = 1/2. The ball of 0.25 is to just
+			// give us a bit of a buffer.
+			if ( (x > 0.5*max_width - 0.25)&&(x < 0.5*max_width + 0.25) )
 			{
-				min_height = current_height_coordinate;
+				if (y > min_height)
+				{
+					min_height = y;
+				}
 			}
 		}
 	}
@@ -171,12 +117,12 @@ c_vector<double,2> EpidermalBasementMembraneForce::GetCryptHeightExtremes(Abstra
 	return height_extremes;
 }
 
-c_vector<double,2> EpidermalBasementMembraneForce::GetCryptWidthExtremes(AbstractCellPopulation<2>& rCellPopulation)
+c_vector<double,2> EpidermalBasementMembraneForce::GetEpidermisWidthExtremes(AbstractCellPopulation<2>& rCellPopulation)
 {
 	NodeBasedCellPopulation<2>* p_tissue = static_cast<NodeBasedCellPopulation<2>*>(&rCellPopulation);
 
-	// Create a vector to store the y-coordinates of the lowest point of the crypt base and the highest point of the
-	// crypt orifice
+	// Create a vector to store the y-coordinates of the lowest point of the Epidermis base and the highest point of the
+	// Epidermis orifice
 	c_vector<double,2> width_extremes;
 
 	double max_width = 0.0;
@@ -221,20 +167,20 @@ c_vector<double,2> EpidermalBasementMembraneForce::GetCryptWidthExtremes(Abstrac
 c_vector<double, 2> EpidermalBasementMembraneForce::GetCosineBasedTangentVector(AbstractCellPopulation<2>& rCellPopulation, c_vector<double, 2> point)
 {
 	// Get the minimal and maximal x-coordinates of epithelium
-	c_vector<double, 2> width_extremes = GetCryptWidthExtremes(rCellPopulation);
+	c_vector<double, 2> width_extremes = GetEpidermisWidthExtremes(rCellPopulation);
 	double max_width = width_extremes[0];
 	double min_width = width_extremes[1];
 
 	// Get the minimal and maximal y-coordinates of epithelium
-	c_vector<double, 2> height_extremes = GetCryptHeightExtremes(rCellPopulation);
+	c_vector<double, 2> height_extremes = GetEpidermisHeightExtremes(rCellPopulation);
 	double max_height = height_extremes[0];
 	double min_height = height_extremes[1];
 
-	// Define width of crypt
-	double crypt_width = max_width - min_width;
+	// Define width of epidermis
+	double epidermis_width = max_width - min_width;
 
-	// Define crypt height
-	double crypt_height = max_height - min_height;
+	// Define epidermis height
+	double epidermis_height = max_height - min_height;
 
 	// Tangent defined by derivative of approximated cosine function
 	c_vector<double, 2> tangent_vector;
@@ -242,7 +188,7 @@ c_vector<double, 2> EpidermalBasementMembraneForce::GetCosineBasedTangentVector(
 
 	// y-component is derivative of cos function approximation of epithelium, with appropriate scalings.
 	tangent_vector[0] = 1.0;
-	tangent_vector[1] = -(M_PI/crypt_width)*crypt_height*sin(2.0*M_PI/crypt_width*(x - min_width));
+	tangent_vector[1] = -(M_PI/epidermis_width)*epidermis_height*sin(2.0*M_PI/epidermis_width*(x - min_width));
 
 	tangent_vector /= norm_2(tangent_vector); // Convert to unit vector
 
@@ -256,7 +202,7 @@ c_vector<double, 2> EpidermalBasementMembraneForce::GetCosineBasedTangentVector(
  * Return vector of Epidermal indices that are close to the considered Epidermal node,
  * but based on an approximated cosine approximation
  */
-std::vector<unsigned> EpidermalBasementMembraneForce::GetClosestNeighboursBasedOnCosineApproximation(AbstractCellPopulation<2>& rCellPopulation, unsigned epidermalIndex)
+std::vector<unsigned> EpidermalBasementMembraneForce::GetClosestNeighboursBasedOnCosineApproximation(AbstractCellPopulation<2>& rCellPopulation, unsigned epidermalIndex, double leftOrRight)
 {
 	// Initialise vector
 	std::vector<unsigned> closest_neighbours;
@@ -267,6 +213,16 @@ std::vector<unsigned> EpidermalBasementMembraneForce::GetClosestNeighboursBasedO
 	// Get the location of the Epidermal node
 	c_vector<double, 2> epidermal_location = rCellPopulation.GetNode(epidermalIndex)->rGetLocation();
 
+	// Get the tangent vector based on the cosine approximation
+	c_vector<double, 2> tangent_vector = GetCosineBasedTangentVector(rCellPopulation, epidermal_location);
+
+	// We multiply the tangent vector by leftOrRight to account for whether we're looking at 
+	// 'left' or 'right' neighbours
+	tangent_vector *= leftOrRight;
+
+	// Get the cut-off radius to determine the nearest neighbours
+	double neighbourhood_radius = GetCutOffRadius();
+
 	// Sweep through the indices
 	for (unsigned i = 0; i < epidermal_indices.size(); i++)
 	{
@@ -274,10 +230,10 @@ std::vector<unsigned> EpidermalBasementMembraneForce::GetClosestNeighboursBasedO
 
 		if (neighbour_index != epidermalIndex)
 		{
-
 			c_vector<double, 2> neighbour_location = rCellPopulation.GetNode(neighbour_index)->rGetLocation();
 
-			if (norm_2(neighbour_location - epidermal_location) < 2.0 ) // Distance of two is based on length of tangent vector, i.e. long enough to catch enough neighbours
+			if ((norm_2(neighbour_location - epidermal_location) < neighbourhood_radius + 0.5) // Is the neighbour reasonably close
+					&&(inner_prod(neighbour_location - epidermal_location, tangent_vector) > 0.0 ) ) // Is the neighbour pointing in the same direction as the tangent vector
 			{
 				closest_neighbours.push_back(neighbour_index);
 			}
@@ -292,13 +248,13 @@ std::vector<unsigned> EpidermalBasementMembraneForce::GetClosestNeighboursBasedO
  * Return the nearest neighbour based on vector projections from the tangent vector
  * at a point along the cosine approximation of the epithelium.
  */
-unsigned EpidermalBasementMembraneForce::GetNearestNeighboursAlongCosineApproximation(AbstractCellPopulation<2>& rCellPopulation, unsigned epidermalIndex)
+unsigned EpidermalBasementMembraneForce::GetNearestNeighbourAlongCosineApproximation(AbstractCellPopulation<2>& rCellPopulation, unsigned epidermalIndex, double leftOrRight)
 {
 	double min_scalar_projection = DBL_MAX;
 	double min_projection_index = 0;
 
 	// Get the closest neighbours, based on the cosine approximation
-	std::vector<unsigned> closest_neighbours = GetClosestNeighboursBasedOnCosineApproximation(rCellPopulation, epidermalIndex);
+	std::vector<unsigned> closest_neighbours = GetClosestNeighboursBasedOnCosineApproximation(rCellPopulation, epidermalIndex, leftOrRight);
 
 	// Get the location of the considered Epidermal node
 	c_vector<double, 2> epidermal_location = rCellPopulation.GetNode(epidermalIndex)->rGetLocation();
@@ -342,8 +298,8 @@ double EpidermalBasementMembraneForce::FindParametricCurvature(AbstractCellPopul
 	c_vector<double, 2> left_to_right = rCellPopulation.rGetMesh().GetVectorFromAtoB(leftPoint, rightPoint);
 
 	// Firstly find the parametric intervals
-	double left_s = pow(pow(left_to_centre[0],2) + pow(left_to_centre[1],2), 0.5);
-	double right_s = pow(pow(centre_to_right[0],2) + pow(centre_to_right[1],2), 0.5);
+	double left_s = pow(pow(left_to_centre[0],2.0) + pow(left_to_centre[1],2.0), 0.5);
+	double right_s = pow(pow(centre_to_right[0],2.0) + pow(centre_to_right[1],2.0), 0.5);
 	//	(left_s, right_s);
 
 	double sum_intervals = left_s + right_s;
@@ -357,7 +313,7 @@ double EpidermalBasementMembraneForce::FindParametricCurvature(AbstractCellPopul
 	double y_double_prime = 2*(left_s*centre_to_right[1] - right_s*left_to_centre[1])/(left_s*right_s*sum_intervals);
 
 	//Calculate curvature using formula
-	double curvature = (x_prime*y_double_prime - y_prime*x_double_prime)/pow((pow(x_prime,2) + pow(y_prime,2)), 1.5);
+	double curvature = (x_prime*y_double_prime - y_prime*x_double_prime)/pow((pow(x_prime,2.0) + pow(y_prime,2.0)), 1.5);
 
 	return curvature;
 }
@@ -369,6 +325,8 @@ std::vector<unsigned> EpidermalBasementMembraneForce::GetEpidermalIndices(Abstra
 {
 	//Create the vector of Epidermal cell indices
 	std::vector<unsigned> epidermal_indices;
+
+	std::vector<std::pair<double, unsigned> > epidermal_indices_and_x_coordinates; //Define vector of pairs, so that we may sort by the x-coordinate
 
 	if (dynamic_cast<NodeBasedCellPopulation<2>*>(&rCellPopulation))
 	{
@@ -384,16 +342,31 @@ std::vector<unsigned> EpidermalBasementMembraneForce::GetEpidermalIndices(Abstra
 			if(p_type->IsType<StemCellProliferativeType>()) //If we have an Epidermal cell
 			{
 				unsigned node_index = p_tissue->GetLocationIndexUsingCell(*cell_iter);
-				epidermal_indices.push_back(node_index);
+				double x_coordinate = rCellPopulation.GetNode(node_index)->rGetLocation()[0];
+
+				// Create the pair of index and x-coordinate
+				std::pair<double, unsigned> x_coordinate_and_index = std::make_pair(x_coordinate, node_index);
+				epidermal_indices_and_x_coordinates.push_back(x_coordinate_and_index);
 			}
 		}
+	}
+
+	//Sort indices by the x-coordinate
+	std::sort(epidermal_indices_and_x_coordinates.begin(), epidermal_indices_and_x_coordinates.end());
+
+	// Push back the indices into the vector
+	for (unsigned i = 0; i < epidermal_indices_and_x_coordinates.size(); i++)
+	{
+		unsigned epidermal_index = epidermal_indices_and_x_coordinates[i].second; //Get node index
+
+		epidermal_indices.push_back(epidermal_index);
 	}
 
 	return epidermal_indices;
 }
 
 /*
- * Method to get the neighbouring nodes that are Epidermal cells
+ * Method to get the neighbouring nodes that are epidermal
  */
 std::vector<unsigned> EpidermalBasementMembraneForce::GetNeighbouringEpidermalIndices(AbstractCellPopulation<2>& rCellPopulation, unsigned nodeIndex)
 {
@@ -433,158 +406,6 @@ std::vector<unsigned> EpidermalBasementMembraneForce::GetNeighbouringEpidermalIn
 	return neighbouring_epidermal_indices;
 }
 
-/*
- * Method to get the Epidermal indices that have a left and right neighbour.
- * Returns a map with pairs <index, <left, right>> for convention.
- */
-std::map<unsigned, std::pair<unsigned, unsigned> > EpidermalBasementMembraneForce::GetEpidermalIndicesAndTheirLeftAndRightEpidermalNeighbours(AbstractCellPopulation<2>& rCellPopulation)
-{
-	//Declare the map
-	std::map<unsigned, std::pair<unsigned, unsigned> > epidermal_indices_and_their_left_and_right_neighbours;
-
-	//Get the Epidermal indices
-	std::vector<unsigned> epidermal_indices = GetEpidermalIndices(rCellPopulation);
-
-	/* We are going to define the basement membrane using the x-coordinate of Epidermal cells.
-	 * Doesn't generalise to 3D, but it will give us a confluent layer.This method only applies if
-	 * we are modelling a crypt. We have to change how we define neighbours if we are modelling an organoid
-	 */
-
-	bool is_force_applied_to_crypt = GetCryptGeometryCheck();
-	if (is_force_applied_to_crypt)
-	{
-		std::vector<std::pair<double, unsigned> > epidermal_indices_and_x_coordinates; //Define vector of pairs, so that we may sort by the x-coordinate
-
-		for (unsigned i = 0; i < epidermal_indices.size(); i++)
-		{
-			unsigned epidermal_index = epidermal_indices[i]; //Get node index
-			double epidermal_x_coordinate = rCellPopulation.GetNode(epidermal_index)->rGetLocation()[0]; //Get x-coordinate of node location
-
-			//Make pair
-			std::pair<double, unsigned> x_coordinate_and_index = std::make_pair(epidermal_x_coordinate, epidermal_index);
-
-			epidermal_indices_and_x_coordinates.push_back(x_coordinate_and_index);
-		}
-
-		//Sort indices by the x-coordinate
-		std::sort(epidermal_indices_and_x_coordinates.begin(), epidermal_indices_and_x_coordinates.end());
-
-		//We now define the nodes and their left and right neighbours in the layer
-		for (unsigned i = 0; i < epidermal_indices_and_x_coordinates.size(); i++)
-		{
-
-			unsigned centre_node_index = epidermal_indices_and_x_coordinates[i].second; //Get index of centre node
-
-			//Initialise left and right neighbours
-			unsigned left_neighbour_index, right_neighbour_index;
-
-			if (i == 0)
-			{
-				left_neighbour_index = epidermal_indices_and_x_coordinates[epidermal_indices_and_x_coordinates.size() - 1].second;
-				right_neighbour_index = epidermal_indices_and_x_coordinates[i + 1].second;
-				// left_neighbour_index = right_neighbour_index;
-			}
-			else if (i == (epidermal_indices_and_x_coordinates.size() - 1) )
-			{
-				left_neighbour_index = epidermal_indices_and_x_coordinates[i - 1].second;
-				// right_neighbour_index = left_neighbour_index;
-				right_neighbour_index = 0;
-			}
-			else
-			{
-				left_neighbour_index = epidermal_indices_and_x_coordinates[i - 1].second;
-				right_neighbour_index = epidermal_indices_and_x_coordinates[i + 1].second;
-			}
-
-			epidermal_indices_and_their_left_and_right_neighbours[centre_node_index] = std::make_pair(left_neighbour_index, right_neighbour_index);
-
-		}
-	}
-	else //If we are applying the force to an organoid, we need to sort the Epidermal cells using polar coordinates (note this assumes tha the initial geomotry is that of an organoid)
-	{
-		std::vector<std::pair<double, unsigned> > epidermal_indices_and_angles; //Define vector of pairs, so that we may sort by the angles
-
-		//First get centre of mass of Epidermal nodes, to define a reference point for calculating the polar angle
-		c_vector<double, 2> centre_of_mass = zero_vector<double>(2);
-
-		for (unsigned i = 0; i < epidermal_indices.size(); i++)
-		{
-			unsigned epidermal_index = epidermal_indices[i]; //Get node index
-			c_vector<double, 2> epidermal_location = rCellPopulation.GetNode(epidermal_index)->rGetLocation(); //Get x-coordinate of node location
-
-			centre_of_mass += epidermal_location;
-		}
-
-		//Average centre of mass
-		centre_of_mass /= epidermal_indices.size();
-
-		for (unsigned k = 0; k < epidermal_indices.size(); k++)
-		{
-			unsigned cell_index = epidermal_indices[k]; //Get the node index
-
-			CellPtr cell = rCellPopulation.GetCellUsingLocationIndex(cell_index); //Get the cell
-
-			//Get the cell location
-			double x = rCellPopulation.GetLocationOfCellCentre(cell)[0];
-			double y = rCellPopulation.GetLocationOfCellCentre(cell)[1];
-
-			//Make the pair of the angle and cell
-			std::pair<double, unsigned> angle_cell;
-
-			//Get point relative to the circle centre
-			double rel_x = x - centre_of_mass[0];
-			double rel_y = y - centre_of_mass[1];
-
-			double circle_angle = atan(rel_y/rel_x); //Get initial angle argument
-
-			if (rel_x<0.0) //If the point is in the second quadrant or third quadrant
-			{
-				circle_angle += M_PI;
-			}
-			else if ((rel_x>=0.0)&&(rel_y<0.0)) //Fourth quadrant
-			{
-				circle_angle += 2*M_PI;
-			}
-
-			angle_cell = std::make_pair(circle_angle, cell_index);
-
-			epidermal_indices_and_angles.push_back(angle_cell); //Add the angle and node index
-		}
-
-		//Sort indices by the angle
-		std::sort(epidermal_indices_and_angles.begin(), epidermal_indices_and_angles.end());
-
-		//We now define the nodes and their left and right neighbours in the layer
-		for (unsigned i = 0; i < epidermal_indices_and_angles.size(); i++)
-		{
-			unsigned centre_node_index = epidermal_indices_and_angles[i].second; //Get index of centre node
-
-			//Initialise left and right neighbours
-			unsigned left_neighbour_index, right_neighbour_index;
-
-			if (i == 0) //If it is the first index, the 'left' neighbour is the last index due to periodicity
-			{
-				left_neighbour_index = epidermal_indices_and_angles[epidermal_indices_and_angles.size() - 1].second;
-				right_neighbour_index = epidermal_indices_and_angles[1].second;
-			}
-			else if (i == (epidermal_indices_and_angles.size() - 1) ) //If it is the last node, the 'right' neighbour is the first index
-			{
-				left_neighbour_index = epidermal_indices_and_angles[epidermal_indices_and_angles.size() - 2].second;
-				right_neighbour_index = epidermal_indices_and_angles[0].second;
-			}
-			else //Otherwise the left neighbour is the index before and the right is the index after
-			{
-				left_neighbour_index = epidermal_indices_and_angles[i - 1].second;
-				right_neighbour_index = epidermal_indices_and_angles[i + 1].second;
-			}
-
-			epidermal_indices_and_their_left_and_right_neighbours[centre_node_index] = std::make_pair(left_neighbour_index, right_neighbour_index);
-		}
-	}
-
-	return epidermal_indices_and_their_left_and_right_neighbours;
-}
-
 // Method to check if node is left or right-most cell
 bool EpidermalBasementMembraneForce::IsBoundaryNode(AbstractCellPopulation<2>& rCellPopulation, unsigned nodeIndex)
 {
@@ -620,216 +441,115 @@ bool EpidermalBasementMembraneForce::IsBoundaryNode(AbstractCellPopulation<2>& r
 }
 
 //Method to calculate the force due to the basement membrane on an Epidermal cell
-c_vector<double, 2> EpidermalBasementMembraneForce::CalculateForceDueToBasementMembrane(AbstractCellPopulation<2>& rCellPopulation, std::map<unsigned, std::pair<unsigned, unsigned > > EpidermalIndicesAndNeighbours, unsigned nodeIndex)
+c_vector<double, 2> EpidermalBasementMembraneForce::CalculateForceDueToBasementMembrane(AbstractCellPopulation<2>& rCellPopulation, std::vector<unsigned> epiderdmalIndices, unsigned nodeIndex)
 {
-	//Get the left and right crypt boundaries and the target curvature
-	double left_boundary = GetLeftCryptBoundary();
-	double right_boundary = GetRightCryptBoundary();
-	double target_curvature = GetTargetCurvature();
 
-	//Get the neighbours of the node index
-	std::pair<unsigned, unsigned> epidermal_neighbours = EpidermalIndicesAndNeighbours[nodeIndex];
-	unsigned left_node_index = epidermal_neighbours.first;
-	unsigned right_node_index = epidermal_neighbours.second;
+	double target_curvature = GetTargetCurvature(); // Get the target curvature
 
-	//Get the location of all three points for the curvature calculation
+	// Get the considered node's location
 	c_vector<double, 2> centre_point = rCellPopulation.GetNode(nodeIndex)->rGetLocation();
-	c_vector<double, 2> left_point = rCellPopulation.GetNode(left_node_index)->rGetLocation();
-	c_vector<double, 2> right_point = rCellPopulation.GetNode(right_node_index)->rGetLocation();
 
-	double basement_membrane_parameter = GetBasementMembraneParameter(); //Get the basement membrane stiffness
+	//Get the left and neighbours of the node index, based on the cosine approximation of the dermal interface.
+	std::vector<unsigned> closest_left_neighbours = GetClosestNeighboursBasedOnCosineApproximation(rCellPopulation, nodeIndex, -1.0);
+	std::vector<unsigned> closest_right_neighbours = GetClosestNeighboursBasedOnCosineApproximation(rCellPopulation, nodeIndex, 1.0);
+
+	// Initialise the left and right node indices and left and right points
+	c_vector<double, 2> left_point, right_point; 
+	// If there is a closest left and right neighbour, this is straightforward
+	if ( (!closest_left_neighbours.empty())&&(!closest_right_neighbours.empty()) )
+	{
+		// Get the indices
+		unsigned left_node_index = GetNearestNeighbourAlongCosineApproximation(rCellPopulation, nodeIndex, -1.0);
+		unsigned right_node_index = GetNearestNeighbourAlongCosineApproximation(rCellPopulation, nodeIndex, 1.0);
+
+		// Get the points
+		left_point = rCellPopulation.GetNode(left_node_index)->rGetLocation();
+		right_point = rCellPopulation.GetNode(right_node_index)->rGetLocation();
+	}
+	else if ( (!closest_left_neighbours.empty())&&(closest_right_neighbours.empty()) )// No right neighbour, but there is a left neighbour
+	{
+		// Get the left index and point
+		unsigned left_node_index = GetNearestNeighbourAlongCosineApproximation(rCellPopulation, nodeIndex, -1.0);
+		left_point = rCellPopulation.GetNode(left_node_index)->rGetLocation();
+
+		// Define the right neighbour by reflecting the vector from the considered node to the right neighbour
+		right_point = centre_point + rCellPopulation.rGetMesh().GetVectorFromAtoB(left_point, centre_point);
+
+	}
+	else if ( (closest_left_neighbours.empty())&&(!closest_right_neighbours.empty()) )// No left neighbour, but there is a right neighbour
+	{
+		// Get the right index and point
+		unsigned right_node_index = GetNearestNeighbourAlongCosineApproximation(rCellPopulation, nodeIndex, 1.0);
+		right_point = rCellPopulation.GetNode(right_node_index)->rGetLocation();
+
+		// Define the right neighbour by reflecting the vector from the considered node to the right neighbour
+		left_point = centre_point + rCellPopulation.rGetMesh().GetVectorFromAtoB(right_point, centre_point);
+
+	}
+	else // Hopefully this never happens. We COULD deal with this, but it really shouldn't happen.
+	{
+		EXCEPTION("Epidermal cell is isolated and has no neighbours.");
+	}
+
+	double curvature = FindParametricCurvature(rCellPopulation, left_point, centre_point, right_point);
+
+	//Get the unit vectors from the centre points to its left and right neighbours
+	c_vector<double, 2> centre_to_left = rCellPopulation.rGetMesh().GetVectorFromAtoB(centre_point, left_point);
+	centre_to_left /= norm_2(centre_to_left); //Normalise vector
+
+	c_vector<double, 2> centre_to_right = rCellPopulation.rGetMesh().GetVectorFromAtoB(centre_point, right_point);
+	centre_to_right /= norm_2(centre_to_right); //Normalise vector
+
+	/* Define direction using a formula derived (essentially solve for the vector w such that u.w = v.w, where w is the force direction
+		* and u = unit vector to the left and v = unit vector pointing to the right)
+		*/
+	c_vector<double, 2> left_to_right = rCellPopulation.rGetMesh().GetVectorFromAtoB(centre_to_left, centre_to_right);
+	//	PRINT_2_VARIABLES(left_point[0], left_point[1]);
+	//	PRINT_2_VARIABLES(centre_point[0], centre_point[1]);
+	//	PRINT_2_VARIABLES(right_point[0], right_point[1]);
+
+	assert(norm_2(left_to_right) != 0.0);
+
+	//Define force direction
+	c_vector<double, 2> force_direction;
+	force_direction(0) = left_to_right[1];
+	force_direction(1) = -left_to_right[0];
+
+	force_direction /= norm_2(left_to_right);
+
+	/* We now ensure the vector is pointing in the appropriate direction
+	* (it will always point "down" and "outwards" initially).
+	* */
+	if (target_curvature > 0.0) //If the force has overshot the target curvature, we need to reverse the force direction
+	{
+		if ( (curvature > 0.0)&&(curvature - target_curvature > 0.0) ) //If points look like V and the 'v' is too pointy, we send it away from the CoM
+		{
+			force_direction *= -1.0;
+		}
+
+	}
+	else if (target_curvature < 0.0) //Similar situation but with "/\"
+	{
+		if ( (curvature < 0.0)&&(curvature - target_curvature < 0.0) )
+		{
+			force_direction *= -1.0;
+		}
+	}
+	else //Reverse the force direction if we get a "V"
+	{
+		if (curvature > 0.0)
+		{
+			force_direction *= -1.0;
+		}
+	}
+
 	//Initialise the force vector
 	c_vector<double, 2> force_due_to_basement_membrane;
 
-	bool is_periodic_force = IsPeriodicForceApplied();
+	// Get the basement membrane stiffness and target curvature
+	double basement_membrane_parameter = GetBasementMembraneParameter(); //Get the basement membrane stiffness
 
-	if (!is_periodic_force)
-	{
-		if ( !IsBoundaryNode(rCellPopulation, nodeIndex) )
-		{
-			double curvature = FindParametricCurvature(rCellPopulation, left_point, centre_point, right_point);
-
-			//Get the unit vectors from the centre points to its left and right neighbours
-			c_vector<double, 2> centre_to_left = rCellPopulation.rGetMesh().GetVectorFromAtoB(centre_point, left_point);
-			centre_to_left /= norm_2(centre_to_left); //Normalise vector
-
-			c_vector<double, 2> centre_to_right = rCellPopulation.rGetMesh().GetVectorFromAtoB(centre_point, right_point);
-			centre_to_right /= norm_2(centre_to_right); //Normalise vector
-
-			/* Define direction using a formula derived (essentially solve for the vector w such that u.w = v.w, where w is the force direction
-			 * and u = unit vector to the left and v = unit vector pointing to the right)
-			 */
-			c_vector<double, 2> left_to_right = rCellPopulation.rGetMesh().GetVectorFromAtoB(centre_to_left, centre_to_right);
-			//	PRINT_2_VARIABLES(left_point[0], left_point[1]);
-			//	PRINT_2_VARIABLES(centre_point[0], centre_point[1]);
-			//	PRINT_2_VARIABLES(right_point[0], right_point[1]);
-
-			assert(norm_2(left_to_right) != 0.0);
-
-			//Define force direction
-			c_vector<double, 2> force_direction;
-			force_direction(0) = left_to_right[1];
-			force_direction(1) = -left_to_right[0];
-
-			force_direction /= norm_2(left_to_right);
-
-			/* We now ensure the vector is pointing in the appropriate direction
-			 * (it will always point "down" and "outwards" initially).
-			 * */
-			if (target_curvature > 0.0) //If the force has overshot the target curvature, we need to reverse the force direction
-			{
-				if ( (curvature > 0.0)&&(curvature - target_curvature > 0.0) ) //If points look like V and the 'v' is too pointy, we send it away from the CoM
-				{
-					force_direction *= -1.0;
-				}
-
-			}
-			else if (target_curvature < 0.0) //Similar situation but with "/\"
-			{
-				if ( (curvature < 0.0)&&(curvature - target_curvature < 0.0) )
-				{
-					force_direction *= -1.0;
-				}
-			}
-			else //Reverse the force direction if we get a "V"
-			{
-				if (curvature > 0.0)
-				{
-					force_direction *= -1.0;
-				}
-			}
-
-			//Again, the geometry of the model alters how we apply target curvature
-			bool is_force_applied_to_crypt = GetCryptGeometryCheck();
-
-			//If we are considering a crypt geometry
-			if(is_force_applied_to_crypt)
-			{
-				// If we are looking at a boundary node, we apply no force.
-				if (left_point[0] > right_point[0])
-				{
-					force_due_to_basement_membrane = zero_vector<double>(2);
-				}
-				else
-				{
-					//If the cell falls in the region of non-zero target curvature
-					if( (centre_point[0] > left_boundary)&&(centre_point[0] < right_boundary) )
-					{
-						force_due_to_basement_membrane = basement_membrane_parameter*(fabs(curvature - target_curvature) )*force_direction;
-					}
-					else
-					{
-						//We take the absolute value of the local curvature as the force direction vector already accounts for which way
-						//the Epidermal node 'should' go
-						force_due_to_basement_membrane = basement_membrane_parameter*fabs(curvature)*force_direction;
-					}
-				}
-			}
-			else //Else we are modelling organoid
-			{
-				force_due_to_basement_membrane = basement_membrane_parameter*(fabs(curvature - target_curvature) )*force_direction;
-			}
-		}
-		else
-		{
-			force_due_to_basement_membrane = zero_vector<double>(2);
-		}
-	}
-	else
-	{
-
-		double curvature = FindParametricCurvature(rCellPopulation, left_point, centre_point, right_point);
-
-		//Get the unit vectors from the centre points to its left and right neighbours
-		c_vector<double, 2> centre_to_left = rCellPopulation.rGetMesh().GetVectorFromAtoB(centre_point, left_point);
-		centre_to_left /= norm_2(centre_to_left); //Normalise vector
-
-		c_vector<double, 2> centre_to_right = rCellPopulation.rGetMesh().GetVectorFromAtoB(centre_point, right_point);
-		centre_to_right /= norm_2(centre_to_right); //Normalise vector
-		
-
-		// if (IsBoundaryNode(rCellPopulation, nodeIndex))
-		// {
-		// 	PRINT_2_VARIABLES(centre_point[0], centre_point[1])
-		// 	PRINT_2_VARIABLES(centre_to_left[0], centre_to_left[1]);
-		// 	PRINT_2_VARIABLES(centre_to_right[0], centre_to_right[1]);
-
-		// }
-
-		/* Define direction using a formula derived (essentially solve for the vector w such that u.w = v.w, where w is the force direction
-		 * and u = unit vector to the left and v = unit vector pointing to the right)
-		 */
-		c_vector<double, 2> left_to_right = rCellPopulation.rGetMesh().GetVectorFromAtoB(centre_to_left, centre_to_right);
-		//	PRINT_2_VARIABLES(left_point[0], left_point[1]);
-		//	PRINT_2_VARIABLES(centre_point[0], centre_point[1]);
-		//	PRINT_2_VARIABLES(right_point[0], right_point[1]);
-
-		assert(norm_2(left_to_right) != 0.0);
-
-		//Define force direction
-		c_vector<double, 2> force_direction;
-		force_direction(0) = left_to_right[1];
-		force_direction(1) = -left_to_right[0];
-
-		force_direction /= norm_2(left_to_right);
-
-		/* We now ensure the vector is pointing in the appropriate direction
-		 * (it will always point "down" and "outwards" initially).
-		 * */
-		if (target_curvature > 0.0) //If the force has overshot the target curvature, we need to reverse the force direction
-		{
-			if ( (curvature > 0.0)&&(curvature - target_curvature > 0.0) ) //If points look like V and the 'v' is too pointy, we send it away from the CoM
-			{
-				force_direction *= -1.0;
-			}
-
-		}
-		else if (target_curvature < 0.0) //Similar situation but with "/\"
-		{
-			if ( (curvature < 0.0)&&(curvature - target_curvature < 0.0) )
-			{
-				force_direction *= -1.0;
-			}
-		}
-		else //Reverse the force direction if we get a "V"
-		{
-			if (curvature > 0.0)
-			{
-				force_direction *= -1.0;
-			}
-		}
-
-		//Again, the geometry of the model alters how we apply target curvature
-		bool is_force_applied_to_crypt = GetCryptGeometryCheck();
-
-		//If we are considering a crypt geometry
-		if(is_force_applied_to_crypt)
-		{
-			// If we are looking at a boundary node, we apply no force.
-			if (left_point[0] > right_point[0])
-			{
-				force_due_to_basement_membrane = zero_vector<double>(2);
-			}
-			else
-			{
-				//If the cell falls in the region of non-zero target curvature
-				if( (centre_point[0] > left_boundary)&&(centre_point[0] < right_boundary) )
-				{
-					force_due_to_basement_membrane = basement_membrane_parameter*(fabs(curvature - target_curvature) )*force_direction;
-				}
-				else
-				{
-					//We take the absolute value of the local curvature as the force direction vector already accounts for which way
-					//the Epidermal node 'should' go
-					force_due_to_basement_membrane = basement_membrane_parameter*fabs(curvature)*force_direction;
-				}
-			}
-		}
-		else //Else we are modelling organoid
-		{
-			force_due_to_basement_membrane = basement_membrane_parameter*(fabs(curvature - target_curvature) )*force_direction;
-		}
-	}
+	force_due_to_basement_membrane = basement_membrane_parameter*( fabs(curvature - target_curvature) )*force_direction;
 
 	return force_due_to_basement_membrane;
 }
@@ -838,38 +558,19 @@ c_vector<double, 2> EpidermalBasementMembraneForce::CalculateForceDueToBasementM
 void EpidermalBasementMembraneForce::AddForceContribution(AbstractCellPopulation<2>& rCellPopulation)
 {
 
-	//Get the Epidermal nodes that have a left and right nearest neighbour
-	std::map<unsigned, std::pair<unsigned, unsigned> > epidermal_nodes_and_their_neighbours = GetEpidermalIndicesAndTheirLeftAndRightEpidermalNeighbours(rCellPopulation);
-
-	/*
-	 * Need to check two things:
-	 * 1) the map of nodes and their neighbours defines a confluent monolayer
-	 * 2) every Epidermal index in the tissue population is mapped to a pair of neighbours in the map
-	 */
-
-	//Get the Epidermal indices
+	//Get the epidermal indices
 	std::vector<unsigned> epidermal_indices = GetEpidermalIndices(rCellPopulation);
 
-	if ( epidermal_indices.size() != epidermal_nodes_and_their_neighbours.size() )
+	// Iterate over each node and apply the force
+	for (unsigned i = 0; i < epidermal_indices.size(); i++)
 	{
-		EXCEPTION("Not every Epidermal cell has been accounted for in defined monolayer");
-	}
+		unsigned epidermal_index = epidermal_indices[i];
 
+		// Calculate the basement membrane force
+		c_vector<double, 2> force_on_node = CalculateForceDueToBasementMembrane(rCellPopulation, epidermal_indices, epidermal_index);
 
-	//Iterate over each node and its neighbours
-	for (std::map<unsigned, std::pair<unsigned, unsigned> >::iterator map_iter = epidermal_nodes_and_their_neighbours.begin();
-			map_iter != epidermal_nodes_and_their_neighbours.end();
-			map_iter++)
-	{
-
-		//Get the node and its neighbours
-		unsigned centre_node_index = map_iter->first;
-
-		//Calculate the forces exerted on the left, centre and right nodes by the basement membrane
-		c_vector<double, 2> force_on_centre_node = CalculateForceDueToBasementMembrane(rCellPopulation, epidermal_nodes_and_their_neighbours, centre_node_index);
-
-		rCellPopulation.GetNode(centre_node_index)->AddAppliedForceContribution(force_on_centre_node);
-
+		// Apply the force
+		rCellPopulation.GetNode(epidermal_index)->AddAppliedForceContribution(force_on_node);
 	}
 }
 
@@ -877,11 +578,6 @@ void EpidermalBasementMembraneForce::OutputForceParameters(out_stream& rParamsFi
 {
 	*rParamsFile <<  "\t\t\t<BasementMembraneParameter>"<<  mBasementMembraneParameter << "</BasementMembraneParameter> \n" ;
 	*rParamsFile <<  "\t\t\t<TargetCurvature>" << mTargetCurvature << "</TargetCurvature> \n";
-	*rParamsFile <<  "\t\t\t<LeftBoundary>"<<  mLeftBoundary << "</LeftBoundary> \n" ;
-	*rParamsFile <<  "\t\t\t<RightBoundary>"<<  mRightBoundary << "</RightBoundary> \n" ;
-	*rParamsFile <<  "\t\t\t<UsePositionDependentMembraneForce>"<<  mUsePositionDependentMembraneForce << "</UsePositionDependentMembraneForce> \n" ;
-	*rParamsFile <<  "\t\t\t<MembraneForceMultiplier>"<<  mMembraneForceMultiplier << "</MembraneForceMultiplier> \n" ;
-	*rParamsFile <<  "\t\t\t<ApplyPeriodicForce>" << mApplyPeriodicForce << "</ApplyPeriodicForce> \n";
 
 	// Call direct parent class
 	AbstractForce<2>::OutputForceParameters(rParamsFile);

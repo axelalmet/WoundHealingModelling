@@ -129,6 +129,11 @@ public:
      * @return the value of the state variable C in the ODE system.
      */
     double GetCollagen();
+
+    /*
+     * Set collagen according to cell data
+     */
+    void SetCollagen();
 };
 
 // Declare identifier for the serializer
