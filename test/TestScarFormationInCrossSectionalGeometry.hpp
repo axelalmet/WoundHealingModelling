@@ -289,12 +289,9 @@ public:
 		simulator.AddSimulationModifier(p_collagen_alignment_modifier);
 
         // Wound the model. 
-        double wound_centre = 0.5*max_width;
-        double wound_width = 0.5*max_width;
-        double wound_base_height = 0.4*max_height;
-
-        boost::shared_ptr<AbstractCellProperty> p_platelet_type(CellPropertyRegistry::Instance()->Get<PlateletCellProliferativeType>());
-        boost::shared_ptr<AbstractCellProperty> p_platelet_state(CellPropertyRegistry::Instance()->Get<PlateletCellMutationState>());
+        // double wound_centre = 0.5*max_width;
+        // double wound_width = 0.5*max_width;
+        // double wound_base_height = 0.4*max_height;
 
         //Obtain the proliferative cells
         for (AbstractCellPopulation<2>::Iterator cell_iter = simulator.rGetCellPopulation().Begin();
@@ -306,7 +303,8 @@ public:
             double y = simulator.rGetCellPopulation().GetLocationOfCellCentre(*cell_iter)[1];
 
             //If the cell is within the 'wound area', we kill it.
-            if ( (x > (wound_centre - 0.5*wound_width))&&(x < (wound_centre + 0.5*wound_width))&&(y > wound_base_height) )
+            // if ( (x > (wound_centre - 0.5*wound_width))&&(x < (wound_centre + 0.5*wound_width))&&(y > wound_base_height) )
+            if ( (y > 2.0*(x - 8.0))&&(y < 2.0*(x - 5.0)))
             {
                 cell_iter->GetCellData()->SetItem("collagen", 1.0);
                 FibroblastStateDependentCollagenSrnModel* p_srn_model = dynamic_cast<FibroblastStateDependentCollagenSrnModel*>(cell_iter->GetSrnModel());
@@ -322,4 +320,4 @@ public:
     }
 };
 
-#endif /* TESTCLOTFORMATIONINCROSSSECTIONALGEOMETRY */
+#endif /* TESTSCARFORMATIONINCROSSSECTIONALGEOMETRY */

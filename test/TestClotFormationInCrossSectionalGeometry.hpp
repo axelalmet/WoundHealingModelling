@@ -52,7 +52,9 @@ static const double M_SAMPLING_TIMESTEP = 0.1/M_DT;
 
 /*
 * A test model to study the various components that we think should be incorporated
-* into the clot formation process that induces the majority of wound healing.
+* into the clot formation process that induces the majority of wound healing. Here,
+* the main challenge is modelling the spread of growth factors induced by the clot
+* and the subsequent degradation of the clot by activated fibroblasts.
 */
 class TestCrossSectionalClotFormation : public AbstractCellBasedTestSuite
 {

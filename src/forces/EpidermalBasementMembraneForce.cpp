@@ -444,8 +444,6 @@ bool EpidermalBasementMembraneForce::IsBoundaryNode(AbstractCellPopulation<2>& r
 c_vector<double, 2> EpidermalBasementMembraneForce::CalculateForceDueToBasementMembrane(AbstractCellPopulation<2>& rCellPopulation, std::vector<unsigned> epiderdmalIndices, unsigned nodeIndex)
 {
 
-	double target_curvature = GetTargetCurvature(); // Get the target curvature
-
 	// Get the considered node's location
 	c_vector<double, 2> centre_point = rCellPopulation.GetNode(nodeIndex)->rGetLocation();
 
@@ -494,19 +492,16 @@ c_vector<double, 2> EpidermalBasementMembraneForce::CalculateForceDueToBasementM
 	double curvature = FindParametricCurvature(rCellPopulation, left_point, centre_point, right_point);
 
 	//Get the unit vectors from the centre points to its left and right neighbours
-	c_vector<double, 2> centre_to_left = rCellPopulation.rGetMesh().GetVectorFromAtoB(centre_point, left_point);
-	centre_to_left /= norm_2(centre_to_left); //Normalise vector
+	// c_vector<double, 2> centre_to_left = rCellPopulation.rGetMesh().GetVectorFromAtoB(centre_point, left_point);
+	// centre_to_left /= norm_2(centre_to_left); //Normalise vector
 
-	c_vector<double, 2> centre_to_right = rCellPopulation.rGetMesh().GetVectorFromAtoB(centre_point, right_point);
-	centre_to_right /= norm_2(centre_to_right); //Normalise vector
+	// c_vector<double, 2> centre_to_right = rCellPopulation.rGetMesh().GetVectorFromAtoB(centre_point, right_point);
+	// centre_to_right /= norm_2(centre_to_right); //Normalise vector
 
-	/* Define direction using a formula derived (essentially solve for the vector w such that u.w = v.w, where w is the force direction
-		* and u = unit vector to the left and v = unit vector pointing to the right)
+	/* Define direction as the perpendicular bisector from the left to right point
 		*/
-	c_vector<double, 2> left_to_right = rCellPopulation.rGetMesh().GetVectorFromAtoB(centre_to_left, centre_to_right);
-	//	PRINT_2_VARIABLES(left_point[0], left_point[1]);
-	//	PRINT_2_VARIABLES(centre_point[0], centre_point[1]);
-	//	PRINT_2_VARIABLES(right_point[0], right_point[1]);
+	c_vector<double, 2> left_to_right = rCellPopulation.rGetMesh().GetVectorFromAtoB(left_point, right_point);
+
 
 	assert(norm_2(left_to_right) != 0.0);
 
@@ -516,6 +511,8 @@ c_vector<double, 2> EpidermalBasementMembraneForce::CalculateForceDueToBasementM
 	force_direction(1) = -left_to_right[0];
 
 	force_direction /= norm_2(left_to_right);
+
+	double target_curvature = GetTargetCurvature(); // Get the target curvature
 
 	/* We now ensure the vector is pointing in the appropriate direction
 	* (it will always point "down" and "outwards" initially).
@@ -551,6 +548,7 @@ c_vector<double, 2> EpidermalBasementMembraneForce::CalculateForceDueToBasementM
 
 	force_due_to_basement_membrane = basement_membrane_parameter*( fabs(curvature - target_curvature) )*force_direction;
 
+	// c_vector<double, 2> force_due_to_basement_membrane = zero_vector<double>(2);
 	return force_due_to_basement_membrane;
 }
 
@@ -569,7 +567,7 @@ void EpidermalBasementMembraneForce::AddForceContribution(AbstractCellPopulation
 		// Calculate the basement membrane force
 		c_vector<double, 2> force_on_node = CalculateForceDueToBasementMembrane(rCellPopulation, epidermal_indices, epidermal_index);
 
-		// Apply the force
+		// // Apply the force
 		rCellPopulation.GetNode(epidermal_index)->AddAppliedForceContribution(force_on_node);
 	}
 }
