@@ -281,6 +281,60 @@ unsigned EpidermalBasementMembraneForce::GetNearestNeighbourAlongCosineApproxima
 	return min_projection_index;
 }
 
+/*
+ * Return the nearest neighbour based on vector projections from the tangent vector
+ * at a point along the cosine approximation of the epithelium.
+ */
+unsigned EpidermalBasementMembraneForce::GetNearestFibroblastNeighbour(AbstractCellPopulation<2>& rCellPopulation, unsigned epidermalIndex)
+{
+	double min_fibroblast_distance = DBL_MAX;
+	unsigned closest_fibroblast_index = 0;
+
+	// Get the location of the considered Epidermal node
+	c_vector<double, 2> epidermal_location = rCellPopulation.GetNode(epidermalIndex)->rGetLocation();
+
+	// This method really only applies to NodeBasedCellPopulations
+	if (dynamic_cast<NodeBasedCellPopulation<2>*>(&rCellPopulation))
+	{
+		NodeBasedCellPopulation<2>* p_tissue = static_cast<NodeBasedCellPopulation<2>*>(&rCellPopulation);
+
+		//Get cut off radius for defining neighbourhood
+		double radius = GetCutOffRadius();
+
+		// Find the indices of the elements owned by this node
+		std::set<unsigned> neighbouring_indices = p_tissue->GetNodesWithinNeighbourhoodRadius(epidermalIndex, radius);
+
+		// Iterate over these elements
+		for (std::set<unsigned>::iterator elem_iter = neighbouring_indices.begin();
+				elem_iter != neighbouring_indices.end();
+				++elem_iter)
+		{
+			//Get the cell according to the index
+			CellPtr cell_iter = rCellPopulation.GetCellUsingLocationIndex(*elem_iter);
+
+			//Get the cell type
+			boost::shared_ptr<AbstractCellProperty> p_type = cell_iter->GetCellProliferativeType();
+
+			// Only consider fibroblasts
+			if(p_type->IsType<FibroblastCellProliferativeType>())
+			{
+				
+				c_vector<double, 2> fibroblast_location = rCellPopulation.GetNode(*elem_iter)->rGetLocation();
+
+				// By the end of this loop, we should end up with the closest fibroblast neighbour
+				if (norm_2(fibroblast_location - epidermal_location) < min_fibroblast_distance)
+				{
+					min_fibroblast_distance = norm_2(fibroblast_location - epidermal_location);
+					closest_fibroblast_index = rCellPopulation.GetNode(*elem_iter)->GetIndex(); // Roundabout way of storing the index, as we can't convert the iterator to an unsigned
+				}
+			}
+
+		}
+	}
+
+	return closest_fibroblast_index;
+}
+
 
 /*
  * Function to find the curvature along three points, using the method previously described by SJD
@@ -470,8 +524,37 @@ c_vector<double, 2> EpidermalBasementMembraneForce::CalculateForceDueToBasementM
 		unsigned left_node_index = GetNearestNeighbourAlongCosineApproximation(rCellPopulation, nodeIndex, -1.0);
 		left_point = rCellPopulation.GetNode(left_node_index)->rGetLocation();
 
-		// Define the right neighbour by reflecting the vector from the considered node to the right neighbour
-		right_point = centre_point + rCellPopulation.rGetMesh().GetVectorFromAtoB(left_point, centre_point);
+		// Obtain the right neighbour by rotating the vector from the centre node to the left node.
+		// We define the angle via the inner product between the centre-to-left vector and the vector from
+		// the closest fibroblast neighbour to the centre node.
+
+		// Get the centre-to-left vector
+		c_vector<double, 2> centre_to_left = rCellPopulation.rGetMesh().GetVectorFromAtoB(centre_point, left_point);
+		double centre_to_left_norm = norm_2(centre_to_left);
+		centre_to_left /= centre_to_left_norm; // Normalise the vector length
+		
+		// Get the fibroblast-to-centre vector
+		unsigned closest_fibroblast_index = GetNearestFibroblastNeighbour(rCellPopulation, nodeIndex);
+		c_vector<double, 2> closest_fibroblast_point = rCellPopulation.GetNode(closest_fibroblast_index)->rGetLocation();
+
+		c_vector<double, 2> fibroblast_to_centre = rCellPopulation.rGetMesh().GetVectorFromAtoB(closest_fibroblast_point, centre_point);
+		fibroblast_to_centre /= norm_2(fibroblast_to_centre); // Normalise the vector length
+
+		// Reflect the fibroblast-to-centre vector so they're pointing in the same quadrant
+		if (inner_prod(fibroblast_to_centre, centre_to_left) < 0.0)
+		{
+			fibroblast_to_centre *= -1.0;
+		}
+
+		// We can now define the right point via a clockwise rotation
+		double theta = acos(inner_prod(fibroblast_to_centre, centre_to_left));
+
+		// Rotate the centre point
+		right_point[0] = centre_to_left_norm*(fibroblast_to_centre[0]*cos(theta) + fibroblast_to_centre[1]*sin(theta));
+		right_point[1] = centre_to_left_norm*(fibroblast_to_centre[1]*cos(theta) - fibroblast_to_centre[0]*sin(theta));
+
+		// // Define the right neighbour by reflecting the vector from the considered node to the right neighbour
+		// right_point = centre_point + rCellPopulation.rGetMesh().GetVectorFromAtoB(left_point, centre_point);
 
 	}
 	else if ( (closest_left_neighbours.empty())&&(!closest_right_neighbours.empty()) )// No left neighbour, but there is a right neighbour
@@ -480,8 +563,37 @@ c_vector<double, 2> EpidermalBasementMembraneForce::CalculateForceDueToBasementM
 		unsigned right_node_index = GetNearestNeighbourAlongCosineApproximation(rCellPopulation, nodeIndex, 1.0);
 		right_point = rCellPopulation.GetNode(right_node_index)->rGetLocation();
 
-		// Define the right neighbour by reflecting the vector from the considered node to the right neighbour
-		left_point = centre_point + rCellPopulation.rGetMesh().GetVectorFromAtoB(right_point, centre_point);
+		// Obtain the left neighbour by rotating the vector from the centre node to the left node.
+		// We define the angle via the inner product between the centre-to-right vector and the vector from
+		// the closest fibroblast neighbour to the centre node.
+
+		// Get the centre-to-right vector
+		c_vector<double, 2> centre_to_right = rCellPopulation.rGetMesh().GetVectorFromAtoB(centre_point, right_point);
+		double centre_to_right_norm = norm_2(centre_to_right);
+		centre_to_right /= centre_to_right_norm; // Normalise the vector length
+
+		// Get the fibroblast-to-centre vector
+		unsigned closest_fibroblast_index = GetNearestFibroblastNeighbour(rCellPopulation, nodeIndex);
+		c_vector<double, 2> closest_fibroblast_point = rCellPopulation.GetNode(closest_fibroblast_index)->rGetLocation();
+
+		c_vector<double, 2> fibroblast_to_centre = rCellPopulation.rGetMesh().GetVectorFromAtoB(closest_fibroblast_point, centre_point);
+		fibroblast_to_centre /= norm_2(fibroblast_to_centre); // Normalise the vector length
+
+		// Reflect the fibroblast-to-centre vector so they're pointing in the same quadrant
+		if (inner_prod(fibroblast_to_centre, centre_to_right) < 0.0)
+		{
+			fibroblast_to_centre *= -1.0;
+		}
+
+		// We can now define the right point via a clockwise rotation
+		double theta = acos(inner_prod(fibroblast_to_centre, centre_to_right));
+
+		// Rotate the centre point
+		left_point[0] = centre_to_right_norm*(fibroblast_to_centre[0]*cos(theta) - fibroblast_to_centre[1]*sin(theta));
+		left_point[1] = centre_to_right_norm*(fibroblast_to_centre[1]*cos(theta) + fibroblast_to_centre[0]*sin(theta));
+
+		// // Define the right neighbour by reflecting the vector from the considered node to the right neighbour
+		// left_point = centre_point + rCellPopulation.rGetMesh().GetVectorFromAtoB(right_point, centre_point);
 
 	}
 	else // Hopefully this never happens. We COULD deal with this, but it really shouldn't happen.

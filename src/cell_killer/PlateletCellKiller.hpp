@@ -27,6 +27,9 @@ private:
     // Growth factor threshold in order to induce anoikis
     double mGrowthFactorThreshold;
 
+    // Threshold volume under which to induce apoptosis
+    double mVolumeThreshold;
+
     // The output file directory for the simulation data that corresponds to the number of cells
     // killed by Platelet
     out_stream mCellKillerOutputFile;
@@ -41,6 +44,7 @@ private:
         archive & mCellsRemovedByFibroblasts;
         archive & mCutOffRadius;
         archive & mGrowthFactorThreshold;
+        archive & mVolumeThreshold;
         archive & mOutputDirectory;
     }
 
@@ -66,6 +70,16 @@ public:
      * Method to set the growth factor threshold that determines platelet cell degradation
      */
     void SetGrowthFactorThreshold(double growthFactorThreshold);
+
+        /*
+     * @return mVolumeThreshold for cell killing
+     */
+    double GetVolumeThreshold();
+
+    /*
+     * Method to set the volume threshold that determines platelet cell degradation
+     */
+    void SetVolumeThreshold(double volumeThreshold);
 
     /*
      * @return mCutOffRadius

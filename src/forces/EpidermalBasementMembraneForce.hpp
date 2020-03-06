@@ -109,13 +109,21 @@ public :
      */
     unsigned GetNearestNeighbourAlongCosineApproximation(AbstractCellPopulation<2>& rCellPopulation, unsigned epidermalIndex, double leftOrRight);
 
+    /*
+     * Return closest fibroblast index to the considered epidermal index
+     * 
+     * @param rCellPopulation the cell population
+     * @param epidermalIndex the considered epidermal node index
+     */
+    unsigned GetNearestFibroblastNeighbour(AbstractCellPopulation<2>& rCellPopulation, unsigned epidermalIndex);
 
-    /*Get method for cut off radius */
+    /* Get method for cut off radius */
     double GetCutOffRadius();
 
-    /*Set method for cut off radius */
+    /* Set method for cut off radius */
     void SetCutOffRadius(double cutOffRadius);
 
+    /* Method to calculate parametre */ 
     double FindParametricCurvature(AbstractCellPopulation<2>& rCellPopulation,
     								c_vector<double, 2> leftPoint,
 									c_vector<double, 2> centrePoint,

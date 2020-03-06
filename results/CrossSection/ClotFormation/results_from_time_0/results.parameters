@@ -2,8 +2,8 @@
 
 	<OffLatticeSimulation-2-2>
 		<Dt>0.005</Dt>
-		<EndTime>5</EndTime>
-		<SamplingTimestepMultiple>20</SamplingTimestepMultiple>
+		<EndTime>20</EndTime>
+		<SamplingTimestepMultiple>200</SamplingTimestepMultiple>
 		<OutputDivisionLocations>0</OutputDivisionLocations>
 		<OutputCellVelocities>0</OutputCellVelocities>
 	</OffLatticeSimulation-2-2>
@@ -43,7 +43,8 @@
 		<PlateletCellKiller>
 			<CellsRemovedByFibroblasts>0</CellsRemovedByFibroblasts> 
 			<CutOffRadius>1.5</CutOffRadius> 
-			<GrowthFactorThreshold>-1</GrowthFactorThreshold> 
+			<GrowthFactorThreshold>0.5</GrowthFactorThreshold> 
+			<VolumeThreshold>0.392699</VolumeThreshold 
 		</PlateletCellKiller>
 	</CellKillers>
 
@@ -64,10 +65,6 @@
 			<UseCutOffLength>1</UseCutOffLength>
 			<CutOffLength>1.5</CutOffLength>
 		</GeneralisedLinearSpringForce-2-2>
-		<WoundBasedChemotacticForce-2>
-			<ChemotacticStrength>5</ChemotacticStrength> 
-			<NeighbourhoodRadius>1.5</NeighbourhoodRadius> 
-		</WoundBasedChemotacticForce-2>
 	</Forces>
 
 	<CellPopulationBoundaryConditions>

@@ -20,7 +20,8 @@ PlateletCellKiller::PlateletCellKiller(AbstractCellPopulation<2>* pCellPopulatio
     : AbstractCellKiller<2>(pCellPopulation),
     mCellsRemovedByFibroblasts(0),
     mCutOffRadius(1.5),
-    mGrowthFactorThreshold(0.5)
+    mGrowthFactorThreshold(0.5),
+	mVolumeThreshold(0.5*0.25*M_PI)
 {
     // Sets up output file
 //	OutputFileHandler output_file_handler(mOutputDirectory + "PlateletData/", false);
@@ -37,6 +38,18 @@ double PlateletCellKiller::GetGrowthFactorThreshold()
 void PlateletCellKiller::SetGrowthFactorThreshold(double growthFactorThreshold)
 {
 	mGrowthFactorThreshold = growthFactorThreshold;
+}
+
+//Method to get mVolumeThreshold
+double PlateletCellKiller::GetVolumeThreshold()
+{
+	return mVolumeThreshold;
+}
+
+//Method to set mVolumeThreshold
+void PlateletCellKiller::SetVolumeThreshold(double volumeThreshold)
+{
+	mVolumeThreshold = volumeThreshold;
 }
 
 //Method to get mCutOffRadius
@@ -83,7 +96,10 @@ bool PlateletCellKiller::ShouldCellBeRemoved(unsigned nodeIndex)
 {
 	bool should_cell_be_removed = false;	// Initialising
 
-    double growth_factor_threshold = GetGrowthFactorThreshold();
+    double growth_factor_threshold = GetGrowthFactorThreshold(); // Get the growth factor threshold
+	
+	double volume_threshold = GetVolumeThreshold();
+	double current_volume = this->mpCellPopulation->GetCellUsingLocationIndex(nodeIndex)->GetCellData()->GetItem("volume"); // Get the cell's volume.
 
 	// if (dynamic_cast<NodeBasedCellPopulation<2>*>(this->mpCellPopulation))
 	// {
@@ -106,7 +122,8 @@ bool PlateletCellKiller::ShouldCellBeRemoved(unsigned nodeIndex)
 				// amount of growth factor.
 				double growth_factor_level = this->mpCellPopulation->GetCellUsingLocationIndex(*neighbour_iter)->GetCellData()->GetItem("morphogen");
 
-				if (growth_factor_level > growth_factor_threshold)
+				
+				if ( (growth_factor_level > growth_factor_threshold)&&(current_volume < volume_threshold) )
 				{
 					should_cell_be_removed = true;
 					break;
@@ -259,6 +276,7 @@ void PlateletCellKiller::OutputCellKillerParameters(out_stream& rParamsFile)
     *rParamsFile << "\t\t\t<CellsRemovedByFibroblasts>" << mCellsRemovedByFibroblasts << "</CellsRemovedByFibroblasts> \n";
     *rParamsFile << "\t\t\t<CutOffRadius>" << mCutOffRadius << "</CutOffRadius> \n";
     *rParamsFile << "\t\t\t<GrowthFactorThreshold>" << mGrowthFactorThreshold << "</GrowthFactorThreshold> \n";
+	*rParamsFile << "\t\t\t<VolumeThreshold>" << mVolumeThreshold << "</VolumeThreshold \n";
 
     // Call direct parent class
     AbstractCellKiller<2>::OutputCellKillerParameters(rParamsFile);

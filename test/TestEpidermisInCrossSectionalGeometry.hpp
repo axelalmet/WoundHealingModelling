@@ -48,7 +48,7 @@ static const std::string M_OUTPUT_DIRECTORY = "WoundHealingModel/CrossSection";
 static const double M_DT = 0.005;
 static const double M_END_TIME = 40.0;
 // static const double M_SAMPLING_TIMESTEP = M_END_TIME / M_DT;
-static const double M_SAMPLING_TIMESTEP = 1.0/M_DT;
+static const double M_SAMPLING_TIMESTEP = 2.0/M_DT;
 
 /*
 * A test model to study the various components that we think should be incorporated
@@ -63,7 +63,7 @@ public:
 
         //Set the number of cells across and down for the array
         unsigned cells_across = 20;
-        unsigned cells_up = 6;
+        unsigned cells_up = 10;
 
         // Set some parameters for node-based cell populations
         double radius_of_interaction = 1.5; // Radius of interaction to determine neighbourhoods
@@ -197,7 +197,7 @@ public:
             // double x = cell_population.GetLocationOfCellCentre(*cell_iter)[0];
             double y = cell_population.GetLocationOfCellCentre(*cell_iter)[1];
             
-            if (y > max_height - 0.25)
+            if (y > max_height - 1.25)
             {
                 BasementMembraneBasedContactInhibitionCellCycleModel* p_cycle_model = new BasementMembraneBasedContactInhibitionCellCycleModel(); //Contact-inhibition-based cycle model yet.
                 p_cycle_model->SetEquilibriumVolume(0.25*M_PI);

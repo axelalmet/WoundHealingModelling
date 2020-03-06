@@ -46,9 +46,9 @@
 
 static const std::string M_OUTPUT_DIRECTORY = "WoundHealingModel/CrossSection";
 static const double M_DT = 0.005;
-static const double M_END_TIME = 5.0;
+static const double M_END_TIME = 20.0;
 // static const double M_SAMPLING_TIMESTEP = M_END_TIME / M_DT;
-static const double M_SAMPLING_TIMESTEP = 0.1/M_DT;
+static const double M_SAMPLING_TIMESTEP = 1.0/M_DT;
 
 /*
 * A test model to study the various components that we think should be incorporated
@@ -155,7 +155,7 @@ public:
                 p_cell->GetCellData()->SetItem("collagen", 0.1);
 
                 cells.push_back(p_cell);
-            }
+            }   
             else
             {
                 CellPtr p_cell(new Cell(p_enf_state, p_cycle_model, p_srn_model));
@@ -342,14 +342,15 @@ public:
         // Add the platelet cell killer
         MAKE_PTR_ARGS(PlateletCellKiller, p_platelet_cell_killer, (&cell_population));
         p_platelet_cell_killer->SetCutOffRadius(radius_of_interaction);
-        p_platelet_cell_killer->SetGrowthFactorThreshold(-1.0);
+        p_platelet_cell_killer->SetGrowthFactorThreshold(0.5);
+        p_platelet_cell_killer->SetVolumeThreshold(0.125*M_PI); // Platelet cells can be compressed to half their size before dying
         simulator.AddCellKiller(p_platelet_cell_killer);
 
-        // Add a chemotactic force
-        MAKE_PTR(WoundBasedChemotacticForce<2>, p_chemotactic_force);
-        p_chemotactic_force->SetChemotacticStrength(5.0);
-        p_chemotactic_force->SetNeighbourhoodRadius(radius_of_interaction);
-        simulator.AddForce(p_chemotactic_force);
+        // // Add a chemotactic force
+        // MAKE_PTR(WoundBasedChemotacticForce<2>, p_chemotactic_force);
+        // p_chemotactic_force->SetChemotacticStrength(5.0);
+        // p_chemotactic_force->SetNeighbourhoodRadius(radius_of_interaction);
+        // simulator.AddForce(p_chemotactic_force);
 
         simulator.Solve(); // Run the simulation.
 

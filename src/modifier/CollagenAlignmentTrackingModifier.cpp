@@ -189,9 +189,6 @@ void CollagenAlignmentTrackingModifier<DIM>::UpdateCellData(AbstractCellPopulati
                 // Get the current node location
                 c_vector<double, DIM> current_location = rCellPopulation.GetNode(node_index)->rGetLocation();
 
-                PRINT_2_VARIABLES(current_location[0], current_location[1]);
-                PRINT_2_VARIABLES(collagen_direction[0], collagen_direction[1]);
-
                 // Get the orientation of the constructed collagen fibre.
                 double collagen_orientation = atan(collagen_direction[1]/collagen_direction[0]); //Get initial angle argument
 
@@ -233,9 +230,6 @@ void CollagenAlignmentTrackingModifier<DIM>::UpdateCellData(AbstractCellPopulati
                 }
 
                 collagen_direction /= norm_2(collagen_direction);
-
-                PRINT_2_VARIABLES(current_location[0], current_location[1]);
-                PRINT_2_VARIABLES(collagen_direction[0], collagen_direction[1]);
 
                 // Get the orientation of the constructed collagen fibre.
                 double collagen_orientation = atan(collagen_direction[1]/collagen_direction[0]); //Get initial angle argument
