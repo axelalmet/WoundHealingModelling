@@ -2,7 +2,7 @@
 
 	<OffLatticeSimulation-2-2>
 		<Dt>0.005</Dt>
-		<EndTime>20</EndTime>
+		<EndTime>100</EndTime>
 		<SamplingTimestepMultiple>200</SamplingTimestepMultiple>
 		<OutputDivisionLocations>0</OutputDivisionLocations>
 		<OutputCellVelocities>0</OutputCellVelocities>
@@ -35,8 +35,8 @@
 	</CellCycleModels>
 
 	<SrnModels>
-		<FibroblastStateDependentCollagenSrnModel>
-		</FibroblastStateDependentCollagenSrnModel>
+		<NullSrnModel>
+		</NullSrnModel>
 	</SrnModels>
 
 	<CellKillers>
@@ -44,15 +44,13 @@
 			<CellsRemovedByFibroblasts>0</CellsRemovedByFibroblasts> 
 			<CutOffRadius>1.5</CutOffRadius> 
 			<GrowthFactorThreshold>0.5</GrowthFactorThreshold> 
-			<VolumeThreshold>0.392699</VolumeThreshold 
+			<VolumeThreshold>0.706858</VolumeThreshold 
 		</PlateletCellKiller>
 	</CellKillers>
 
 	<SimulationModifiers>
 		<VolumeTrackingModifier-2>
 		</VolumeTrackingModifier-2>
-		<CollagenAlignmentTrackingModifier-2>
-		</CollagenAlignmentTrackingModifier-2>
 		<ParabolicGrowingDomainWithCellDeathPdeModifier-2>
 		</ParabolicGrowingDomainWithCellDeathPdeModifier-2>
 	</SimulationModifiers>

@@ -76,7 +76,7 @@ public:
         // double target_curvature = 0.0; // Target curvature
 
         // Set the probability of being an EPF fibroblast.
-        double epf_fibroblast_probability = 0.8;
+        double epf_fibroblast_probability = 0.25;
 
         HoneycombMeshGenerator generator(cells_across, cells_up, 0); //Create mesh
         MutableMesh<2, 2>* p_generating_mesh = generator.GetMesh(); //Generate mesh
@@ -289,9 +289,9 @@ public:
 		simulator.AddSimulationModifier(p_collagen_alignment_modifier);
 
         // Wound the model. 
-        // double wound_centre = 0.5*max_width;
-        // double wound_width = 0.5*max_width;
-        // double wound_base_height = 0.4*max_height;
+        double wound_centre = 0.5*max_width;
+        double wound_width = 0.5*max_width;
+        double wound_base_height = 0.4*max_height;
 
         //Obtain the proliferative cells
         for (AbstractCellPopulation<2>::Iterator cell_iter = simulator.rGetCellPopulation().Begin();
@@ -302,9 +302,10 @@ public:
             double x = simulator.rGetCellPopulation().GetLocationOfCellCentre(*cell_iter)[0];
             double y = simulator.rGetCellPopulation().GetLocationOfCellCentre(*cell_iter)[1];
 
-            //If the cell is within the 'wound area', we kill it.
-            // if ( (x > (wound_centre - 0.5*wound_width))&&(x < (wound_centre + 0.5*wound_width))&&(y > wound_base_height) )
-            if ( (y > 2.0*(x - 8.0))&&(y < 2.0*(x - 5.0)))
+            //If the cell is within the 'wound area', we mark it with collagen.
+
+            // if ( (y > 2.0*(x - 8.0))&&(y < 2.0*(x - 5.0)))
+            if ( (y > wound_base_height)&&(x > wound_centre - 0.5*wound_width)&&(x < wound_centre + 0.5*wound_width))
             {
                 cell_iter->GetCellData()->SetItem("collagen", 1.0);
                 FibroblastStateDependentCollagenSrnModel* p_srn_model = dynamic_cast<FibroblastStateDependentCollagenSrnModel*>(cell_iter->GetSrnModel());

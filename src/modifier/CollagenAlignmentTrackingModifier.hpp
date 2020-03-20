@@ -114,6 +114,18 @@ public:
      */
     void SetReorientationStrength(double reorientationStrength);
 
+    /*
+     * Determine whether the collagen fibres intersect
+     * 
+     * return true or false.
+     * 
+     * @param rCellPopulation
+     * @param unsigned nodeIndex, the considered node
+     * @param unsigned neighbourIndex, neighbouring node with collagen fibre.
+     */
+    
+    bool DoCollagenFibresIntersect(AbstractCellPopulation<DIM,DIM>& rCellPopulation, unsigned nodeIndex, unsigned neighbourIndex);
+
     /**
      * Overridden UpdateAtEndOfTimeStep() method.
      *

@@ -1,4 +1,4 @@
-#include "EpidermalBasementMembraneForce.hpp"
+	#include "EpidermalBasementMembraneForce.hpp"
 #include "NodeBasedCellPopulation.hpp"
 #include "StemCellProliferativeType.hpp"
 #include "FibroblastCellProliferativeType.hpp"
@@ -20,11 +20,12 @@ EpidermalBasementMembraneForce::EpidermalBasementMembraneForce()
 :  AbstractForce<2>(),
    mBasementMembraneParameter(DOUBLE_UNSET),
    mTargetCurvature(DOUBLE_UNSET),
-   mCutOffRadius(1.5)   {
+   mCutOffRadius(1.5)  
+{
 	// Sets up output file
 	//	OutputFileHandler output_file_handler("CurvatureData/", false);
 	//	mMeinekeOutputFile = output_file_handler.OpenOutputFile("results.curvature");
-   }
+}
 
 EpidermalBasementMembraneForce::~EpidermalBasementMembraneForce()
 {

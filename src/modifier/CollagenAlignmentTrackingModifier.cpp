@@ -75,6 +75,50 @@ void CollagenAlignmentTrackingModifier<DIM>::SetReorientationStrength(double reo
     mReorientationStrength = reorientationStrength;
 }
 
+    /*
+     * This method is used to determine whether two fibres may intersect.
+     * The way we determine this is by using the collagen orientations, theta_i.
+     * 
+     * For a cell i's position, given by r_i = (x_i, y_i), we may parametrise a line
+     * using the collagen orientation by 
+     * 
+     * r_i = (x_i, y_i) + t*(cos(theta_i), sin(theta_i)), where t is a real number.
+     * 
+     * Similarly, for the neighbour j, we can write
+     * 
+     * r_j = (x_j, y_j) + s*(cos(theta_j), sin(theta_j)), where s is a real number.
+     * 
+     * We can write down the expressions for s and t to determine where they intersect. If
+     * both s > 0 and t >0, we say the fibres intersect.
+     */ 
+
+template<unsigned DIM>
+bool CollagenAlignmentTrackingModifier<DIM>::DoCollagenFibresIntersect(AbstractCellPopulation<DIM,DIM>& rCellPopulation, unsigned nodeIndex, unsigned neighbourIndex)
+{
+    bool do_collagen_fibres_intersect = false;
+
+    // Get the considered node's location and orientation
+    c_vector<double, 2> current_location = rCellPopulation.GetNode(nodeIndex)->rGetLocation();
+    double current_orientation = rCellPopulation.GetCellUsingLocationIndex(nodeIndex)->GetCellData()->GetItem("orientation");
+
+
+    // Get the neighbouring node's location and orientation
+    c_vector<double, 2> neighbour_location = rCellPopulation.GetNode(neighbourIndex)->rGetLocation();
+    double neighbour_orientation = rCellPopulation.GetCellUsingLocationIndex(neighbourIndex)->GetCellData()->GetItem("orientation");
+
+    // Determine the intersecting points, i.e. determine the values of s and t such that the lines intersect.
+    double s = (neighbour_location[1] - current_location[1] - (neighbour_location[0] - current_location[0]))/(cos(neighbour_orientation) - sin(neighbour_orientation));
+    double t = (cos(neighbour_orientation)*(neighbour_location[1] - current_location[1]) - sin(neighbour_orientation)*(neighbour_location[0] - current_location[0]))/(cos(current_orientation)*(cos(neighbour_orientation) - sin(neighbour_orientation)));
+
+    if ( (s > 0.0)&&(t > 0.0) ) // If s and t are both positive, then the fibres intersect.
+    {
+        do_collagen_fibres_intersect = true;
+    }
+
+    return do_collagen_fibres_intersect;
+
+}
+
 template<unsigned DIM>
 void CollagenAlignmentTrackingModifier<DIM>::UpdateAtEndOfTimeStep(AbstractCellPopulation<DIM,DIM>& rCellPopulation)
 {
@@ -102,7 +146,7 @@ void CollagenAlignmentTrackingModifier<DIM>::UpdateCellData(AbstractCellPopulati
 
 	NodeBasedCellPopulation<DIM>* p_cell_population = static_cast<NodeBasedCellPopulation<DIM>*>(&rCellPopulation);
 
-    double neighbourhood_radius = GetNeighbourhoodRadius();
+    // double neighbourhood_radius = GetNeighbourhoodRadius();
 
     // First check the current attachments to the basement membrane, which depends on the cell type.
     for (typename AbstractCellPopulation<DIM>::Iterator cell_iter = rCellPopulation.Begin();
@@ -118,15 +162,22 @@ void CollagenAlignmentTrackingModifier<DIM>::UpdateCellData(AbstractCellPopulati
             // Get the node index
             unsigned node_index = p_cell_population->GetLocationIndexUsingCell(*cell_iter);
                 
-            //Sort the neighbours by collagen amounts.
-            std::vector<std::pair<double, unsigned> > sorted_neighbours_by_collagen;
+            // Get the neighbours with non-zero collagen.
+            std::vector<unsigned> neighbours_with_collagen;
 
-            // Get the set of neighbouring location indices within a neighbourhood radius
-            std::set<unsigned> neighbour_indices = p_cell_population->GetNodesWithinNeighbourhoodRadius(node_index, neighbourhood_radius);
+            // Get the set of neighbouring location indices within a neighbourhood radius.
+            // N.B. We may change the neighbourhood radius to reflect the length of the
+            // collagen fibre.
+            // std::set<unsigned> neighbour_indices = p_cell_population->GetNodesWithinNeighbourhoodRadius(node_index, neighbourhood_radius);
+            std::set<unsigned> neighbour_indices = p_cell_population->GetNeighbouringNodeIndices(node_index);
 
             // We only update the orientation if, well, we can.
             if (!neighbour_indices.empty())
             {
+                // Get the current orientation
+                double current_orientation = cell_iter->GetCellData()->GetItem("orientation");
+                double reorientation_strength = GetReorientationStrength();
+
                 for (std::set<unsigned>::iterator iter = neighbour_indices.begin();
                     iter != neighbour_indices.end();
                     ++iter)
@@ -141,109 +192,25 @@ void CollagenAlignmentTrackingModifier<DIM>::UpdateCellData(AbstractCellPopulati
 
                         if (neighbour_collagen > 0.0) // We should only orient towards neighbours which actually are enriched with collagen
                         {
-                            std::pair<double, unsigned> collagen_index = std::make_pair(neighbour_collagen, *iter);
-                            sorted_neighbours_by_collagen.push_back(collagen_index); //Add the collagen amount and index
+                            // Determine if the collagen fibres intersect
+                            bool do_fibres_intersect = DoCollagenFibresIntersect(rCellPopulation, node_index, *iter);
+
+                            if (do_fibres_intersect) // If the fibres intersect, we orient the fibres with respect to the neighbouring orientation
+                            {
+                                double neighbour_orientation = p_cell->GetCellData()->GetItem("orientation");
+                                current_orientation += reorientation_strength * sin(neighbour_orientation - current_orientation);
+                            }
                         }
 
                     }
                 }
-            }
 
-            //Sort the vector by the collagen amount in decreasing order
-            std::sort(sorted_neighbours_by_collagen.rbegin(), sorted_neighbours_by_collagen.rend());
-
-            // Once again, only do something if we have a sufficient number of collagen neighbours, two
-            if (sorted_neighbours_by_collagen.size() > 1)
-            {
-                // Get the relevant neighbours, i.e. the neighbours with the highest and second highest
-                // amount of collagen
-                std::pair<double, unsigned> first_neighbour = sorted_neighbours_by_collagen[0];
-                std::pair<double, unsigned> second_neighbour = sorted_neighbours_by_collagen[1];
-
-                // Get the neighbour indices
-                unsigned first_neighbour_index = first_neighbour.second;
-                unsigned second_neighbour_index = second_neighbour.second;
-
-                // Get their locations
-                c_vector<double, DIM> first_neighbour_location = rCellPopulation.GetNode(first_neighbour_index)->rGetLocation();
-                c_vector<double, DIM> second_neighbour_location = rCellPopulation.GetNode(second_neighbour_index)->rGetLocation();
-
-                // Determine the collagen direction
-                c_vector<double, DIM> collagen_direction = rCellPopulation.rGetMesh().GetVectorFromAtoB(second_neighbour_location, first_neighbour_location);
-                
-                // Compare this to the considered node location
-                double orientation = cell_iter->GetCellData()->GetItem("orientation");
-
-                c_vector<double, DIM> current_orientation;
-                current_orientation[0] = cos(orientation);
-                current_orientation[1] = sin(orientation);
-
-                // If the inner product is negative, reverse the collagen direction, so as to minimise the change in orientation
-                if (inner_prod(collagen_direction, current_orientation) < 0.0)
-                {
-                    collagen_direction *= -1.0;
-                }
-
-                collagen_direction /= norm_2(collagen_direction);
-
-                // Get the current node location
-                c_vector<double, DIM> current_location = rCellPopulation.GetNode(node_index)->rGetLocation();
-
-                // Get the orientation of the constructed collagen fibre.
-                double collagen_orientation = atan(collagen_direction[1]/collagen_direction[0]); //Get initial angle argument
-
-                // Finally, calculate the new orientation
-                double reorientation_strength = GetReorientationStrength();
-                double new_orientation = orientation + reorientation_strength * sin(collagen_orientation - orientation);
-                
-                // Update the cell data
-                cell_iter->GetCellData()->SetItem("orientation", new_orientation);
-            }
-            else if (sorted_neighbours_by_collagen.size() == 1)
-            {
-                // Get the one collagen-expressing neighbour
-                std::pair<double, unsigned> neighbour = sorted_neighbours_by_collagen[0];
-
-                // Get the neighbour indices
-                unsigned neighbour_index = neighbour.second;
-
-                // Get their locations
-                c_vector<double, DIM> neighbour_location = rCellPopulation.GetNode(neighbour_index)->rGetLocation();
-
-                // Get the current node location
-                c_vector<double, DIM> current_location = rCellPopulation.GetNode(node_index)->rGetLocation();
-
-                // Determine the collagen direction
-                c_vector<double, DIM> collagen_direction = rCellPopulation.rGetMesh().GetVectorFromAtoB(current_location, neighbour_location);
-
-                // Compare this to the considered node location
-                double orientation = cell_iter->GetCellData()->GetItem("orientation");
-
-                c_vector<double, DIM> current_orientation;
-                current_orientation[0] = cos(orientation);
-                current_orientation[1] = sin(orientation);
-
-                // If the inner product is negative, reverse the collagen direction, so as to minimise the change in orientation
-                if (inner_prod(collagen_direction, current_orientation) < 0.0)
-                {
-                    collagen_direction *= -1.0;
-                }
-
-                collagen_direction /= norm_2(collagen_direction);
-
-                // Get the orientation of the constructed collagen fibre.
-                double collagen_orientation = atan(collagen_direction[1]/collagen_direction[0]); //Get initial angle argument
-
-                // Finally, calculate the new orientation
-                double reorientation_strength = GetReorientationStrength();
-                double new_orientation = orientation + reorientation_strength * sin(collagen_orientation - orientation);
-                
-                // Update the cell data
-                cell_iter->GetCellData()->SetItem("orientation", new_orientation);
+                // Update the fibre orientations
+                cell_iter->GetCellData()->SetItem("orientation", current_orientation);
             }
         }
-
     }
+
 }
 
 template<unsigned DIM>
