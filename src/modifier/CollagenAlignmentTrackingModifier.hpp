@@ -124,7 +124,7 @@ public:
      * @param unsigned neighbourIndex, neighbouring node with collagen fibre.
      */
     
-    bool DoCollagenFibresIntersect(AbstractCellPopulation<DIM,DIM>& rCellPopulation, unsigned nodeIndex, unsigned neighbourIndex);
+    bool DoesCollagenFibreIntersectWithFibroblast(AbstractCellPopulation<DIM,DIM>& rCellPopulation, unsigned nodeIndex, unsigned fibroblastIndex);
 
     /**
      * Overridden UpdateAtEndOfTimeStep() method.

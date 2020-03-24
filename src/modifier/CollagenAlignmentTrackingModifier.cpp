@@ -80,11 +80,11 @@ void CollagenAlignmentTrackingModifier<DIM>::SetReorientationStrength(double reo
      * The way we determine this is by using the collagen orientations, theta_i.
      * 
      * For a cell i's position, given by r_i = (x_i, y_i), we may parametrise a line
-     * using the collagen orientation by 
+     * using the collagen fibre orientation by 
      * 
      * r_i = (x_i, y_i) + t*(cos(theta_i), sin(theta_i)), where t is a real number.
      * 
-     * Similarly, for the neighbour j, we can write
+     * Similarly, for the fibroblast neighbour j, we can write
      * 
      * r_j = (x_j, y_j) + s*(cos(theta_j), sin(theta_j)), where s is a real number.
      * 
@@ -93,18 +93,17 @@ void CollagenAlignmentTrackingModifier<DIM>::SetReorientationStrength(double reo
      */ 
 
 template<unsigned DIM>
-bool CollagenAlignmentTrackingModifier<DIM>::DoCollagenFibresIntersect(AbstractCellPopulation<DIM,DIM>& rCellPopulation, unsigned nodeIndex, unsigned neighbourIndex)
+bool CollagenAlignmentTrackingModifier<DIM>::DoesCollagenFibreIntersectWithFibroblast(AbstractCellPopulation<DIM,DIM>& rCellPopulation, unsigned nodeIndex, unsigned fibroblastIndex)
 {
-    bool do_collagen_fibres_intersect = false;
+    bool does_fibre_intersect_with_fibroblast = false;
 
-    // Get the considered node's location and orientation
+    // Get the considered collagen node's location and orientation
     c_vector<double, 2> current_location = rCellPopulation.GetNode(nodeIndex)->rGetLocation();
     double current_orientation = rCellPopulation.GetCellUsingLocationIndex(nodeIndex)->GetCellData()->GetItem("orientation");
 
-
     // Get the neighbouring node's location and orientation
-    c_vector<double, 2> neighbour_location = rCellPopulation.GetNode(neighbourIndex)->rGetLocation();
-    double neighbour_orientation = rCellPopulation.GetCellUsingLocationIndex(neighbourIndex)->GetCellData()->GetItem("orientation");
+    c_vector<double, 2> neighbour_location = rCellPopulation.GetNode(fibroblastIndex)->rGetLocation();
+    double neighbour_orientation = rCellPopulation.GetCellUsingLocationIndex(fibroblastIndex)->GetCellData()->GetItem("direction");
 
     // Determine the intersecting points, i.e. determine the values of s and t such that the lines intersect.
     double s = (neighbour_location[1] - current_location[1] - (neighbour_location[0] - current_location[0]))/(cos(neighbour_orientation) - sin(neighbour_orientation));
@@ -112,10 +111,10 @@ bool CollagenAlignmentTrackingModifier<DIM>::DoCollagenFibresIntersect(AbstractC
 
     if ( (s > 0.0)&&(t > 0.0) ) // If s and t are both positive, then the fibres intersect.
     {
-        do_collagen_fibres_intersect = true;
+        does_fibre_intersect_with_fibroblast = true;
     }
 
-    return do_collagen_fibres_intersect;
+    return does_fibre_intersect_with_fibroblast;
 
 }
 
@@ -148,7 +147,9 @@ void CollagenAlignmentTrackingModifier<DIM>::UpdateCellData(AbstractCellPopulati
 
     // double neighbourhood_radius = GetNeighbourhoodRadius();
 
-    // First check the current attachments to the basement membrane, which depends on the cell type.
+    // We will consider fibres that span from fibroblasts. We define fibres from nodes which
+    // express a non-zero amount of collagen (whether or not we then define fibre length based
+    // on collagen expression is a future question).
     for (typename AbstractCellPopulation<DIM>::Iterator cell_iter = rCellPopulation.Begin();
          cell_iter != rCellPopulation.End();
          ++cell_iter)
@@ -159,54 +160,67 @@ void CollagenAlignmentTrackingModifier<DIM>::UpdateCellData(AbstractCellPopulati
         if (p_cell_type->template IsType<FibroblastCellProliferativeType>())
         {
 
-            // Get the node index
-            unsigned node_index = p_cell_population->GetLocationIndexUsingCell(*cell_iter);
-                
-            // Get the neighbours with non-zero collagen.
-            std::vector<unsigned> neighbours_with_collagen;
+            // Get the collagen amount
+            double collagen = cell_iter->GetCellData()->GetItem("collagen");
 
-            // Get the set of neighbouring location indices within a neighbourhood radius.
-            // N.B. We may change the neighbourhood radius to reflect the length of the
-            // collagen fibre.
-            // std::set<unsigned> neighbour_indices = p_cell_population->GetNodesWithinNeighbourhoodRadius(node_index, neighbourhood_radius);
-            std::set<unsigned> neighbour_indices = p_cell_population->GetNeighbouringNodeIndices(node_index);
-
-            // We only update the orientation if, well, we can.
-            if (!neighbour_indices.empty())
+            if (collagen > 0.0)
             {
-                // Get the current orientation
-                double current_orientation = cell_iter->GetCellData()->GetItem("orientation");
-                double reorientation_strength = GetReorientationStrength();
+                // Get the node index
+                unsigned node_index = p_cell_population->GetLocationIndexUsingCell(*cell_iter);
+                    
+                // Get the set of neighbouring location indices within a neighbourhood radius.
+                // N.B. We may change the neighbourhood radius to reflect the length of the
+                // collagen fibre.
+                std::set<unsigned> neighbour_indices = p_cell_population->GetNeighbouringNodeIndices(node_index);
 
-                for (std::set<unsigned>::iterator iter = neighbour_indices.begin();
-                    iter != neighbour_indices.end();
-                    ++iter)
+                // We only update the orientation if, well, we can.
+                if (!neighbour_indices.empty())
                 {
-                    CellPtr p_cell = rCellPopulation.GetCellUsingLocationIndex(*iter);
-                    boost::shared_ptr<AbstractCellProperty> p_neighbour_cell_type = p_cell->GetCellProliferativeType();
+                    // Get the current orientation
+                    double current_orientation = cell_iter->GetCellData()->GetItem("orientation");
+                    double reorientation_strength = GetReorientationStrength();
 
-                    // Only look at fibroblast neighbours.
-                    if (p_neighbour_cell_type->template IsType<FibroblastCellProliferativeType>())
+                    for (std::set<unsigned>::iterator iter = neighbour_indices.begin();
+                        iter != neighbour_indices.end();
+                        ++iter)
                     {
-                        double neighbour_collagen = p_cell->GetCellData()->GetItem("collagen");
+                        CellPtr p_cell = rCellPopulation.GetCellUsingLocationIndex(*iter);
+                        boost::shared_ptr<AbstractCellProperty> p_neighbour_cell_type = p_cell->GetCellProliferativeType();
 
-                        if (neighbour_collagen > 0.0) // We should only orient towards neighbours which actually are enriched with collagen
+                        // Only look at fibroblast neighbours.
+                        if (p_neighbour_cell_type->template IsType<FibroblastCellProliferativeType>())
                         {
-                            // Determine if the collagen fibres intersect
-                            bool do_fibres_intersect = DoCollagenFibresIntersect(rCellPopulation, node_index, *iter);
 
-                            if (do_fibres_intersect) // If the fibres intersect, we orient the fibres with respect to the neighbouring orientation
+                            // Determine if the collagen fibre intersects with the (migrating) fibroblast
+                            bool does_fibre_intersect_with_fibroblast = DoesCollagenFibreIntersectWithFibroblast(rCellPopulation, node_index, *iter);
+
+                            if (does_fibre_intersect_with_fibroblast) // If the fibres intersect, we orient the fibres with respect to the neighbouring orientation
                             {
-                                double neighbour_orientation = p_cell->GetCellData()->GetItem("orientation");
+                                double neighbour_orientation = p_cell->GetCellData()->GetItem("direction");
+
+                                // Adjust the fibroblast orientation so that it lies between -pi/2 and pi/2
+                                if ((neighbour_orientation > 0.5*M_PI)&&(neighbour_orientation <= M_PI) ) // 2nd quadrant
+                                {
+                                    neighbour_orientation -= M_PI;
+                                }
+                                else if ( (neighbour_orientation > M_PI)&&(neighbour_orientation <= 1.5*M_PI) ) // 3rd quadrant
+                                {
+                                    neighbour_orientation -= M_PI;
+                                }
+                                else if ( (neighbour_orientation > 1.5*M_PI)&&(neighbour_orientation <= 2.0*M_PI) ) // 4th quadrant
+                                {
+                                    neighbour_orientation -= 2.0*M_PI;
+                                }
+
                                 current_orientation += reorientation_strength * sin(neighbour_orientation - current_orientation);
                             }
+
                         }
-
                     }
-                }
 
-                // Update the fibre orientations
-                cell_iter->GetCellData()->SetItem("orientation", current_orientation);
+                    // Update the fibre orientations
+                    cell_iter->GetCellData()->SetItem("orientation", current_orientation);
+                }
             }
         }
     }

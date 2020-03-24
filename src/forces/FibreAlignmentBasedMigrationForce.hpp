@@ -33,8 +33,8 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#ifndef WOUNDBASEDChemotacticForce_HPP_
-#define WOUNDBASEDChemotacticForce_HPP_
+#ifndef FIBREALIGNMENTBASEDMIGRATIONFORCE_HPP_
+#define FIBREALIGNMENTBASEDMIGRATIONFORCE_HPP_
 
 #include "ChasteSerialization.hpp"
 #include <boost/serialization/base_object.hpp>
@@ -42,24 +42,24 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AbstractForce.hpp"
 
 /**
- * A WoundBasedChemotactic force class.
+ * A FibreAlignmentBasedMigration force class.
  */
 template<unsigned DIM>
-class WoundBasedChemotacticForce  : public AbstractForce<DIM>
+class FibreAlignmentBasedMigrationForce  : public AbstractForce<DIM>
 {
 friend class TestForces;
 
 private:
 
     /*
-     * Chemotactic Force strenghth parameter
+     * Migration fibre reorientation strength
      */
-    double mChemotacticStrength;
+    double mReorientationStrength;
 
     /*
-     * Radius of interaction to determine which neighbours we compare the concentrations to.
-     */ 
-    double mNeighbourhoodRadius;
+     * Migration force strength
+     */
+    double mMigrationForceStrength;
 
     friend class boost::serialization::access;
     /**
@@ -73,8 +73,8 @@ private:
     void serialize(Archive & archive, const unsigned int version)
     {
         archive & boost::serialization::base_object<AbstractForce<DIM> >(*this);
-        archive & mChemotacticStrength;
-        archive & mNeighbourhoodRadius;
+        archive & mReorientationStrength;
+        archive & mMigrationForceStrength;
     }
 
 public:
@@ -82,48 +82,54 @@ public:
     /**
      * Constructor.
      */
-    WoundBasedChemotacticForce();
+    FibreAlignmentBasedMigrationForce();
 
     /**
      * Destructor.
      */
-    ~WoundBasedChemotacticForce();
+    ~FibreAlignmentBasedMigrationForce();
 
     /*
-     * Get chemotactic force strength
+     * Get fibre reorientation strength
      * 
-     * @return mChemotacticStrength
+     * @return mReorientationStrength
      */
-    double GetChemotacticStrength();
+    double GetReorientationStrength();
 
     /*
-     * Set the chemotactic force strength
+     * Set the fibre reorientation strength
      * 
-     * @param chemotacticStrength
+     * @param ReorientationStrength
      */
-    void SetChemotacticStrength(double chemotacticStrength);
-
-
-    /*
-     * Get neighbourhood radius
-     * 
-     * @return mNeighbourhoodRadius
-     */
-    double GetNeighbourhoodRadius();
+    void SetReorientationStrength(double reorientationStrength);
 
     /*
-     * Set the neighbourhood radius
+     * Get migration force strength
      * 
-     * @param neighbourhoodRadius
+     * @return mMigrationForceStrength
      */
-    void SetNeighbourhoodRadius(double neighbourhoodRadius);
+    double GetMigrationForceStrength();
+
+    /*
+     * Set the fibre reorientation strength
+     * 
+     * @param migrationForceStrength
+     */
+    void SetMigrationForceStrength(double migrationForceStrength);
+
+    /*
+     * Determine whether fibre intersects with with fibroblast
+     * 
+     * @param rCellPopulation
+     * @param fibroblastIndex fibroblast index
+     * @param fibreIndex index for spanning collagen fibre
+     */
+    bool DoesCollagenFibreIntersectWithFibroblast(AbstractCellPopulation<DIM>& rCellPopulation, unsigned fibroblastIndex, unsigned fibreIndex);
 
     /**
      * Overridden AddForceContribution() method.
      *
      * @param rCellPopulation reference to the cell population
-     *
-     * Fc = chi(C,|gradC|) gradC/|gradC|  (if |gradC|>0, else Fc = 0)
      *
      */
     void AddForceContribution(AbstractCellPopulation<DIM>& rCellPopulation);
@@ -137,6 +143,6 @@ public:
 };
 
 #include "SerializationExportWrapper.hpp"
-EXPORT_TEMPLATE_CLASS_SAME_DIMS(WoundBasedChemotacticForce)
+EXPORT_TEMPLATE_CLASS_SAME_DIMS(FibreAlignmentBasedMigrationForce)
 
-#endif /*WOUNDBASEDChemotacticForce_HPP_*/
+#endif /*FibreAlignmentBasedMigrationForce_HPP_*/

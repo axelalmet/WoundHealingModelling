@@ -12,6 +12,7 @@
 #include "GeneralisedLinearSpringForce.hpp" // Standard spring force that implements logarithmic repulsion and exponential attraction for OS models
 #include "EpidermalBasementMembraneForce.hpp" // Force to anchor basal stem cells to dermis
 #include "WoundBasedChemotacticForce.hpp" // Individual-based chemotactic force to induce migration.
+#include "FibreAlignmentBasedMigrationForce.hpp" // Migration force that aligns each fibroblast with surrounding collagen fibres
 #include "FixedRegionPlaneBoundaryCondition.hpp" // Fixed-position boundary condition
 #include "PlaneBoundaryCondition.hpp" // Plane-based boundary condition
 #include "HoneycombMeshGenerator.hpp" // Generates mesh
@@ -76,7 +77,7 @@ public:
         // double target_curvature = 0.0; // Target curvature
 
         // Set the probability of being an EPF fibroblast.
-        double epf_fibroblast_probability = 0.25;
+        double epf_fibroblast_probability = 0.75;
 
         HoneycombMeshGenerator generator(cells_across, cells_up, 0); //Create mesh
         MutableMesh<2, 2>* p_generating_mesh = generator.GetMesh(); //Generate mesh
@@ -101,7 +102,6 @@ public:
         std::vector<CellPtr> cells; //Create vector of cells
 
         for (unsigned i = 0; i < p_mesh->GetNumNodes(); i++) // Iterator for periodic mesh
-        // for (unsigned i = 0; i < mesh.GetNumNodes(); i++) // Iterator for non-periodic mesh
         {
             // Set contact inhibition based cell cycle
             GrowthFactorBasedContactInhibitionCellCycleModel* p_cycle_model = new GrowthFactorBasedContactInhibitionCellCycleModel(); //Contact-inhibition-based cycle model yet.
@@ -113,19 +113,17 @@ public:
             // Set collagen-based SRN model
             FibroblastStateDependentCollagenSrnModel* p_srn_model = new FibroblastStateDependentCollagenSrnModel(); //Fibroblast-state-dependent collagen SRN model
 
-            // // Create a vector of initial conditions
-            // std::vector<double> starter_conditions;
-            // starter_conditions.push_back(0.1);
-            // p_srn_model->SetInitialConditions(starter_conditions);
-
             // Randomly fill the fibroblast population with EPF and ENF fibroblasts, according to proportions
-            // from the Rinkevich et al. (2018) paper.
+            // from the Rinkevich et al. (2018) paper (0.75 EPF, 0.25 ENF)
             double fibroblast_state = RandomNumberGenerator::Instance()->ranf();
 
             // Randomly initiate a collagen orientation
             double collagen_orientation = -0.5*M_PI + (M_PI * RandomNumberGenerator::Instance()->ranf());
 
-            if (fibroblast_state < epf_fibroblast_probability) // Roughly in line with the Rinkevich et al. (2018) paper.
+            // Random initiate a fibroblast direction
+            double fibroblast_direction = 2.0*M_PI * RandomNumberGenerator::Instance()->ranf(); // Not random yet!
+
+            if (fibroblast_state < epf_fibroblast_probability) 
             {
                 CellPtr p_cell(new Cell(p_epf_state, p_cycle_model, p_srn_model));
                 p_cell->SetCellProliferativeType(p_fibroblast_type); //Make cell differentiated
@@ -145,11 +143,14 @@ public:
                 // Initialise cell data to describe BM attachment.
                 p_cell->GetCellData()->SetItem("attachment", -1.0);
 
-                // Initialise collagen orientation
-                p_cell->GetCellData()->SetItem("orientation", collagen_orientation);
-
                 // Set EPF state
                 p_cell->GetCellData()->SetItem("epf", 1.0);
+
+                // Initialise fibroblast direction
+                p_cell->GetCellData()->SetItem("direction", fibroblast_direction);
+
+                // Initialise collagen orientation
+                p_cell->GetCellData()->SetItem("orientation", collagen_orientation);
 
                 // Set collagen amount
                 p_cell->GetCellData()->SetItem("collagen", 0.0);
@@ -173,6 +174,9 @@ public:
 
                 // Initialise cell data to describe BM attachment.
                 p_cell->GetCellData()->SetItem("attachment", -1.0);
+
+                // Initialise fibroblast direction
+                p_cell->GetCellData()->SetItem("direction", fibroblast_direction);
 
                 // Initialise collagen orientation
                 p_cell->GetCellData()->SetItem("orientation", collagen_orientation);
@@ -259,12 +263,11 @@ public:
         p_spring_force->SetCutOffLength(radius_of_interaction);
         simulator.AddForce(p_spring_force);
 
-        // Add basement membrane force
-        // MAKE_PTR(EpidermalBasementMembraneForce, p_bm_force);
-        // p_bm_force->SetBasementMembraneParameter(bm_stiffness);
-        // p_bm_force->SetTargetCurvature(target_curvature);
-        // p_bm_force->ApplyPeriodicForce(false);
-        // simulator.AddForce(p_bm_force);
+        // Add fibre-alignment-based migration force
+        MAKE_PTR(FibreAlignmentBasedMigrationForce<2>, p_migration_force);
+        p_migration_force->SetMigrationForceStrength(0.0);
+        p_migration_force->SetReorientationStrength(2.5 * M_DT);
+        simulator.AddForce(p_migration_force);
 
 
         // Define a fixed-regions boundary condition so that cells can't move past y = 0
@@ -308,6 +311,7 @@ public:
             if ( (y > wound_base_height)&&(x > wound_centre - 0.5*wound_width)&&(x < wound_centre + 0.5*wound_width))
             {
                 cell_iter->GetCellData()->SetItem("collagen", 1.0);
+                // cell_iter->GetCellData()->SetItem("direction", 0.25*M_PI);
                 FibroblastStateDependentCollagenSrnModel* p_srn_model = dynamic_cast<FibroblastStateDependentCollagenSrnModel*>(cell_iter->GetSrnModel());
                 p_srn_model->SetCollagen();
                 cell_iter->SetSrnModel(p_srn_model);

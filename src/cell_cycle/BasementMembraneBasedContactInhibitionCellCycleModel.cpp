@@ -117,12 +117,15 @@ void BasementMembraneBasedContactInhibitionCellCycleModel::UpdateCellCyclePhase(
     // Now check whether or not the cell has lost contact with the basement membrane
     double bm_attachment = mpCell->GetCellData()->GetItem("attachment");
 
-    // If the cell has lost contact with the basement membrane, differentiate it
-    if (bm_attachment == 0.0)
+    // If an epidermal cell has lost contact with the basement membrane, differentiate it.
+    if (mpCell->GetCellProliferativeType()->IsType<StemCellProliferativeType>())
     {
-        boost::shared_ptr<AbstractCellProperty> p_diff_type =
-            mpCell->rGetCellPropertyCollection().GetCellPropertyRegistry()->Get<DifferentiatedCellProliferativeType>();
-        mpCell->SetCellProliferativeType(p_diff_type);
+        if (bm_attachment == 0.0)
+        {
+            boost::shared_ptr<AbstractCellProperty> p_diff_type =
+                mpCell->rGetCellPropertyCollection().GetCellPropertyRegistry()->Get<DifferentiatedCellProliferativeType>();
+            mpCell->SetCellProliferativeType(p_diff_type);
+        }
     }
 
     double time_since_birth = GetAge();
