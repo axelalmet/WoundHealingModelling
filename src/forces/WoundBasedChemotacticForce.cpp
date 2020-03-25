@@ -178,6 +178,22 @@ void WoundBasedChemotacticForce<DIM>::AddForceContribution(AbstractCellPopulatio
                 // F += chi * gradC/|gradC|
                 c_vector<double, DIM> force = chemotactic_strength * morphogen_max_grad * gradient_direction / norm_2(gradient_direction);
                 rCellPopulation.GetNode(current_index)->AddAppliedForceContribution(force);
+
+                // Also need to update the fibroblast migration direction, which is stored as cell data.
+                double gradient_angle = atan(gradient_direction[1]/gradient_direction[0]);
+
+                // Correct for the quadrants
+                if ( (gradient_direction[0] < 0.0) ) // Second or third quadrant quadrant
+                {
+                    gradient_angle += M_PI; 
+                }
+                else if ( (gradient_direction[0] > 0.0)&&(gradient_direction[1] < 0.0) ) // Third quadrant
+                {
+                    gradient_angle += 2.0*M_PI;
+                }
+
+                cell_iter->GetCellData()->SetItem("direction", gradient_angle); // Update the fibroblast migration direction
+
             }
             // else Fc=0
         }
