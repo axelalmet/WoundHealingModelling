@@ -33,28 +33,26 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#ifndef COLLAGENALIGNMENTBASEDFORCE_HPP_
-#define COLLAGENALIGNMENTBASEDFORCE_HPP_
+#ifndef BASEMENTMEMBRANEDISTANCEBASEDCELLKILLER_HPP_
+#define BASEMENTMEMBRANEDISTANCEBASEDCELLKILLER_HPP_
+
+#include "AbstractCellKiller.hpp"
 
 #include "ChasteSerialization.hpp"
 #include <boost/serialization/base_object.hpp>
 
-#include "AbstractForce.hpp"
-
 /**
- * A CollagenAlignmentBased force class.
+ *  Distance-based cell killer, where differentiated cells that
+ *  are a specified distance away from the basement membrane are 
+ *  sloughed.
  */
-template<unsigned DIM>
-class CollagenAlignmentBasedForce  : public AbstractForce<DIM>
+class BasementMembraneDistanceBasedCellKiller : public AbstractCellKiller<2>
 {
-friend class TestForces;
-
 private:
 
-    /*
-     * Chemotactic Force strenghth parameter
-     */
-    double mForceMagnitude;
+
+    /** Radius of death. */
+    double mRadius;
 
     friend class boost::serialization::access;
     /**
@@ -67,56 +65,81 @@ private:
     template<class Archive>
     void serialize(Archive & archive, const unsigned int version)
     {
-        archive & boost::serialization::base_object<AbstractForce<DIM> >(*this);
-        archive & mForceMagnitude;
+        archive & boost::serialization::base_object<AbstractCellKiller<2> >(*this);
     }
 
 public:
 
     /**
      * Constructor.
+     *
+     * @param pCellPopulation pointer to the cell population.
+     * @param radius the radius of death.
      */
-    CollagenAlignmentBasedForce();
+    BasementMembraneDistanceBasedCellKiller(AbstractCellPopulation<2>* pCellPopulation,
+                              double radius);
 
     /**
-     * Destructor.
+     * @return mRadius.
      */
-    ~CollagenAlignmentBasedForce();
-
-    /*
-     * Get chemotactic force strength
-     * 
-     * @return mForceMagnitude
-     */
-    double GetForceMagnitude();
-
-    /*
-     * Set the chemotactic force strength
-     * 
-     * @param ForceMagnitude
-     */
-    void SetForceMagnitude(double ForceMagnitude);
+    double GetRadius() const;
 
     /**
-     * Overridden AddForceContribution() method.
-     *
-     * @param rCellPopulation reference to the cell population
-     *
-     * Fc = f(cos(theta), sin(theta)), where theta represents the orientation of
-     * the cell that is modified by collagen fibres.
-     *
+     * Loop over cells and kills cells outside boundary.
      */
-    void AddForceContribution(AbstractCellPopulation<DIM>& rCellPopulation);
+    virtual void CheckAndLabelCellsForApoptosisOrDeath();
 
     /**
-     * Overridden OutputForceParameters() method.
+     * Outputs cell killer parameters to file
+     *
+     * As this method is pure virtual, it must be overridden
+     * in subclasses.
      *
      * @param rParamsFile the file stream to which the parameters are output
      */
-    void OutputForceParameters(out_stream& rParamsFile);
+    void OutputCellKillerParameters(out_stream& rParamsFile);
 };
 
 #include "SerializationExportWrapper.hpp"
-EXPORT_TEMPLATE_CLASS_SAME_DIMS(CollagenAlignmentBasedForce)
+CHASTE_CLASS_EXPORT(BasementMembraneDistanceBasedCellKiller)
 
-#endif /*CollagenAlignmentBasedFORCE_HPP_*/
+namespace boost
+{
+namespace serialization
+{
+/**
+ * Serialize information required to construct a BasementMembraneDistanceBasedCellKiller.
+ */
+template<class Archive>
+inline void save_construct_data(
+    Archive & ar, const BasementMembraneDistanceBasedCellKiller * t, const unsigned int file_version)
+{
+    // Save data required to construct instance
+    const AbstractCellPopulation<2>* const p_cell_population = t->GetCellPopulation();
+    ar & p_cell_population;
+    double radius = t->GetRadius();
+    ar & radius;
+}
+
+/**
+ * De-serialize constructor parameters and initialise a BasementMembraneDistanceBasedCellKiller.
+ */
+template<class Archive>
+inline void load_construct_data(
+    Archive & ar, BasementMembraneDistanceBasedCellKiller * t, const unsigned int file_version)
+{
+    // Retrieve data from archive required to construct new instance
+    AbstractCellPopulation<2>* p_cell_population;
+    ar & p_cell_population;
+    double radius;
+    ar & radius;
+
+    // Invoke inplace constructor to initialise instance
+    ::new(t)BasementMembraneDistanceBasedCellKiller(p_cell_population, radius);
+}
+}
+} // namespace ...
+
+
+#endif /*BASEMENTMEMBRANEDISTANCEBASEDCELLKILLER_HPP_*/
+

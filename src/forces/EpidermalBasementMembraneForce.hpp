@@ -82,13 +82,16 @@ public :
     double GetTargetCurvature();
 
     /* Returns Epidermis height extremes to apply non-zero curvature to base */
-    c_vector<double, 2> GetEpidermisHeightExtremes(AbstractCellPopulation<2>& rCellPopulation);
+    c_vector<double, 2> GetEpidermisHeightExtremes(AbstractCellPopulation<2>& rCellPopulation, c_vector<double, 2> epidermalWidthExtremes);
 
     /* Returns Epidermis width extremes */
     c_vector<double, 2> GetEpidermisWidthExtremes(AbstractCellPopulation<2>& rCellPopulation);
 
     /* Return tangent vector at point based on cosine parametrisation */
-    c_vector<double, 2> GetCosineBasedTangentVector(AbstractCellPopulation<2>& rCellPopulation, c_vector<double, 2> point);
+    c_vector<double, 2> GetCosineBasedTangentVector(AbstractCellPopulation<2>& rCellPopulation,
+                                                    c_vector<double, 2> epidermalHeightExtremes,
+                                                    c_vector<double, 2> epidermalWidthExtremes,
+                                                    c_vector<double, 2> point);
 
     /*
      * Return vector of Epidermal indices that are close to the considered Epidermal node,
@@ -98,7 +101,12 @@ public :
      * @param epidermalIndex the considered epidermal node index
      * @param leftOrRight, should be 1.0 or -1.0, determines whether we consider 'left' or 'right' neighbours
      */
-    std::vector<unsigned> GetClosestNeighboursBasedOnCosineApproximation(AbstractCellPopulation<2>& rCellPopulation, unsigned epidermalIndex, double leftOrRight);
+    std::vector<unsigned> GetClosestNeighboursBasedOnCosineApproximation(AbstractCellPopulation<2>& rCellPopulation, 
+                                                                        std::vector<unsigned> epidermalIndices,
+                                                                        c_vector<double, 2> epidermalHeightExtremes,
+                                                                        c_vector<double, 2> epidermalWidthExtremes,
+                                                                        unsigned epidermalIndex,
+                                                                        double leftOrRight);
 
     /*
      * Return closest epidermal node indice to the considered Epidermal node,
@@ -107,7 +115,12 @@ public :
      * @param epidermalIndex the considered epidermal node index
      * @param leftOrRight, should be 1.0 or -1.0, determines whether we consider 'left' or 'right' neighbours
      */
-    unsigned GetNearestNeighbourAlongCosineApproximation(AbstractCellPopulation<2>& rCellPopulation, unsigned epidermalIndex, double leftOrRight);
+    unsigned GetNearestNeighbourAlongCosineApproximation(AbstractCellPopulation<2>& rCellPopulation, 
+                                                        std::vector<unsigned> epidermalIndices,
+                                                        c_vector<double, 2> epidermalHeightExtremes,
+                                                        c_vector<double, 2> epidermalWidthExtremes,
+                                                        unsigned epidermalIndex,
+                                                        double leftOrRight);
 
     /*
      * Return closest fibroblast index to the considered epidermal index
@@ -141,14 +154,13 @@ public :
     std::vector<unsigned> GetNeighbouringEpidermalIndices(AbstractCellPopulation<2>& rCellPopulation, unsigned nodeIndex);
 
     /*
-     * Method to check whether or not node is on the left or right boundary (and hence should have zero force).
-     */
-    bool IsBoundaryNode(AbstractCellPopulation<2>& rCellPopulation, unsigned nodeIndex);
-
-    /*
      * Method to calculate the force due to basement membrane on an Epidermal cell
      */
-    c_vector<double, 2> CalculateForceDueToBasementMembrane(AbstractCellPopulation<2>& rCellPopulation, std::vector<unsigned> epidermalIndices, unsigned nodeIndex);
+    c_vector<double, 2> CalculateForceDueToBasementMembrane(AbstractCellPopulation<2>& rCellPopulation, 
+                                                            std::vector<unsigned> epidermalIndices,
+                                                            c_vector<double, 2> epidermalHeightExtremes,
+                                                            c_vector<double, 2> epidermalWidthExtremes,
+                                                            unsigned nodeIndex);
 
     /**
      * Overridden AddForceContribution method.

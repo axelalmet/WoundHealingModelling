@@ -33,8 +33,8 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#ifndef WOUNDBASEDChemotacticForce_HPP_
-#define WOUNDBASEDChemotacticForce_HPP_
+#ifndef WOUNDBASEDCHEMOTACTICFORCE_HPP_
+#define WOUNDBASEDCHEMOTACTICFORCE_HPP_
 
 #include "ChasteSerialization.hpp"
 #include <boost/serialization/base_object.hpp>

@@ -39,6 +39,7 @@
 #include "CollagenAlignmentTrackingModifier.hpp" // Modifier to align fibroblasts with local collagen fibre orientation
 #include "VolumeTrackingModifier.hpp" // Modifier to track cell volume
 #include "PlateletCellKiller.hpp" // Cell killer to remove platelets upon wound healing
+#include "BasementMembraneDistanceBasedCellKiller.hpp" // Cell killer based on distance to the basement membrane
 #include "FakePetscSetup.hpp" //Forbids tests running in parallel
 #include "PetscSetupAndFinalize.hpp"
 
@@ -46,9 +47,9 @@
 
 static const std::string M_OUTPUT_DIRECTORY = "WoundHealingModel/CrossSection";
 static const double M_DT = 0.005;
-static const double M_END_TIME = 40.0;
+static const double M_END_TIME = 10.0;
 // static const double M_SAMPLING_TIMESTEP = M_END_TIME / M_DT;
-static const double M_SAMPLING_TIMESTEP = 2.0/M_DT;
+static const double M_SAMPLING_TIMESTEP = 1.0/M_DT;
 
 /*
 * A test model to study the various components that we think should be incorporated
@@ -62,7 +63,7 @@ public:
     {
 
         //Set the number of cells across and down for the array
-        unsigned cells_across = 20;
+        unsigned cells_across = 25;
         unsigned cells_up = 10;
 
         // Set some parameters for node-based cell populations
@@ -70,7 +71,7 @@ public:
         double division_separation = 0.1; // Initial resting length upon division
 
         // Mechanical parameters
-        double spring_stiffness = 30.0; // Spring stiffness
+        double spring_stiffness = 50.0; // Spring stiffness
         double bm_stiffness = 6.0; // Basement membrane attachment strength
         double target_curvature = 0.0; // Target curvature
 
@@ -82,7 +83,7 @@ public:
 
         // Construct a periodic mesh
         Cylindrical2dNodesOnlyMesh* p_mesh = new Cylindrical2dNodesOnlyMesh(1.0*cells_across);
-		p_mesh->ConstructNodesWithoutMesh(*p_generating_mesh, 2.0); //Construct mesh
+		p_mesh->ConstructNodesWithoutMesh(*p_generating_mesh, 5.0); //Construct mesh
 
 
         //Create shared pointers for cell and mutation states
@@ -197,7 +198,7 @@ public:
             // double x = cell_population.GetLocationOfCellCentre(*cell_iter)[0];
             double y = cell_population.GetLocationOfCellCentre(*cell_iter)[1];
             
-            if (y > max_height - 1.25)
+            if (y > max_height - 2*sqrt(3.0))
             {
                 BasementMembraneBasedContactInhibitionCellCycleModel* p_cycle_model = new BasementMembraneBasedContactInhibitionCellCycleModel(); //Contact-inhibition-based cycle model yet.
                 p_cycle_model->SetEquilibriumVolume(0.25*M_PI);
@@ -211,6 +212,9 @@ public:
 
                 // Initialise cell data to describe BM attachment.
                 cell_iter->GetCellData()->SetItem("attachment", 1.0);
+
+                // Should turn of the EPF status
+                cell_iter->GetCellData()->SetItem("epf", 0.0);
 
             }
             if (y == min_height)
@@ -264,6 +268,10 @@ public:
         MAKE_PTR(BasementMembraneAttachmentTrackingModifier<2>, p_bm_attachment_tracking_modifier);
         p_bm_attachment_tracking_modifier->SetNeighbourhoodRadius(radius_of_interaction);
 		simulator.AddSimulationModifier(p_bm_attachment_tracking_modifier);
+
+        // Add a cell killer to remove differentiated cells that are too far from the basement membrane.
+        MAKE_PTR_ARGS(BasementMembraneDistanceBasedCellKiller, p_cell_killer, (&cell_population, 1.9*sqrt(3.0)));
+        simulator.AddCellKiller(p_cell_killer);
         
         simulator.Solve(); // Run the simulation.
 

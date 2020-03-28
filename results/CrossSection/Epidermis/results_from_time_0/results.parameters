@@ -2,14 +2,14 @@
 
 	<OffLatticeSimulation-2-2>
 		<Dt>0.005</Dt>
-		<EndTime>40</EndTime>
-		<SamplingTimestepMultiple>400</SamplingTimestepMultiple>
+		<EndTime>10</EndTime>
+		<SamplingTimestepMultiple>200</SamplingTimestepMultiple>
 		<OutputDivisionLocations>0</OutputDivisionLocations>
 		<OutputCellVelocities>0</OutputCellVelocities>
 	</OffLatticeSimulation-2-2>
 
 	<NodeBasedCellPopulation-2>
-		<MechanicsCutOffLength>2</MechanicsCutOffLength>
+		<MechanicsCutOffLength>5</MechanicsCutOffLength>
 		<UseVariableRadii>0</UseVariableRadii>
 		<MeinekeDivisionSeparation>0.1</MeinekeDivisionSeparation>
 		<CentreBasedDivisionRule>
@@ -41,6 +41,9 @@
 	</SrnModels>
 
 	<CellKillers>
+		<BasementMembraneDistanceBasedCellKiller>
+			<mRadius>3.4641</mRadius>
+		</BasementMembraneDistanceBasedCellKiller>
 	</CellKillers>
 
 	<SimulationModifiers>
@@ -52,7 +55,7 @@
 
 	<Forces>
 		<GeneralisedLinearSpringForce-2-2>
-			<MeinekeSpringStiffness>30</MeinekeSpringStiffness>
+			<MeinekeSpringStiffness>50</MeinekeSpringStiffness>
 			<MeinekeDivisionRestingSpringLength>0.5</MeinekeDivisionRestingSpringLength>
 			<MeinekeSpringGrowthDuration>1</MeinekeSpringGrowthDuration>
 			<UseCutOffLength>1</UseCutOffLength>

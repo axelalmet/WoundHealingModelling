@@ -1,30 +1,30 @@
 <?xml version="1.0"?>
 <VTKFile type="UnstructuredGrid" version="0.1" byte_order="LittleEndian" header_type="UInt32" compressor="vtkZLibDataCompressor">
   <UnstructuredGrid>
-    <Piece NumberOfPoints="200"                  NumberOfCells="0"                   >
+    <Piece NumberOfPoints="250"                  NumberOfCells="0"                   >
       <PointData>
         <DataArray type="Float64" Name="Cell types" format="appended" RangeMin="0"                    RangeMax="7"                    offset="0"                   />
         <DataArray type="Float64" Name="Process rank" format="appended" RangeMin="0"                    RangeMax="0"                    offset="112"                 />
-        <DataArray type="Float64" Name="attachment" format="appended" RangeMin="-1"                   RangeMax="1"                    offset="164"                 />
-        <DataArray type="Float64" Name="epf" format="appended" RangeMin="0"                    RangeMax="1"                    offset="228"                 />
-        <DataArray type="Float64" Name="volume" format="appended" RangeMin="0.7853981634"         RangeMax="0.7853981634"         offset="364"                 />
+        <DataArray type="Float64" Name="attachment" format="appended" RangeMin="-1"                   RangeMax="1"                    offset="168"                 />
+        <DataArray type="Float64" Name="epf" format="appended" RangeMin="0"                    RangeMax="1"                    offset="236"                 />
+        <DataArray type="Float64" Name="volume" format="appended" RangeMin="0.7853981634"         RangeMax="0.7853981634"         offset="388"                 />
       </PointData>
       <CellData>
       </CellData>
       <Points>
-        <DataArray type="Float64" Name="Vertex positions" NumberOfComponents="3" format="appended" RangeMin="0"                    RangeMax="21"                   offset="444"                 />
+        <DataArray type="Float64" Name="Vertex positions" NumberOfComponents="3" format="appended" RangeMin="0"                    RangeMax="25.709920264"         offset="472"                 />
       </Points>
       <Cells>
-        <DataArray type="Int64" Name="connectivity" format="appended" RangeMin=""                     RangeMax=""                     offset="1152"                />
-        <DataArray type="Int64" Name="offsets" format="appended" RangeMin=""                     RangeMax=""                     offset="1168"                />
-        <DataArray type="UInt8" Name="types" format="appended" RangeMin=""                     RangeMax=""                     offset="1184"                />
+        <DataArray type="Int64" Name="connectivity" format="appended" RangeMin=""                     RangeMax=""                     offset="1300"                />
+        <DataArray type="Int64" Name="offsets" format="appended" RangeMin=""                     RangeMax=""                     offset="1316"                />
+        <DataArray type="UInt8" Name="types" format="appended" RangeMin=""                     RangeMax=""                     offset="1332"                />
       </Cells>
     </Piece>
   </UnstructuredGrid>
   <AppendedData encoding="base64">
-   _AQAAAACAAABABgAAQAAAAA==eJxjYAABEQeGQU3LQGkJEmly9Q2UuYPVPlL5A0VTyx3EmkOqfcSGG6XhPVjig1h/0jocCKkb9MBhsNIAj1o8FQ==AQAAAACAAABABgAAFQAAAA==eJxjYBgFo2AUjIJRMApIBwAGQAABAQAAAACAAABABgAAHQAAAA==eJxjYACBD/sZRulRepQepUcmbT+46cELANVnJRw=AQAAAACAAABABgAAUgAAAA==eJxjYACBD/YMZNHogFj1xMqTaj6p9lHqb2qbO1jtI5U/UDS13EGsOaTah64el35C6gjZS6q7Bipe0AGtwoGQOmL1k2sOrdMvtdxFujkAAIvCHQ==AQAAAACAAABABgAAKgAAAA==eJyT0HUJ+a340l5ilB6lB4AWG+T0QIfPUKcHOv6GOj3Q8UeIBgBhNnFvAQAAAACAAADAEgAAAQIAAA==eJx916uuE1EUBuARI5owojSlaUpTer9POxdBUDOBYAgYBMHzFqjjeRPwPAMWj6gkHHNkEwwNpIJhf2z5LfGLnT9r7yj637mrMKjD3IK34V14Hz6Ej+FT+By+hK/hW/gefoBn8BxewEv4qfr48u33959vG/d5hsd12BN4B96DD+Aj+AQ+gy/gK/gGvoOn8GPYbzJ4Di/gJXKj6I//bPhdFfaoDnsL3oZ34X34ED6GT+Fz+BK+hm/he/gBnsFzeAEv4afq5snTw7cvcf23n+FxHfYE3oH34AP4CD6Bz+AL+Aq+ge/gKfwY9kt/w57DC3iJ3Gt/7zX82t+mX/vb9Ba8De/C+/AhfAyfwufwJXwN38L38AM8g+fwAl7CT9WP4+Ovyev7DT/D4zrsCbwD78EH8BF8Ap/BF/AVfAPfwVP4MeyX/oY9hxfwErmX0e9eN9+zd1XYozrsLXgb3oX34UP4GD6Fz+FL+Bq+he/hB3gGz+EFvISfqgfPXn34VDX/JWd4XIc9gXfgPfgAPoJP4DP4Ar6Cb+A7eAo/hv3S37Dn8AJeIve6fx82/Lp/m37dv01vwdvwLrwPH8LH8Cl8Dl/C1/AtfA8/wDN4Di/gJfxUVW/ePX+RPmr4GR7XYU/gHXgPPoCP4BP4DL6Ar+Ab+A6ewo9hv/Q37Dm8gJf/+C9zfLwQAAAAAACAAAAAAAAAAAAAAACAAAAAAAAAAAAAAACAAAAAAAAA
+   _AQAAAACAAADQBwAAQQAAAA==eJxjYAABEQeGYUFLoNEyOMQppWll7mC1j1T+QNHUcgex5pBqH7HhRml4D5b4INafpIbDsAEOo/QoTU0aAOvzRkE=AQAAAACAAADQBwAAFwAAAA==eJxjYBgFo2AUjIJRMApGwVAHAAfQAAE=AQAAAACAAADQBwAAIAAAAA==eJxjYACBD/sZRulRepQepYcGbT886FEwCqgLAK6OGjE=AQAAAACAAADQBwAAYAAAAA==eJxjYACBD/YMZNHogFj1xMqTaj6p9lHqb2qbO1jtI5U/UDS13EGsOaTah64el35C6gjZS6q7Bipe0AGtwoGQOmL1k2sOrdMvtdxFa/+RGt60LsdITaeDLd4xaQD7u/UCAQAAAACAAADQBwAAKwAAAA==eJyT0HUJ+a340l5ilB6lR2kMWmyY0AMdjqP08ExXw4Ue6PRALRoA8GEN0g==AQAAAACAAABwFwAAWgIAAA==eJx916vOM1UUBuCKiiZUlKY0TWlKz+fTnAc1EwiGgEEQPHeB+j13Ap5rwOIRlQTMJ5tgaCAVDPthy2epN9l5s1ar9X/vrcKgDnMH3oMP4CP4BD6DL+Ar+Aa+gx/gJ/gFfoNH8BiewFN4Bs/hBbyE36sfvvjmt+9++qPxjx7wdh32LrwPH8LH8Cl8Dl/C1/AtfA8/ws/wa9jf3eARPIYn8BSewXN4AS+Rt9X6x/9s+FsV9lYd9g68Bx/AR/AJfAZfwFfwDXwHP8BP8Av8Bo/gMTyBp/AMnsMLeAm/V+8+/uTy68/t+t/+gLfrsHfhffgQPoZP4XP4Er6Gb+F7+BF+hl/D/uyrsEfwGJ7AU3gGz+EFvETeV1+91/BXXzX91VdN78B78AF8BJ/AZ/AFfAXfwHfwA/wEv8Bv8AgewxN4Cs/gObyAl/B79fu1+KX71fsNf8Dbddi78D58CB/Dp/A5fAlfw7fwPfwIP8OvYX/2VdgjeAxP4Ck8g+fwAl4i73P0d48177O3KuytOuwdeA8+gI/gE/gMvoCv4Bv4Dn6An+AX+A0ewWN4Ak/hGTyHF/ASfq8++PTL73+smvf9A96uw96F9+FD+Bg+hc/hS/gavoXv4Uf4GX4N+7Ovwh7BY3gCT+EZPIcX8BJ5X/vVhw1/7VdNf+1XTe/Ae/ABfASfwGfwBXwF38B38AP8BL/Ab/AIHsMTeArP4Dm8gJfwe1V9/e1nn58/avgD3q7D3oX34UP4GD6Fz+FL+Bq+he/hR/gZfg37s6/CHsFjeAJP4Rk8hxfw8j/+F7zHdng=AAAAAACAAAAAAAAAAAAAAACAAAAAAAAAAAAAAACAAAAAAAAA
   </AppendedData>
 </VTKFile>
 
-<!-- Created by Chaste version 2019.1.f4f9636 (with uncommitted modifications) on Fri, 06 Mar 2020 01:37:17 +0000.  Chaste was built on Wed, 04 Mar 2020 14:22:31 +0000 by machine (uname) 'Linux' using settings: Debug.  Checked-out project versions: AxelA=58358c550748fedf6088863782fdd77870262cc6; MorphoCellBasedComparison=16de33a9744c65327e83bc3f0c912a1b99f2ee7d; WoundHealingModelling=1930eacc2d9cfe5fc4c5864149aff32bed11defc.
+<!-- Created by Chaste version 2019.1.f4f9636 (with uncommitted modifications) on Fri, 27 Mar 2020 22:12:39 +0000.  Chaste was built on Mon, 02 Mar 2020 07:58:05 +0000 by machine (uname) 'Linux' using settings: Debug.  Checked-out project versions: AxelA=58358c550748fedf6088863782fdd77870262cc6; MorphoCellBasedComparison=16de33a9744c65327e83bc3f0c912a1b99f2ee7d; WoundHealingModelling=ab62ceb3b722a300de495ddcce971e860687ccc4.
 -->

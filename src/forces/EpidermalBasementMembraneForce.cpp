@@ -64,7 +64,7 @@ void EpidermalBasementMembraneForce::SetCutOffRadius(double cutOffRadius)
 	mCutOffRadius = cutOffRadius;
 }
 
-c_vector<double,2> EpidermalBasementMembraneForce::GetEpidermisHeightExtremes(AbstractCellPopulation<2>& rCellPopulation)
+c_vector<double,2> EpidermalBasementMembraneForce::GetEpidermisHeightExtremes(AbstractCellPopulation<2>& rCellPopulation, c_vector<double, 2> epidermalWidthExtremes)
 {
 	NodeBasedCellPopulation<2>* p_tissue = static_cast<NodeBasedCellPopulation<2>*>(&rCellPopulation);
 
@@ -76,7 +76,7 @@ c_vector<double,2> EpidermalBasementMembraneForce::GetEpidermisHeightExtremes(Ab
 	double min_height = 0.0; // This will make sense in a bit
 
 	// We will need the width extremes, actually
-	double max_width = GetEpidermisWidthExtremes(rCellPopulation)[0];
+	double max_width = epidermalWidthExtremes[0];
 
 	// To account for injury, we will consider the dermal fibroblast positions
 	// instead. The maximum height is found by 
@@ -165,17 +165,18 @@ c_vector<double,2> EpidermalBasementMembraneForce::GetEpidermisWidthExtremes(Abs
  * Method to calculate the tangent line at a point, based on approximating the epithelium positions
  * by a cosine curve.
  */
-c_vector<double, 2> EpidermalBasementMembraneForce::GetCosineBasedTangentVector(AbstractCellPopulation<2>& rCellPopulation, c_vector<double, 2> point)
+c_vector<double, 2> EpidermalBasementMembraneForce::GetCosineBasedTangentVector(AbstractCellPopulation<2>& rCellPopulation, 
+																				c_vector<double, 2> epidermalHeightExtremes,
+                                                            					c_vector<double, 2> epidermalWidthExtremes,
+																				c_vector<double, 2> point)
 {
 	// Get the minimal and maximal x-coordinates of epithelium
-	c_vector<double, 2> width_extremes = GetEpidermisWidthExtremes(rCellPopulation);
-	double max_width = width_extremes[0];
-	double min_width = width_extremes[1];
+	double max_width = epidermalWidthExtremes[0];
+	double min_width = epidermalWidthExtremes[1];
 
 	// Get the minimal and maximal y-coordinates of epithelium
-	c_vector<double, 2> height_extremes = GetEpidermisHeightExtremes(rCellPopulation);
-	double max_height = height_extremes[0];
-	double min_height = height_extremes[1];
+	double max_height = epidermalHeightExtremes[0];
+	double min_height = epidermalHeightExtremes[1];
 
 	// Define width of epidermis
 	double epidermis_width = max_width - min_width;
@@ -203,19 +204,21 @@ c_vector<double, 2> EpidermalBasementMembraneForce::GetCosineBasedTangentVector(
  * Return vector of Epidermal indices that are close to the considered Epidermal node,
  * but based on an approximated cosine approximation
  */
-std::vector<unsigned> EpidermalBasementMembraneForce::GetClosestNeighboursBasedOnCosineApproximation(AbstractCellPopulation<2>& rCellPopulation, unsigned epidermalIndex, double leftOrRight)
+std::vector<unsigned> EpidermalBasementMembraneForce::GetClosestNeighboursBasedOnCosineApproximation(AbstractCellPopulation<2>& rCellPopulation, 
+																									std::vector<unsigned> epidermalIndices,
+																									c_vector<double, 2> epidermalHeightExtremes,
+                                                            										c_vector<double, 2> epidermalWidthExtremes,
+																									unsigned epidermalIndex,
+																									double leftOrRight)
 {
 	// Initialise vector
 	std::vector<unsigned> closest_neighbours;
-
-	// Get the Epidermal indices
-	std::vector<unsigned> epidermal_indices = GetEpidermalIndices(rCellPopulation);
 
 	// Get the location of the Epidermal node
 	c_vector<double, 2> epidermal_location = rCellPopulation.GetNode(epidermalIndex)->rGetLocation();
 
 	// Get the tangent vector based on the cosine approximation
-	c_vector<double, 2> tangent_vector = GetCosineBasedTangentVector(rCellPopulation, epidermal_location);
+	c_vector<double, 2> tangent_vector = GetCosineBasedTangentVector(rCellPopulation, epidermalHeightExtremes, epidermalWidthExtremes, epidermal_location);
 
 	// We multiply the tangent vector by leftOrRight to account for whether we're looking at 
 	// 'left' or 'right' neighbours
@@ -225,9 +228,9 @@ std::vector<unsigned> EpidermalBasementMembraneForce::GetClosestNeighboursBasedO
 	double neighbourhood_radius = GetCutOffRadius();
 
 	// Sweep through the indices
-	for (unsigned i = 0; i < epidermal_indices.size(); i++)
+	for (unsigned i = 0; i < epidermalIndices.size(); i++)
 	{
-		unsigned neighbour_index = epidermal_indices[i];
+		unsigned neighbour_index = epidermalIndices[i];
 
 		if (neighbour_index != epidermalIndex)
 		{
@@ -249,19 +252,29 @@ std::vector<unsigned> EpidermalBasementMembraneForce::GetClosestNeighboursBasedO
  * Return the nearest neighbour based on vector projections from the tangent vector
  * at a point along the cosine approximation of the epithelium.
  */
-unsigned EpidermalBasementMembraneForce::GetNearestNeighbourAlongCosineApproximation(AbstractCellPopulation<2>& rCellPopulation, unsigned epidermalIndex, double leftOrRight)
+unsigned EpidermalBasementMembraneForce::GetNearestNeighbourAlongCosineApproximation(AbstractCellPopulation<2>& rCellPopulation, 
+																					std::vector<unsigned> epidermalIndices,
+																					c_vector<double, 2> epidermalHeightExtremes,
+																					c_vector<double, 2> epidermalWidthExtremes,
+																					unsigned epidermalIndex,
+																					double leftOrRight)
 {
 	double min_scalar_projection = DBL_MAX;
 	double min_projection_index = 0;
 
 	// Get the closest neighbours, based on the cosine approximation
-	std::vector<unsigned> closest_neighbours = GetClosestNeighboursBasedOnCosineApproximation(rCellPopulation, epidermalIndex, leftOrRight);
+	std::vector<unsigned> closest_neighbours = GetClosestNeighboursBasedOnCosineApproximation(rCellPopulation, 
+																								epidermalIndices,
+																								epidermalHeightExtremes,
+																								epidermalWidthExtremes,
+																								epidermalIndex,
+																								leftOrRight);
 
 	// Get the location of the considered Epidermal node
 	c_vector<double, 2> epidermal_location = rCellPopulation.GetNode(epidermalIndex)->rGetLocation();
 
 	// Calculate the tangent vector at the Epidermal node
-	c_vector<double, 2> tangent_vector = GetCosineBasedTangentVector(rCellPopulation, epidermal_location);
+	c_vector<double, 2> tangent_vector = GetCosineBasedTangentVector(rCellPopulation, epidermalHeightExtremes, epidermalWidthExtremes, epidermal_location);
 
 	for (unsigned i = 0; i < closest_neighbours.size(); i++)
 	{
@@ -461,50 +474,30 @@ std::vector<unsigned> EpidermalBasementMembraneForce::GetNeighbouringEpidermalIn
 	return neighbouring_epidermal_indices;
 }
 
-// Method to check if node is left or right-most cell
-bool EpidermalBasementMembraneForce::IsBoundaryNode(AbstractCellPopulation<2>& rCellPopulation, unsigned nodeIndex)
-{
-	bool is_boundary_node = false;
-
-	//Get the Epidermal indices
-	std::vector<unsigned> epidermal_indices = GetEpidermalIndices(rCellPopulation);
-	unsigned num_epidermal_nodes = epidermal_indices.size();
-
-	std::vector<std::pair<double, unsigned> > epidermal_indices_and_x_coordinates; //Define vector of pairs, so that we may sort by the x-coordinate
-
-	for (unsigned i = 0; i < epidermal_indices.size(); i++)
-	{
-		unsigned epidermal_index = epidermal_indices[i]; //Get node index
-		double epidermal_x_coordinate = rCellPopulation.GetNode(epidermal_index)->rGetLocation()[0]; //Get x-coordinate of node location
-
-		//Make pair
-		std::pair<double, unsigned> x_coordinate_and_index = std::make_pair(epidermal_x_coordinate, epidermal_index);
-
-		epidermal_indices_and_x_coordinates.push_back(x_coordinate_and_index);
-	}
-
-	//Sort indices by the x-coordinate
-	std::sort(epidermal_indices_and_x_coordinates.begin(), epidermal_indices_and_x_coordinates.end());
-
-	// If the index corresponds to the first or last index, it has to be one of the boundary nodes
-	if ( (nodeIndex == epidermal_indices_and_x_coordinates[0].second)||(nodeIndex == epidermal_indices_and_x_coordinates[num_epidermal_nodes - 1].second) )
-	{
-		is_boundary_node = true;
-	}
-
-	return is_boundary_node;
-}
-
 //Method to calculate the force due to the basement membrane on an Epidermal cell
-c_vector<double, 2> EpidermalBasementMembraneForce::CalculateForceDueToBasementMembrane(AbstractCellPopulation<2>& rCellPopulation, std::vector<unsigned> epiderdmalIndices, unsigned nodeIndex)
+c_vector<double, 2> EpidermalBasementMembraneForce::CalculateForceDueToBasementMembrane(AbstractCellPopulation<2>& rCellPopulation, 
+																						std::vector<unsigned> epidermalIndices,
+																						c_vector<double, 2> epidermalHeightExtremes,
+                                                            							c_vector<double, 2> epidermalWidthExtremes, 
+																						unsigned nodeIndex)
 {
 
 	// Get the considered node's location
 	c_vector<double, 2> centre_point = rCellPopulation.GetNode(nodeIndex)->rGetLocation();
 
 	//Get the left and neighbours of the node index, based on the cosine approximation of the dermal interface.
-	std::vector<unsigned> closest_left_neighbours = GetClosestNeighboursBasedOnCosineApproximation(rCellPopulation, nodeIndex, -1.0);
-	std::vector<unsigned> closest_right_neighbours = GetClosestNeighboursBasedOnCosineApproximation(rCellPopulation, nodeIndex, 1.0);
+	std::vector<unsigned> closest_left_neighbours = GetClosestNeighboursBasedOnCosineApproximation(rCellPopulation, 
+																									epidermalIndices,
+																									epidermalHeightExtremes,
+																									epidermalWidthExtremes,
+																									nodeIndex,
+																									-1.0);
+	std::vector<unsigned> closest_right_neighbours = GetClosestNeighboursBasedOnCosineApproximation(rCellPopulation,
+																									epidermalIndices,
+																									epidermalHeightExtremes,
+																									epidermalWidthExtremes,
+																									nodeIndex,
+																									1.0);
 
 	// Initialise the left and right node indices and left and right points
 	c_vector<double, 2> left_point, right_point; 
@@ -512,8 +505,18 @@ c_vector<double, 2> EpidermalBasementMembraneForce::CalculateForceDueToBasementM
 	if ( (!closest_left_neighbours.empty())&&(!closest_right_neighbours.empty()) )
 	{
 		// Get the indices
-		unsigned left_node_index = GetNearestNeighbourAlongCosineApproximation(rCellPopulation, nodeIndex, -1.0);
-		unsigned right_node_index = GetNearestNeighbourAlongCosineApproximation(rCellPopulation, nodeIndex, 1.0);
+		unsigned left_node_index = GetNearestNeighbourAlongCosineApproximation(rCellPopulation, 
+																				epidermalIndices,
+																				epidermalHeightExtremes,
+																				epidermalWidthExtremes,
+																				nodeIndex,
+																				-1.0);
+		unsigned right_node_index = GetNearestNeighbourAlongCosineApproximation(rCellPopulation,
+																				epidermalIndices,
+																				epidermalHeightExtremes,
+																				epidermalWidthExtremes,
+																				nodeIndex,
+																				1.0);
 
 		// Get the points
 		left_point = rCellPopulation.GetNode(left_node_index)->rGetLocation();
@@ -522,7 +525,12 @@ c_vector<double, 2> EpidermalBasementMembraneForce::CalculateForceDueToBasementM
 	else if ( (!closest_left_neighbours.empty())&&(closest_right_neighbours.empty()) )// No right neighbour, but there is a left neighbour
 	{
 		// Get the left index and point
-		unsigned left_node_index = GetNearestNeighbourAlongCosineApproximation(rCellPopulation, nodeIndex, -1.0);
+		unsigned left_node_index = GetNearestNeighbourAlongCosineApproximation(rCellPopulation, 
+																				epidermalIndices,
+																				epidermalHeightExtremes,
+																				epidermalWidthExtremes,
+																				nodeIndex,
+																				-1.0);
 		left_point = rCellPopulation.GetNode(left_node_index)->rGetLocation();
 
 		// Obtain the right neighbour by rotating the vector from the centre node to the left node.
@@ -561,7 +569,12 @@ c_vector<double, 2> EpidermalBasementMembraneForce::CalculateForceDueToBasementM
 	else if ( (closest_left_neighbours.empty())&&(!closest_right_neighbours.empty()) )// No left neighbour, but there is a right neighbour
 	{
 		// Get the right index and point
-		unsigned right_node_index = GetNearestNeighbourAlongCosineApproximation(rCellPopulation, nodeIndex, 1.0);
+		unsigned right_node_index = GetNearestNeighbourAlongCosineApproximation(rCellPopulation,
+																				epidermalIndices,
+																				epidermalHeightExtremes,
+																				epidermalWidthExtremes,
+																				nodeIndex,
+																				1.0);
 		right_point = rCellPopulation.GetNode(right_node_index)->rGetLocation();
 
 		// Obtain the left neighbour by rotating the vector from the centre node to the left node.
@@ -672,13 +685,17 @@ void EpidermalBasementMembraneForce::AddForceContribution(AbstractCellPopulation
 	//Get the epidermal indices
 	std::vector<unsigned> epidermal_indices = GetEpidermalIndices(rCellPopulation);
 
+	// Get the epidermal width and height extremes
+	c_vector<double, 2> epidermis_widths = GetEpidermisWidthExtremes(rCellPopulation);
+	c_vector<double, 2> epidermis_heights = GetEpidermisHeightExtremes(rCellPopulation, epidermis_widths);
+
 	// Iterate over each node and apply the force
 	for (unsigned i = 0; i < epidermal_indices.size(); i++)
 	{
 		unsigned epidermal_index = epidermal_indices[i];
 
 		// Calculate the basement membrane force
-		c_vector<double, 2> force_on_node = CalculateForceDueToBasementMembrane(rCellPopulation, epidermal_indices, epidermal_index);
+		c_vector<double, 2> force_on_node = CalculateForceDueToBasementMembrane(rCellPopulation, epidermal_indices, epidermis_heights, epidermis_widths, epidermal_index);
 
 		// // Apply the force
 		rCellPopulation.GetNode(epidermal_index)->AddAppliedForceContribution(force_on_node);
