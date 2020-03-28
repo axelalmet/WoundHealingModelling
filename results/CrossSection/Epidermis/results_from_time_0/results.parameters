@@ -42,7 +42,7 @@
 
 	<CellKillers>
 		<BasementMembraneDistanceBasedCellKiller>
-			<mRadius>3.4641</mRadius>
+			<mRadius>3.2909</mRadius>
 		</BasementMembraneDistanceBasedCellKiller>
 	</CellKillers>
 
