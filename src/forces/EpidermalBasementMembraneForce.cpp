@@ -612,6 +612,7 @@ c_vector<double, 2> EpidermalBasementMembraneForce::CalculateForceDueToBasementM
 	}
 	else // Hopefully this never happens. We COULD deal with this, but it really shouldn't happen.
 	{
+		PRINT_VARIABLE(1.0);
 		EXCEPTION("Epidermal cell is isolated and has no neighbours.");
 	}
 

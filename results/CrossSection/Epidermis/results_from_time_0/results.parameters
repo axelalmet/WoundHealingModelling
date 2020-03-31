@@ -2,8 +2,8 @@
 
 	<OffLatticeSimulation-2-2>
 		<Dt>0.005</Dt>
-		<EndTime>10</EndTime>
-		<SamplingTimestepMultiple>200</SamplingTimestepMultiple>
+		<EndTime>40</EndTime>
+		<SamplingTimestepMultiple>400</SamplingTimestepMultiple>
 		<OutputDivisionLocations>0</OutputDivisionLocations>
 		<OutputCellVelocities>0</OutputCellVelocities>
 	</OffLatticeSimulation-2-2>
@@ -13,8 +13,8 @@
 		<UseVariableRadii>0</UseVariableRadii>
 		<MeinekeDivisionSeparation>0.1</MeinekeDivisionSeparation>
 		<CentreBasedDivisionRule>
-			<RandomDirectionCentreBasedDivisionRule-2-2>
-			</RandomDirectionCentreBasedDivisionRule-2-2>
+			<RandomSymmetricDivisionBasedDivisionRule-2-2>
+			</RandomSymmetricDivisionBasedDivisionRule-2-2>
 		</CentreBasedDivisionRule>
 		<DampingConstantNormal>1</DampingConstantNormal>
 		<DampingConstantMutant>1</DampingConstantMutant>
@@ -55,14 +55,14 @@
 
 	<Forces>
 		<GeneralisedLinearSpringForce-2-2>
-			<MeinekeSpringStiffness>50</MeinekeSpringStiffness>
+			<MeinekeSpringStiffness>30</MeinekeSpringStiffness>
 			<MeinekeDivisionRestingSpringLength>0.5</MeinekeDivisionRestingSpringLength>
 			<MeinekeSpringGrowthDuration>1</MeinekeSpringGrowthDuration>
 			<UseCutOffLength>1</UseCutOffLength>
 			<CutOffLength>1.5</CutOffLength>
 		</GeneralisedLinearSpringForce-2-2>
 		<EpidermalBasementMembraneForce>
-			<BasementMembraneParameter>6</BasementMembraneParameter> 
+			<BasementMembraneParameter>5</BasementMembraneParameter> 
 			<TargetCurvature>0</TargetCurvature> 
 		</EpidermalBasementMembraneForce>
 	</Forces>

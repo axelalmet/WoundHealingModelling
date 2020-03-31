@@ -20,6 +20,7 @@
 #include "GrowthFactorBasedContactInhibitionCellCycleModel.hpp" // Cell cycle for fibroblasts that is dependent on exposure to wound-derived growth factors
 #include "FibroblastStateDependentCollagenSrnModel.hpp"
 #include "NodeBasedCellPopulation.hpp" // Overlapping spheres centre-based population
+#include "RandomSymmetricDivisionBasedDivisionRule.hpp" // Symmetric and asymmetric division rule
 #include "Cylindrical2dNodesOnlyMesh.hpp" // Mesh with periodic vertical boundaries
 #include "CellDataItemWriter.hpp" // Allows us to track different cell data items
 #include "ParabolicGrowingDomainWithCellDeathPdeModifier.hpp" // Modifier to track PDE solutions
@@ -47,9 +48,9 @@
 
 static const std::string M_OUTPUT_DIRECTORY = "WoundHealingModel/CrossSection";
 static const double M_DT = 0.005;
-static const double M_END_TIME = 10.0;
-// static const double M_SAMPLING_TIMESTEP = M_END_TIME / M_DT;
-static const double M_SAMPLING_TIMESTEP = 1.0/M_DT;
+static const double M_END_TIME = 40.0;
+// static const double M_SAMPLING_TIMESTEP = 0.1*M_END_TIME / M_DT;
+static const double M_SAMPLING_TIMESTEP = 2.0/M_DT;
 
 /*
 * A test model to study the various components that we think should be incorporated
@@ -71,12 +72,15 @@ public:
         double division_separation = 0.1; // Initial resting length upon division
 
         // Mechanical parameters
-        double spring_stiffness = 50.0; // Spring stiffness
-        double bm_stiffness = 6.0; // Basement membrane attachment strength
+        double spring_stiffness = 30.0; // Spring stiffness
+        double bm_stiffness = 5.0; // Basement membrane attachment strength
         double target_curvature = 0.0; // Target curvature
 
         // Set the probability of being an EPF fibroblast.
         double epf_fibroblast_probability = 0.8;
+
+        // Set the probability of symmetric division
+        // double symmetric_division_probability = 0.5;
 
         HoneycombMeshGenerator generator(cells_across, cells_up, 0); //Create mesh
         MutableMesh<2, 2>* p_generating_mesh = generator.GetMesh(); //Generate mesh
@@ -84,7 +88,6 @@ public:
         // Construct a periodic mesh
         Cylindrical2dNodesOnlyMesh* p_mesh = new Cylindrical2dNodesOnlyMesh(1.0*cells_across);
 		p_mesh->ConstructNodesWithoutMesh(*p_generating_mesh, 5.0); //Construct mesh
-
 
         //Create shared pointers for cell and mutation states
         // boost::shared_ptr<AbstractCellProperty> p_diff_type(CellPropertyRegistry::Instance()->Get<DifferentiatedCellProliferativeType>());
@@ -154,8 +157,11 @@ public:
 
         //Create cell population
         NodeBasedCellPopulation<2> cell_population(*p_mesh, cells); // Used for periodic
-        // NodeBasedCellPopulation<2> cell_population(mesh, cells); // Used for non-periodic
         cell_population.SetMeinekeDivisionSeparation(division_separation);
+
+        // Set a custom cell division rule 
+        // boost::shared_ptr<AbstractCentreBasedDivisionRule<2,2> > p_symmetric_division_rule(new RandomSymmetricDivisionBasedDivisionRule<2,2>(symmetric_division_probability));
+        // cell_population.SetCentreBasedDivisionRule(p_symmetric_division_rule);
 
         //Get the maximum width so we know where to apply the right BC.
         double min_width = 0.0;
@@ -266,7 +272,7 @@ public:
 
         // Create a modifier to track which cells are attached to the basement membrane.
         MAKE_PTR(BasementMembraneAttachmentTrackingModifier<2>, p_bm_attachment_tracking_modifier);
-        p_bm_attachment_tracking_modifier->SetNeighbourhoodRadius(radius_of_interaction);
+        p_bm_attachment_tracking_modifier->SetNeighbourhoodRadius(1.1);
 		simulator.AddSimulationModifier(p_bm_attachment_tracking_modifier);
 
         // Add a cell killer to remove differentiated cells that are too far from the basement membrane.
