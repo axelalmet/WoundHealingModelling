@@ -50,7 +50,7 @@ static const std::string M_OUTPUT_DIRECTORY = "WoundHealingModel/CrossSection";
 static const double M_DT = 0.005;
 static const double M_END_TIME = 40.0;
 // static const double M_SAMPLING_TIMESTEP = 0.1*M_END_TIME / M_DT;
-static const double M_SAMPLING_TIMESTEP = 2.0/M_DT;
+static const double M_SAMPLING_TIMESTEP = 5.0/M_DT;
 
 /*
 * A test model to study the various components that we think should be incorporated
@@ -64,15 +64,15 @@ public:
     {
 
         //Set the number of cells across and down for the array
-        unsigned cells_across = 25;
-        unsigned cells_up = 10;
+        unsigned cells_across = 20;
+        unsigned cells_up = 8;
 
         // Set some parameters for node-based cell populations
         double radius_of_interaction = 1.5; // Radius of interaction to determine neighbourhoods
         double division_separation = 0.1; // Initial resting length upon division
 
         // Mechanical parameters
-        double spring_stiffness = 30.0; // Spring stiffness
+        double spring_stiffness = 25.0; // Spring stiffness
         double bm_stiffness = 5.0; // Basement membrane attachment strength
         double target_curvature = 0.0; // Target curvature
 
@@ -80,7 +80,7 @@ public:
         double epf_fibroblast_probability = 0.8;
 
         // Set the probability of symmetric division
-        // double symmetric_division_probability = 0.5;
+        double symmetric_division_probability = 1.0;
 
         HoneycombMeshGenerator generator(cells_across, cells_up, 0); //Create mesh
         MutableMesh<2, 2>* p_generating_mesh = generator.GetMesh(); //Generate mesh
@@ -159,9 +159,9 @@ public:
         NodeBasedCellPopulation<2> cell_population(*p_mesh, cells); // Used for periodic
         cell_population.SetMeinekeDivisionSeparation(division_separation);
 
-        // Set a custom cell division rule 
-        // boost::shared_ptr<AbstractCentreBasedDivisionRule<2,2> > p_symmetric_division_rule(new RandomSymmetricDivisionBasedDivisionRule<2,2>(symmetric_division_probability));
-        // cell_population.SetCentreBasedDivisionRule(p_symmetric_division_rule);
+        // // Set a custom cell division rule 
+        boost::shared_ptr<AbstractCentreBasedDivisionRule<2,2> > p_symmetric_division_rule(new RandomSymmetricDivisionBasedDivisionRule<2,2>(symmetric_division_probability));
+        cell_population.SetCentreBasedDivisionRule(p_symmetric_division_rule);
 
         //Get the maximum width so we know where to apply the right BC.
         double min_width = 0.0;
@@ -208,7 +208,7 @@ public:
             {
                 BasementMembraneBasedContactInhibitionCellCycleModel* p_cycle_model = new BasementMembraneBasedContactInhibitionCellCycleModel(); //Contact-inhibition-based cycle model yet.
                 p_cycle_model->SetEquilibriumVolume(0.25*M_PI);
-                p_cycle_model->SetQuiescentVolumeFraction(0.8);
+                p_cycle_model->SetQuiescentVolumeFraction(0.85);
                 p_cycle_model->SetStemCellG1Duration(1.0);
                 p_cycle_model->SetDimension(2);
 
@@ -249,7 +249,7 @@ public:
         p_spring_force->SetCutOffLength(radius_of_interaction);
         simulator.AddForce(p_spring_force);
 
-        //  Add basement membrane force
+        // Add basement membrane force
         MAKE_PTR(EpidermalBasementMembraneForce, p_bm_force);
         p_bm_force->SetBasementMembraneParameter(bm_stiffness);
         p_bm_force->SetTargetCurvature(target_curvature);
@@ -272,7 +272,7 @@ public:
 
         // Create a modifier to track which cells are attached to the basement membrane.
         MAKE_PTR(BasementMembraneAttachmentTrackingModifier<2>, p_bm_attachment_tracking_modifier);
-        p_bm_attachment_tracking_modifier->SetNeighbourhoodRadius(1.1);
+        p_bm_attachment_tracking_modifier->SetNeighbourhoodRadius(radius_of_interaction);
 		simulator.AddSimulationModifier(p_bm_attachment_tracking_modifier);
 
         // Add a cell killer to remove differentiated cells that are too far from the basement membrane.

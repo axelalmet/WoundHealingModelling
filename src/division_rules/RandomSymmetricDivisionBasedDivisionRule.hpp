@@ -51,7 +51,7 @@ template<unsigned ELEMENT_DIM, unsigned SPACE_DIM> class AbstractCentreBasedDivi
  * either roughly parallel to the basement membrane, which will be symmetric,
  * or roughly perpendicular to the basement membrane.
  */
-template<unsigned ELEMENT_DIM, unsigned SPACE_DIM=ELEMENT_DIM>
+template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
 class RandomSymmetricDivisionBasedDivisionRule : public AbstractCentreBasedDivisionRule<ELEMENT_DIM, SPACE_DIM>
 {
 private:
@@ -96,12 +96,12 @@ public:
     const double& rGetSymmetricDivisionProbability() const;
 
     /*
-     * Return closest fibroblast index to the considered epidermal index
+     * Return two closest fibroblast indices to the considered epidermal index
      * 
      * @param rCellPopulation the cell population
      * @param epidermalIndex the considered epidermal node index
      */
-    unsigned GetNearestFibroblastNeighbour(AbstractCentreBasedCellPopulation<ELEMENT_DIM, SPACE_DIM>& rCellPopulation, unsigned epidermalIndex);
+    c_vector<unsigned, 2> GetTwoNearestFibroblastNeighbours(AbstractCentreBasedCellPopulation<ELEMENT_DIM, SPACE_DIM>& rCellPopulation, unsigned epidermalIndex);
 
     /**
      * Overridden CalculateCellDivisionVector() method.

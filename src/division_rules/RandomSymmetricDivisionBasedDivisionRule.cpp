@@ -38,6 +38,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "NodeBasedCellPopulation.hpp"
 #include "FibroblastCellProliferativeType.hpp"
 #include "StemCellProliferativeType.hpp"
+#include "Debug.hpp"
 
 
 template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
@@ -62,10 +63,14 @@ const double& RandomSymmetricDivisionBasedDivisionRule<ELEMENT_DIM, SPACE_DIM>::
 * @param epidermalIndex the considered epidermal node index
 */
 template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
-unsigned RandomSymmetricDivisionBasedDivisionRule<ELEMENT_DIM, SPACE_DIM>::GetNearestFibroblastNeighbour(AbstractCentreBasedCellPopulation<ELEMENT_DIM, SPACE_DIM>& rCellPopulation, unsigned epidermalIndex)
+c_vector<unsigned, 2> RandomSymmetricDivisionBasedDivisionRule<ELEMENT_DIM, SPACE_DIM>::GetTwoNearestFibroblastNeighbours(AbstractCentreBasedCellPopulation<ELEMENT_DIM, SPACE_DIM>& rCellPopulation, unsigned epidermalIndex)
 {
     double min_fibroblast_distance = DBL_MAX;
+    double second_min_fibroblast_distance = min_fibroblast_distance;
 	unsigned closest_fibroblast_index = 0;
+    unsigned second_closest_fibroblast_index = closest_fibroblast_index;
+
+    c_vector<unsigned, 2> closest_fibroblast_indices;
 
 	// Get the location of the considered Epidermal node
 	c_vector<double, SPACE_DIM> epidermal_location = rCellPopulation.GetNode(epidermalIndex)->rGetLocation();
@@ -75,8 +80,9 @@ unsigned RandomSymmetricDivisionBasedDivisionRule<ELEMENT_DIM, SPACE_DIM>::GetNe
 	{
 		// NodeBasedCellPopulation<SPACE_DIM>* p_tissue = static_cast<NodeBasedCellPopulation<SPACE_DIM>*>(&rCellPopulation);
 
+        CellPtr p_cell = rCellPopulation.GetCellUsingLocationIndex(epidermalIndex);
 		// Find the indices of the elements owned by this node
-		std::set<unsigned> neighbouring_indices = rCellPopulation.GetNeighbouringNodeIndices(epidermalIndex);
+        std::set<unsigned> neighbouring_indices = rCellPopulation.GetNeighbouringLocationIndices(p_cell);
 
 		// Iterate over these elements
 		for (std::set<unsigned>::iterator elem_iter = neighbouring_indices.begin();
@@ -94,19 +100,34 @@ unsigned RandomSymmetricDivisionBasedDivisionRule<ELEMENT_DIM, SPACE_DIM>::GetNe
 			{
 				
 				c_vector<double, 2> fibroblast_location = rCellPopulation.GetNode(*elem_iter)->rGetLocation();
+                unsigned fibroblast_index = rCellPopulation.GetNode(*elem_iter)->GetIndex();
 
-				// By the end of this loop, we should end up with the closest fibroblast neighbour
+				// By the end of this loop, we should end up with the two closest fibroblast neighbour
+
+                // Update first-closest fibroblast index
 				if (norm_2(fibroblast_location - epidermal_location) < min_fibroblast_distance)
 				{
+                    second_min_fibroblast_distance = min_fibroblast_distance;
+                    second_closest_fibroblast_index = closest_fibroblast_index;
+
 					min_fibroblast_distance = norm_2(fibroblast_location - epidermal_location);
-					closest_fibroblast_index = rCellPopulation.GetNode(*elem_iter)->GetIndex(); // Roundabout way of storing the index, as we can't convert the iterator to an unsigned
+					closest_fibroblast_index = fibroblast_index; // Roundabout way of storing the index, as we can't convert the iterator to an unsigned
 				}
+                // Second-closest index (must be distinct)//
+                else if ( (fibroblast_index != closest_fibroblast_index)&&(norm_2(fibroblast_location - epidermal_location) < second_min_fibroblast_distance) )
+                {
+                    second_min_fibroblast_distance = norm_2(fibroblast_location - epidermal_location);
+					second_closest_fibroblast_index = fibroblast_index; // Roundabout way of storing the index, as we can't convert the iterator to an unsigned
+                }
 			}
 
 		}
 	}
 
-	return closest_fibroblast_index;
+    closest_fibroblast_indices[0] = closest_fibroblast_index;
+    closest_fibroblast_indices[1] = second_closest_fibroblast_index;
+
+	return closest_fibroblast_indices;
 
 }
 
@@ -131,54 +152,57 @@ std::pair<c_vector<double, SPACE_DIM>, c_vector<double, SPACE_DIM> > RandomSymme
             // Get the cell location index
             unsigned parent_cell_index = rCellPopulation.GetLocationIndexUsingCell(pParentCell);
 
-            // Determine where the nearest fibroblast neighbour is
-            unsigned nearest_fibroblast_index = GetNearestFibroblastNeighbour(rCellPopulation, parent_cell_index);
+            // Determine where the two nearest fibroblast neighbours are
+            c_vector<unsigned, 2> nearest_fibroblast_indices = GetTwoNearestFibroblastNeighbours(rCellPopulation, parent_cell_index);
+
 
             // Get the locations of the cells
             c_vector<double, SPACE_DIM> stem_position = rCellPopulation.GetLocationOfCellCentre(pParentCell); // Parent cell
 
-            c_vector<double, SPACE_DIM> fibroblast_position = rCellPopulation.GetNode(nearest_fibroblast_index)->rGetLocation(); // Fibroblast
+            c_vector<double, SPACE_DIM> left_fibroblast_position = rCellPopulation.GetNode(nearest_fibroblast_indices[0])->rGetLocation(); // "left" fibroblast
+            c_vector<double, SPACE_DIM> right_fibroblast_position = rCellPopulation.GetNode(nearest_fibroblast_indices[1])->rGetLocation(); // "right" fibroblast
 
-            // Get the vector between the two
-            c_vector<double, SPACE_DIM> fibroblast_to_stem = stem_position - fibroblast_position;
+            // Get the initial division vector
+            c_vector<double, SPACE_DIM> mean_fibroblast_position = right_fibroblast_position + 0.5*rCellPopulation.rGetMesh().GetVectorFromAtoB(right_fibroblast_position, left_fibroblast_position); // Average the two fibroblast positions
             
-            fibroblast_to_stem /= norm_2(fibroblast_to_stem); // Normalise the vector
+            c_vector<double, SPACE_DIM> initial_division_vector = rCellPopulation.rGetMesh().GetVectorFromAtoB(mean_fibroblast_position, stem_position);
+            initial_division_vector /= norm_2(initial_division_vector); // Normalise the vector
 
             /* If the probability is less than mSymmetricDivisionProbability, the division direction is
             * roughly parallel to the basement membrane. If not, the division direction is roughly
             * perpendicular to the basement membrane.
             */
-
             double division_probability = RandomNumberGenerator::Instance()->ranf();
 
             double symmetric_division_probability = mSymmetricDivisionProbability;
 
             // Initialise parent and daughter positions
-            c_vector<double, SPACE_DIM> parent_position, daughter_position;
-
+            c_vector<double, SPACE_DIM> parent_position, daughter_position, division_vector;
 
             if (division_probability < symmetric_division_probability)
             {
-                // Rotate the division direction 90 degrees
-                c_vector<double, SPACE_DIM> division_vector;
+                // Rotate the initial division direction by 90 degrees
+                division_vector[0] = -initial_division_vector[1];
+                division_vector[1] = initial_division_vector[0];
 
-                division_vector(0) = -fibroblast_to_stem(1);
-                division_vector(1) = fibroblast_to_stem(0);
-
-                parent_position = stem_position - 0.5*division_vector;
-                daughter_position = stem_position + 0.5*division_vector;
+                parent_position = stem_position - 0.5*separation*division_vector;
+                daughter_position = stem_position + 0.5*separation*division_vector;
 
             }
-            else // Division direction is perpendicular to basement membrane, i.e. from fibroblast to stem cell
+            else // Division direction is perpendicular to basement membrane, i.e. from fibroblast to stem cell, 
             {
+                // Division is the same as the initial division vector
+                division_vector = initial_division_vector; 
+
                 parent_position = stem_position;
 
-                daughter_position = stem_position + separation*fibroblast_to_stem;
+                daughter_position = stem_position + separation*division_vector;
             }
 
             // Division division pair
             positions.first = parent_position;
             positions.second = daughter_position;
+
         }
         else // Essentially for anything not a stem cell 
         {
@@ -245,12 +269,12 @@ std::pair<c_vector<double, SPACE_DIM>, c_vector<double, SPACE_DIM> > RandomSymme
 }
 
 // Explicit instantiation
-template class RandomSymmetricDivisionBasedDivisionRule<1,1>;
-template class RandomSymmetricDivisionBasedDivisionRule<1,2>;
-template class RandomSymmetricDivisionBasedDivisionRule<2,2>;
-template class RandomSymmetricDivisionBasedDivisionRule<1,3>;
-template class RandomSymmetricDivisionBasedDivisionRule<2,3>;
-template class RandomSymmetricDivisionBasedDivisionRule<3,3>;
+template class RandomSymmetricDivisionBasedDivisionRule<1, 1>;
+template class RandomSymmetricDivisionBasedDivisionRule<1, 2>;
+template class RandomSymmetricDivisionBasedDivisionRule<1, 3>;
+template class RandomSymmetricDivisionBasedDivisionRule<2, 2>;
+template class RandomSymmetricDivisionBasedDivisionRule<2, 3>;
+template class RandomSymmetricDivisionBasedDivisionRule<3, 3>;
 
 // Serialization for Boost >= 1.36
 #include "SerializationExportWrapperForCpp.hpp"

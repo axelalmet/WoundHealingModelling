@@ -1,5 +1,5 @@
-#ifndef EPIDERMALBASEMENTMEMBRANEFORCE_HPP_
-#define EPIDERMALBASEMENTMEMBRANEFORCE_HPP_
+#ifndef DISTANCEBASEDEPIDERMALBASEMENTMEMBRANEFORCE_HPP_
+#define DISTANCEBASEDEPIDERMALBASEMENTMEMBRANEFORCE_HPP_
 
 #include "ChasteSerialization.hpp"
 #include <boost/serialization/base_object.hpp>
@@ -19,7 +19,7 @@
  * A force class that defines the force due to the basement membrane.
  */
 
-class EpidermalBasementMembraneForce : public AbstractForce<2>
+class DistanceBasedEpidermalBasementMembraneForce : public AbstractForce<2>
 {
     friend class TestCrossSectionModelInteractionForce;
 
@@ -58,12 +58,12 @@ public :
     /**
      * Constructor.
      */
-	EpidermalBasementMembraneForce();
+	DistanceBasedEpidermalBasementMembraneForce();
 
     /**
      * Destructor.
      */
-    ~EpidermalBasementMembraneForce();
+    ~DistanceBasedEpidermalBasementMembraneForce();
 
     /* Set method for Basement Membrane Parameter
      */
@@ -128,7 +128,7 @@ public :
      * @param rCellPopulation the cell population
      * @param epidermalIndex the considered epidermal node index
      */
-    c_vector<unsigned,2> GetTwoNearestFibroblastNeighbours(AbstractCellPopulation<2>& rCellPopulation, unsigned epidermalIndex);
+    unsigned GetNearestFibroblastNeighbour(AbstractCellPopulation<2>& rCellPopulation, unsigned epidermalIndex);
 
     /* Get method for cut off radius */
     double GetCutOffRadius();
@@ -182,6 +182,6 @@ public :
 };
 
 #include "SerializationExportWrapper.hpp"
-CHASTE_CLASS_EXPORT(EpidermalBasementMembraneForce)
+CHASTE_CLASS_EXPORT(DistanceBasedEpidermalBasementMembraneForce)
 
-#endif /*EPIDERMALBASEMENTMEMBRANEFORCE_HPP_*/
+#endif /*DistanceBasedEpidermalBasementMembraneForce_HPP_*/
