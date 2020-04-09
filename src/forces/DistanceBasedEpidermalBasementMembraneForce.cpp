@@ -1,4 +1,4 @@
-	#include "DistanceBasedEpidermalBasementMembraneForce.hpp"
+#include "DistanceBasedEpidermalBasementMembraneForce.hpp"
 #include "NodeBasedCellPopulation.hpp"
 #include "StemCellProliferativeType.hpp"
 #include "FibroblastCellProliferativeType.hpp"
@@ -236,8 +236,10 @@ std::vector<unsigned> DistanceBasedEpidermalBasementMembraneForce::GetClosestNei
 		{
 			c_vector<double, 2> neighbour_location = rCellPopulation.GetNode(neighbour_index)->rGetLocation();
 
-			if ((norm_2(neighbour_location - epidermal_location) < neighbourhood_radius + 0.5) // Is the neighbour reasonably close
-					&&(inner_prod(neighbour_location - epidermal_location, tangent_vector) > 0.0 ) ) // Is the neighbour pointing in the same direction as the tangent vector
+			c_vector<double, 2> node_to_neighbour = rCellPopulation.rGetMesh().GetVectorFromAtoB(epidermal_location, neighbour_location);
+
+			if ((norm_2(node_to_neighbour) < neighbourhood_radius + 0.5) // Is the neighbour reasonably close
+					&&(inner_prod(node_to_neighbour, tangent_vector) > 0.0 ) ) // Is the neighbour pointing in the same direction as the tangent vector
 			{
 				closest_neighbours.push_back(neighbour_index);
 			}
@@ -282,8 +284,10 @@ unsigned DistanceBasedEpidermalBasementMembraneForce::GetNearestNeighbourAlongCo
 		unsigned neighbour_index = closest_neighbours[i];
 		c_vector<double, 2> neighbour_location = rCellPopulation.GetNode(neighbour_index)->rGetLocation();
 
+		c_vector<double, 2> node_to_neighbour = rCellPopulation.rGetMesh().GetVectorFromAtoB(epidermal_location, neighbour_location);
+
 		// Get the scalar projection of the relative position vector onto the tangent vector
-		double scalar_projection = inner_prod(neighbour_location - epidermal_location, tangent_vector)/norm_2(tangent_vector);
+		double scalar_projection = inner_prod(node_to_neighbour, tangent_vector)/norm_2(tangent_vector);
 
 		if (scalar_projection < min_scalar_projection)
 		{
@@ -299,10 +303,16 @@ unsigned DistanceBasedEpidermalBasementMembraneForce::GetNearestNeighbourAlongCo
  * Return the nearest neighbour based on vector projections from the tangent vector
  * at a point along the cosine approximation of the epithelium.
  */
-unsigned DistanceBasedEpidermalBasementMembraneForce::GetNearestFibroblastNeighbour(AbstractCellPopulation<2>& rCellPopulation, unsigned epidermalIndex)
+c_vector<unsigned, 2> DistanceBasedEpidermalBasementMembraneForce::GetTwoNearestFibroblastNeighbours(AbstractCellPopulation<2>& rCellPopulation, unsigned epidermalIndex)
 {
+	// Initialise the vector
+	c_vector<unsigned, 2> closest_fibroblast_indices;
+
+	// Initialise the values of the minimum distances and the corresponding indices (these will be replaced anyway)
 	double min_fibroblast_distance = DBL_MAX;
+	double second_min_fibroblast_distance = min_fibroblast_distance;
 	unsigned closest_fibroblast_index = 0;
+	unsigned second_closest_fibroblast_index = 0;
 
 	// Get the location of the considered Epidermal node
 	c_vector<double, 2> epidermal_location = rCellPopulation.GetNode(epidermalIndex)->rGetLocation();
@@ -332,21 +342,39 @@ unsigned DistanceBasedEpidermalBasementMembraneForce::GetNearestFibroblastNeighb
 			// Only consider fibroblasts
 			if(p_type->IsType<FibroblastCellProliferativeType>())
 			{
-				
-				c_vector<double, 2> fibroblast_location = rCellPopulation.GetNode(*elem_iter)->rGetLocation();
+				// Get the fibroblast index and location
+				unsigned fibroblast_index = rCellPopulation.GetNode(*elem_iter)->GetIndex(); // Roundabout way of storing the index, as I don't know how to convert the iterator to an unsigned
+				c_vector<double, 2> fibroblast_location = rCellPopulation.GetNode(fibroblast_index)->rGetLocation();
+
+				c_vector<double, 2> fibroblast_to_node = rCellPopulation.rGetMesh().GetVectorFromAtoB(fibroblast_location, epidermal_location);
 
 				// By the end of this loop, we should end up with the closest fibroblast neighbour
-				if (norm_2(fibroblast_location - epidermal_location) < min_fibroblast_distance)
+				if (norm_2(fibroblast_to_node) < min_fibroblast_distance)
 				{
-					min_fibroblast_distance = norm_2(fibroblast_location - epidermal_location);
-					closest_fibroblast_index = rCellPopulation.GetNode(*elem_iter)->GetIndex(); // Roundabout way of storing the index, as we can't convert the iterator to an unsigned
+					// Update second closest index
+					second_min_fibroblast_distance = min_fibroblast_distance;
+					second_closest_fibroblast_index = closest_fibroblast_index;
+
+					// Update closest index
+					min_fibroblast_distance = norm_2(fibroblast_to_node);
+					closest_fibroblast_index = fibroblast_index;
+				}
+				// Else if the distance is closer than the second and distinct from the first, update the second index
+				else if ( (fibroblast_index != closest_fibroblast_index)&&(norm_2(fibroblast_to_node) < second_min_fibroblast_distance) )
+				{
+					// Update second closest index
+					second_min_fibroblast_distance = norm_2(fibroblast_to_node);
+					second_closest_fibroblast_index = fibroblast_index;
 				}
 			}
 
 		}
 	}
 
-	return closest_fibroblast_index;
+	closest_fibroblast_indices[0] = closest_fibroblast_index;
+	closest_fibroblast_indices[1] = second_closest_fibroblast_index;
+
+	return closest_fibroblast_indices;
 }
 
 
@@ -485,10 +513,35 @@ c_vector<double, 2> DistanceBasedEpidermalBasementMembraneForce::CalculateForceD
 	// Get the considered node's location
 	c_vector<double, 2> centre_point = rCellPopulation.GetNode(nodeIndex)->rGetLocation();
 
+	// Get the fibroblast-to-centre vector
+	c_vector<unsigned, 2> closest_fibroblast_indices = GetTwoNearestFibroblastNeighbours(rCellPopulation, nodeIndex);
 
-    // Get the fibroblast-to-centre vector
-    unsigned closest_fibroblast_index = GetNearestFibroblastNeighbour(rCellPopulation, nodeIndex);
-    c_vector<double, 2> closest_fibroblast_point = rCellPopulation.GetNode(closest_fibroblast_index)->rGetLocation();
+	unsigned closest_fibroblast_index = closest_fibroblast_indices[0];
+	unsigned second_closest_fibroblast_index = closest_fibroblast_indices[1];
+
+	c_vector<double, 2> left_fibroblast_point = rCellPopulation.GetNode(closest_fibroblast_index)->rGetLocation();
+	c_vector<double, 2> right_fibroblast_point = rCellPopulation.GetNode(second_closest_fibroblast_index)->rGetLocation();
+
+	// Define the average fibroblast point, accounting for periodicity
+	c_vector<double, 2> average_fibroblast_point;
+	if (left_fibroblast_point[0] < right_fibroblast_point[0])
+	{
+		average_fibroblast_point = left_fibroblast_point + 0.5*rCellPopulation.rGetMesh().GetVectorFromAtoB(left_fibroblast_point, right_fibroblast_point);
+	}
+	else
+	{
+		average_fibroblast_point = right_fibroblast_point + 0.5*rCellPopulation.rGetMesh().GetVectorFromAtoB(right_fibroblast_point, left_fibroblast_point);
+	}
+
+	c_vector<double, 2> fibroblast_to_centre = rCellPopulation.rGetMesh().GetVectorFromAtoB(average_fibroblast_point, centre_point);
+	
+	// Calculate the distance to the BM
+	double distance_to_basement_membrane = norm_2(fibroblast_to_centre);
+	
+	// Normalise the force direction vector
+	fibroblast_to_centre /= norm_2(fibroblast_to_centre);
+
+	// We now need to adjust the direction of the force direction, depending on local curvature
 
 	//Get the left and neighbours of the node index, based on the cosine approximation of the dermal interface.
 	std::vector<unsigned> closest_left_neighbours = GetClosestNeighboursBasedOnCosineApproximation(rCellPopulation, 
@@ -546,13 +599,6 @@ c_vector<double, 2> DistanceBasedEpidermalBasementMembraneForce::CalculateForceD
 		c_vector<double, 2> centre_to_left = rCellPopulation.rGetMesh().GetVectorFromAtoB(centre_point, left_point);
 		double centre_to_left_norm = norm_2(centre_to_left);
 		centre_to_left /= centre_to_left_norm; // Normalise the vector length
-		
-		// Get the fibroblast-to-centre vector
-		unsigned closest_fibroblast_index = GetNearestFibroblastNeighbour(rCellPopulation, nodeIndex);
-		c_vector<double, 2> closest_fibroblast_point = rCellPopulation.GetNode(closest_fibroblast_index)->rGetLocation();
-
-		c_vector<double, 2> fibroblast_to_centre = rCellPopulation.rGetMesh().GetVectorFromAtoB(closest_fibroblast_point, centre_point);
-		fibroblast_to_centre /= norm_2(fibroblast_to_centre); // Normalise the vector length
 
 		// Reflect the fibroblast-to-centre vector so they're pointing in the same quadrant
 		if (inner_prod(fibroblast_to_centre, centre_to_left) < 0.0)
@@ -566,9 +612,6 @@ c_vector<double, 2> DistanceBasedEpidermalBasementMembraneForce::CalculateForceD
 		// Rotate the centre point
 		right_point[0] = centre_to_left_norm*(fibroblast_to_centre[0]*cos(theta) + fibroblast_to_centre[1]*sin(theta));
 		right_point[1] = centre_to_left_norm*(fibroblast_to_centre[1]*cos(theta) - fibroblast_to_centre[0]*sin(theta));
-
-		// // Define the right neighbour by reflecting the vector from the considered node to the right neighbour
-		// right_point = centre_point + rCellPopulation.rGetMesh().GetVectorFromAtoB(left_point, centre_point);
 
 	}
 	else if ( (closest_left_neighbours.empty())&&(!closest_right_neighbours.empty()) )// No left neighbour, but there is a right neighbour
@@ -590,13 +633,6 @@ c_vector<double, 2> DistanceBasedEpidermalBasementMembraneForce::CalculateForceD
 		c_vector<double, 2> centre_to_right = rCellPopulation.rGetMesh().GetVectorFromAtoB(centre_point, right_point);
 		double centre_to_right_norm = norm_2(centre_to_right);
 		centre_to_right /= centre_to_right_norm; // Normalise the vector length
-
-		// Get the fibroblast-to-centre vector
-		unsigned closest_fibroblast_index = GetNearestFibroblastNeighbour(rCellPopulation, nodeIndex);
-		c_vector<double, 2> closest_fibroblast_point = rCellPopulation.GetNode(closest_fibroblast_index)->rGetLocation();
-
-		c_vector<double, 2> fibroblast_to_centre = rCellPopulation.rGetMesh().GetVectorFromAtoB(closest_fibroblast_point, centre_point);
-		fibroblast_to_centre /= norm_2(fibroblast_to_centre); // Normalise the vector length
 
 		// Reflect the fibroblast-to-centre vector so they're pointing in the same quadrant
 		if (inner_prod(fibroblast_to_centre, centre_to_right) < 0.0)
@@ -621,13 +657,6 @@ c_vector<double, 2> DistanceBasedEpidermalBasementMembraneForce::CalculateForceD
 		// right neighbours by rotating the vector from the cello's closest fibroblast neighbour to the 
 		// considered cell 90 degrees CCW and CW respectively.
 
-		// Get the fibroblast-to-centre vector
-		unsigned closest_fibroblast_index = GetNearestFibroblastNeighbour(rCellPopulation, nodeIndex);
-		c_vector<double, 2> closest_fibroblast_point = rCellPopulation.GetNode(closest_fibroblast_index)->rGetLocation();
-
-		c_vector<double, 2> fibroblast_to_centre = rCellPopulation.rGetMesh().GetVectorFromAtoB(closest_fibroblast_point, centre_point);
-		fibroblast_to_centre /= norm_2(fibroblast_to_centre); // Normalise the vector length
-
 		// Rotate the vector 90 degrees
 		c_vector<double, 2> centre_to_left;
 		centre_to_left[0] = -fibroblast_to_centre[1];
@@ -642,26 +671,8 @@ c_vector<double, 2> DistanceBasedEpidermalBasementMembraneForce::CalculateForceD
 
 	double curvature = FindParametricCurvature(rCellPopulation, left_point, centre_point, right_point);
 
-	//Get the unit vectors from the centre points to its left and right neighbours
-	// c_vector<double, 2> centre_to_left = rCellPopulation.rGetMesh().GetVectorFromAtoB(centre_point, left_point);
-	// centre_to_left /= norm_2(centre_to_left); //Normalise vector
-
-	// c_vector<double, 2> centre_to_right = rCellPopulation.rGetMesh().GetVectorFromAtoB(centre_point, right_point);
-	// centre_to_right /= norm_2(centre_to_right); //Normalise vector
-
-	/* Define direction as the perpendicular bisector from the left to right point
-		*/
-	c_vector<double, 2> left_to_right = rCellPopulation.rGetMesh().GetVectorFromAtoB(left_point, right_point);
-
-
-	assert(norm_2(left_to_right) != 0.0);
-
 	//Define force direction
-	c_vector<double, 2> force_direction;
-	force_direction(0) = left_to_right[1];
-	force_direction(1) = -left_to_right[0];
-
-	force_direction /= norm_2(left_to_right);
+	c_vector<double, 2> force_direction = fibroblast_to_centre;
 
 	double target_curvature = GetTargetCurvature(); // Get the target curvature
 
@@ -697,7 +708,9 @@ c_vector<double, 2> DistanceBasedEpidermalBasementMembraneForce::CalculateForceD
 	// Get the basement membrane stiffness and target curvature
 	double basement_membrane_parameter = GetBasementMembraneParameter(); //Get the basement membrane stiffness
 
-	force_due_to_basement_membrane = basement_membrane_parameter*( fabs(curvature - target_curvature) )*force_direction;
+	// Define force as F = beta/(|u_{ij}| + 0.01)*\hat{u}_{ij}, where i is the epithelial cell and j is the average
+	// of the two closest fibroblasts.
+	force_due_to_basement_membrane = basement_membrane_parameter/(distance_to_basement_membrane + 0.01)*force_direction;
 
 	// c_vector<double, 2> force_due_to_basement_membrane = zero_vector<double>(2);
 	return force_due_to_basement_membrane;
@@ -719,7 +732,7 @@ void DistanceBasedEpidermalBasementMembraneForce::AddForceContribution(AbstractC
 	{
 		unsigned epidermal_index = epidermal_indices[i];
 
-		// Calculate the basement membrane force        
+		// Calculate the basement membrane force
 		c_vector<double, 2> force_on_node = CalculateForceDueToBasementMembrane(rCellPopulation, epidermal_indices, epidermis_heights, epidermis_widths, epidermal_index);
 
 		// // Apply the force

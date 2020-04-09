@@ -120,11 +120,20 @@ void BasementMembraneBasedContactInhibitionCellCycleModel::UpdateCellCyclePhase(
     // If an epidermal cell has lost contact with the basement membrane, differentiate it.
     if (mpCell->GetCellProliferativeType()->IsType<StemCellProliferativeType>())
     {
-        if (bm_attachment == 0.0)
+        if (bm_attachment == 0.0) // Lost contact with BM
         {
             boost::shared_ptr<AbstractCellProperty> p_diff_type =
                 mpCell->rGetCellPropertyCollection().GetCellPropertyRegistry()->Get<DifferentiatedCellProliferativeType>();
             mpCell->SetCellProliferativeType(p_diff_type);
+        }
+    }
+    else if (mpCell->GetCellProliferativeType()->IsType<DifferentiatedCellProliferativeType>())
+    {
+        if (bm_attachment == 1.0) // Re-attached to BM
+        {
+            boost::shared_ptr<AbstractCellProperty> p_stem_type =
+                mpCell->rGetCellPropertyCollection().GetCellPropertyRegistry()->Get<StemCellProliferativeType>();
+            mpCell->SetCellProliferativeType(p_stem_type);
         }
     }
 

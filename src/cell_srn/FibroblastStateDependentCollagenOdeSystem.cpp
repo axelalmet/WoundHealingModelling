@@ -53,8 +53,9 @@ FibroblastStateDependentCollagenOdeSystem::FibroblastStateDependentCollagenOdeSy
 //    SetDefaultInitialCondition(2, 0.01); // soon overwritten
 
     this->mParameters.push_back(0.0); // EPF status
-    this->mParameters.push_back(0.1); // Production rate of collagen
-    this->mParameters.push_back(0.05); // Degradation rate of collagen
+    this->mParameters.push_back(0.0); // fibroblast activation
+    this->mParameters.push_back(0.2); // Production rate of collagen
+    this->mParameters.push_back(0.1); // Degradation rate of collagen
 
     if (stateVariables != std::vector<double>())
     {
@@ -73,15 +74,17 @@ void FibroblastStateDependentCollagenOdeSystem::EvaluateYDerivatives(double time
 
     // Get the parameters
     double is_epf = this->GetParameter("epf"); // Check whether or not cell is an EPF fibroblast
-    double p_c = this->mParameters[1]; // Production rate of collagen
-    double d_c = this->mParameters[2]; // Degradation rate of collagen
+    double is_activated = this->GetParameter("activated"); // Check whether or not cell is an EPF fibroblast
+    double p_c = this->mParameters[2]; // Production rate of collagen
+    double d_c = this->mParameters[3]; // Degradation rate of collagen
 
     // calculations
     double reaction_1 = is_epf * p_c * C;
+    // double reaction_1 = is_epf * p_c * C / (1.0 + C);
     double reaction_2 = d_c * C;
 
     // ODEs
-    rDY[0] = reaction_1 - reaction_2; // dC/dt = p_C*delta(EPF)*C - d_C*C
+    rDY[0] = is_activated * (reaction_1 - reaction_2); // dC/dt = p_C*delta(EPF)*C - d_C*C
 }
 
 template<>
@@ -95,6 +98,10 @@ void CellwiseOdeSystemInformation<FibroblastStateDependentCollagenOdeSystem>::In
 
     // Multiplier to check whether or not cells are EPF fibroblasts
     this->mParameterNames.push_back("epf");
+    this->mParameterUnits.push_back("non-dim");
+
+    // Multiplier to check whether or not cells have been activated by, say, PDGF
+    this->mParameterNames.push_back("activated");
     this->mParameterUnits.push_back("non-dim");
 
     // Production rate of collagen

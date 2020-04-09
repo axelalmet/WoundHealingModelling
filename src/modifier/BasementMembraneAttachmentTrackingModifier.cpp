@@ -100,9 +100,8 @@ void BasementMembraneAttachmentTrackingModifier<DIM>::UpdateCellData(AbstractCel
         // Only consider stem cells
         boost::shared_ptr<AbstractCellProperty> p_cell_type = cell_iter->GetCellProliferativeType();
 
-        if (p_cell_type->template IsType<StemCellProliferativeType>())
+        if (!p_cell_type->template IsType<FibroblastCellProliferativeType>())
         {
-
             // Get the node index
             unsigned node_index = p_cell_population->GetLocationIndexUsingCell(*cell_iter);
                 
@@ -140,11 +139,7 @@ void BasementMembraneAttachmentTrackingModifier<DIM>::UpdateCellData(AbstractCel
             }
 
         }
-        else if (p_cell_type->template IsType<DifferentiatedCellProliferativeType>())
-        {
-            cell_iter->GetCellData()->SetItem("attachment", 0.0);
-        }
-        else if (p_cell_type->template IsType<FibroblastCellProliferativeType>())
+        else
         {
             cell_iter->GetCellData()->SetItem("attachment", -1.0);
         }

@@ -2,8 +2,8 @@
 
 	<OffLatticeSimulation-2-2>
 		<Dt>0.005</Dt>
-		<EndTime>10</EndTime>
-		<SamplingTimestepMultiple>200</SamplingTimestepMultiple>
+		<EndTime>2</EndTime>
+		<SamplingTimestepMultiple>20</SamplingTimestepMultiple>
 		<OutputDivisionLocations>0</OutputDivisionLocations>
 		<OutputCellVelocities>0</OutputCellVelocities>
 	</OffLatticeSimulation-2-2>
@@ -23,9 +23,9 @@
 
 	<CellCycleModels>
 		<GrowthFactorBasedContactInhibitionCellCycleModel>
-			<QuiescentVolumeFraction>0.8</QuiescentVolumeFraction>
+			<QuiescentVolumeFraction>0.9</QuiescentVolumeFraction>
 			<EquilibriumVolume>0.785398</EquilibriumVolume>
-			<GrowthFactorThreshold>0.25</GrowthFactorThresholde>
+			<GrowthFactorThreshold>0.1</GrowthFactorThresholde>
 			<StemCellG1Duration>14</StemCellG1Duration>
 			<TransitCellG1Duration>2</TransitCellG1Duration>
 			<SDuration>5</SDuration>
@@ -40,11 +40,19 @@
 	</SrnModels>
 
 	<CellKillers>
+		<PlateletCellKiller>
+			<CellsRemovedByFibroblasts>0</CellsRemovedByFibroblasts> 
+			<CutOffRadius>1.5</CutOffRadius> 
+			<GrowthFactorThreshold>0.25</GrowthFactorThreshold> 
+			<VolumeThreshold>0.706858</VolumeThreshold 
+		</PlateletCellKiller>
 	</CellKillers>
 
 	<SimulationModifiers>
 		<VolumeTrackingModifier-2>
 		</VolumeTrackingModifier-2>
+		<ParabolicGrowingDomainWithCellDeathPdeModifier-2>
+		</ParabolicGrowingDomainWithCellDeathPdeModifier-2>
 	</SimulationModifiers>
 
 	<Forces>
@@ -56,7 +64,7 @@
 			<CutOffLength>1.5</CutOffLength>
 		</GeneralisedLinearSpringForce-2-2>
 		<WoundBasedChemotacticForce-2>
-			<ChemotacticStrength>0</ChemotacticStrength> 
+			<ChemotacticStrength>0.01</ChemotacticStrength> 
 			<NeighbourhoodRadius>1.5</NeighbourhoodRadius> 
 		</WoundBasedChemotacticForce-2>
 	</Forces>

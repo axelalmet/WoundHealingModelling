@@ -58,7 +58,7 @@
 			<CutOffLength>1.5</CutOffLength>
 		</GeneralisedLinearSpringForce-2-2>
 		<FibreAlignmentBasedMigrationForce-2>
-			<ReorientationStrength>0.0125</ReorientationStrength> 
+			<ReorientationStrength>0</ReorientationStrength> 
 			<MigrationForceStrength>0</MigrationForceStrength> 
 		</FibreAlignmentBasedMigrationForce-2>
 	</Forces>

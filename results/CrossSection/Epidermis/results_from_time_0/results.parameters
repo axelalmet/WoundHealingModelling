@@ -2,8 +2,8 @@
 
 	<OffLatticeSimulation-2-2>
 		<Dt>0.005</Dt>
-		<EndTime>40</EndTime>
-		<SamplingTimestepMultiple>1000</SamplingTimestepMultiple>
+		<EndTime>100</EndTime>
+		<SamplingTimestepMultiple>2000</SamplingTimestepMultiple>
 		<OutputDivisionLocations>0</OutputDivisionLocations>
 		<OutputCellVelocities>0</OutputCellVelocities>
 	</OffLatticeSimulation-2-2>
@@ -25,7 +25,7 @@
 		<NoCellCycleModel>
 		</NoCellCycleModel>
 		<BasementMembraneBasedContactInhibitionCellCycleModel>
-			<QuiescentVolumeFraction>0.85</QuiescentVolumeFraction>
+			<QuiescentVolumeFraction>0.9</QuiescentVolumeFraction>
 			<EquilibriumVolume>0.785398</EquilibriumVolume>
 			<StemCellG1Duration>1</StemCellG1Duration>
 			<TransitCellG1Duration>2</TransitCellG1Duration>
@@ -54,6 +54,17 @@
 	</SimulationModifiers>
 
 	<Forces>
+		<GeneralisedLinearSpringForce-2-2>
+			<MeinekeSpringStiffness>15</MeinekeSpringStiffness>
+			<MeinekeDivisionRestingSpringLength>0.5</MeinekeDivisionRestingSpringLength>
+			<MeinekeSpringGrowthDuration>1</MeinekeSpringGrowthDuration>
+			<UseCutOffLength>1</UseCutOffLength>
+			<CutOffLength>1.5</CutOffLength>
+		</GeneralisedLinearSpringForce-2-2>
+		<EpidermalBasementMembraneForce>
+			<BasementMembraneParameter>10</BasementMembraneParameter> 
+			<TargetCurvature>0</TargetCurvature> 
+		</EpidermalBasementMembraneForce>
 	</Forces>
 
 	<CellPopulationBoundaryConditions>

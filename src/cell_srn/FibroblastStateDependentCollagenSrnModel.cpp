@@ -118,6 +118,20 @@ void FibroblastStateDependentCollagenSrnModel::UpdateEpfStatus()
     }
 
     mpOdeSystem->SetParameter("epf", is_epf);
+
+    // We only activate collagen production if the fibroblasts have been exposed to a morphogen
+    double morphogen = mpCell->GetCellData()->GetItem("morphogen");
+
+    double is_activated = 0.0; // Initialise activation status
+
+    if (morphogen > 0.0)
+    {
+        is_activated = 1.0;
+    }
+
+    mpOdeSystem->SetParameter("activated", is_activated);
+
+
 }
 
 

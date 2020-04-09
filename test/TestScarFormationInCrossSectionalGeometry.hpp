@@ -39,6 +39,8 @@
 #include "BasementMembraneAttachmentTrackingModifier.hpp" // Modifier to track stem cell attachment to the basement membrane
 #include "CollagenAlignmentTrackingModifier.hpp" // Modifier to align fibroblasts with local collagen fibre orientation
 #include "VolumeTrackingModifier.hpp" // Modifier to track cell volume
+#include "CellMigrationDirectionWriter.hpp" // Cell writer for migration direction
+#include "CellCollagenFibreOrientationWriter.hpp" // Cell writer for collagen fibre orientations
 #include "PlateletCellKiller.hpp" // Cell killer to remove platelets upon wound healing
 #include "FakePetscSetup.hpp" //Forbids tests running in parallel
 #include "PetscSetupAndFinalize.hpp"
@@ -47,7 +49,7 @@
 
 static const std::string M_OUTPUT_DIRECTORY = "WoundHealingModel/CrossSection";
 static const double M_DT = 0.005;
-static const double M_END_TIME = 5.0;
+static const double M_END_TIME = 10.0;
 // static const double M_SAMPLING_TIMESTEP = M_END_TIME / M_DT;
 static const double M_SAMPLING_TIMESTEP = 0.1/M_DT;
 
@@ -121,7 +123,10 @@ public:
             double collagen_orientation = -0.5*M_PI + (M_PI * RandomNumberGenerator::Instance()->ranf());
 
             // Random initiate a fibroblast direction
-            double fibroblast_direction = 2.0*M_PI * RandomNumberGenerator::Instance()->ranf(); // Not random yet!
+            double fibroblast_direction = 2.0*M_PI * RandomNumberGenerator::Instance()->ranf(); 
+
+            // Randomly initiate collagen amount
+            double collagen_amount = RandomNumberGenerator::Instance()->ranf();
 
             if (fibroblast_state < epf_fibroblast_probability) 
             {
@@ -134,11 +139,12 @@ public:
                 double birth_time = - RandomNumberGenerator::Instance()->ranf() * 1.0;
                 p_cell->SetBirthTime(birth_time);
 
-                // For completeness in the stupid contact inhibition model.
-                p_cell->GetCellData()->SetItem("volume", 0.25*M_PI);
+                // Initialise all the scalar cell data
 
+                // For completeness in the contact inhibition model.
+                p_cell->GetCellData()->SetItem("volume", 0.25*M_PI);
                 // Initialise morphogen for later.
-                p_cell->GetCellData()->SetItem("morphogen", 1e-4);
+                p_cell->GetCellData()->SetItem("morphogen", 0.0);
 
                 // Initialise cell data to describe BM attachment.
                 p_cell->GetCellData()->SetItem("attachment", -1.0);
@@ -153,7 +159,7 @@ public:
                 p_cell->GetCellData()->SetItem("orientation", collagen_orientation);
 
                 // Set collagen amount
-                p_cell->GetCellData()->SetItem("collagen", 0.0);
+                p_cell->GetCellData()->SetItem("collagen", collagen_amount);
 
                 cells.push_back(p_cell);
             }
@@ -185,7 +191,7 @@ public:
                 p_cell->GetCellData()->SetItem("epf", 0.0);
 
                 // Set collagen amount
-                p_cell->GetCellData()->SetItem("collagen", 0.0);
+                p_cell->GetCellData()->SetItem("collagen", collagen_amount);
 
                 cells.push_back(p_cell);
             }
@@ -195,6 +201,10 @@ public:
         NodeBasedCellPopulation<2> cell_population(*p_mesh, cells); // Used for periodic
         // NodeBasedCellPopulation<2> cell_population(mesh, cells); // Used for non-periodic
         cell_population.SetMeinekeDivisionSeparation(division_separation);
+
+        // Add cell writers
+        cell_population.AddCellWriter<CellMigrationDirectionWriter>();
+        cell_population.AddCellWriter<CellCollagenFibreOrientationWriter>();
 
         //Get the maximum width so we know where to apply the right BC.
         double min_width = 0.0;
@@ -266,9 +276,8 @@ public:
         // Add fibre-alignment-based migration force
         MAKE_PTR(FibreAlignmentBasedMigrationForce<2>, p_migration_force);
         p_migration_force->SetMigrationForceStrength(0.0);
-        p_migration_force->SetReorientationStrength(2.5 * M_DT);
+        p_migration_force->SetReorientationStrength(0.0 * M_DT);
         simulator.AddForce(p_migration_force);
-
 
         // Define a fixed-regions boundary condition so that cells can't move past y = 0
         c_vector<double, 2> point, normal;
@@ -288,7 +297,7 @@ public:
         // Create a modifier to realign cell orientations with collagen.
         MAKE_PTR(CollagenAlignmentTrackingModifier<2>, p_collagen_alignment_modifier);
         p_collagen_alignment_modifier->SetNeighbourhoodRadius(radius_of_interaction);
-        p_collagen_alignment_modifier->SetReorientationStrength(2.5*M_DT);
+        p_collagen_alignment_modifier->SetReorientationStrength(1.0*M_DT);
 		simulator.AddSimulationModifier(p_collagen_alignment_modifier);
 
         // Wound the model. 
@@ -307,14 +316,15 @@ public:
 
             //If the cell is within the 'wound area', we mark it with collagen.
 
-            // if ( (y > 2.0*(x - 8.0))&&(y < 2.0*(x - 5.0)))
             if ( (y > wound_base_height)&&(x > wound_centre - 0.5*wound_width)&&(x < wound_centre + 0.5*wound_width))
             {
+                cell_iter->GetCellData()->SetItem("direction", 0.0*M_PI);
                 cell_iter->GetCellData()->SetItem("collagen", 1.0);
-                // cell_iter->GetCellData()->SetItem("direction", 0.25*M_PI);
-                FibroblastStateDependentCollagenSrnModel* p_srn_model = dynamic_cast<FibroblastStateDependentCollagenSrnModel*>(cell_iter->GetSrnModel());
-                p_srn_model->SetCollagen();
-                cell_iter->SetSrnModel(p_srn_model);
+                cell_iter->GetCellData()->SetItem("morphogen", 1.0); // Activate the fibroblasts
+
+                // FibroblastStateDependentCollagenSrnModel* p_srn_model = dynamic_cast<FibroblastStateDependentCollagenSrnModel*>(cell_iter->GetSrnModel());
+                // p_srn_model->SetCollagen();
+                // cell_iter->SetSrnModel(p_srn_model);
             }
         
         }

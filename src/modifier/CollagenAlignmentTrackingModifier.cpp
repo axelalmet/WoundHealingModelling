@@ -218,8 +218,8 @@ void CollagenAlignmentTrackingModifier<DIM>::UpdateCellData(AbstractCellPopulati
                         }
                     }
 
-                    // Update the fibre orientations
-                    cell_iter->GetCellData()->SetItem("orientation", current_orientation);
+                    // Update the fibre orientations                    
+                    cell_iter->GetCellData()->SetItem("orientation", current_orientation); // Update scalar data
                 }
             }
         }

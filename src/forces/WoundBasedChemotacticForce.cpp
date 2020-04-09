@@ -35,6 +35,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "WoundBasedChemotacticForce.hpp"
 #include "NodeBasedCellPopulation.hpp"
+#include "PlateletCellProliferativeType.hpp"
 #include "RandomNumberGenerator.hpp"
 
 template<unsigned DIM>
@@ -93,109 +94,118 @@ void WoundBasedChemotacticForce<DIM>::AddForceContribution(AbstractCellPopulatio
          cell_iter != rCellPopulation.End();
          ++cell_iter)
     {
-        // Get the node index
-        unsigned current_index = rCellPopulation.GetLocationIndexUsingCell(*cell_iter);
 
-        // Get the location of the node
-        c_vector<double, DIM> current_location = rCellPopulation.GetNode(current_index)->rGetLocation();
+        // Should only look at non-platelet cells
 
-        // Get the current morphogen concentration that we will compare for chemotaxis.
-        double current_morphogen_concentration = cell_iter->GetCellData()->GetItem("morphogen");
 
-        // Get the neighbouring node indices
-		std::set<unsigned> neighbouring_indices = p_tissue->GetNodesWithinNeighbourhoodRadius(current_index, neighbourhood_radius);
+        // Only apply this migration force to fibroblasts
+        boost::shared_ptr<AbstractCellProperty> p_cell_type = cell_iter->GetCellProliferativeType(); // Get the cell type
 
-        // We determine which neighbours result in a direction of maximal change. There may be more than one, in which case
-        // we will pick one at random.
-
-        // First figure out what the maximal change in morphogen is. 
-        double morphogen_max_grad = 0.0;
-
-        // Iterate over these elements
-		for (std::set<unsigned>::iterator elem_iter = neighbouring_indices.begin();
-				elem_iter != neighbouring_indices.end();
-				++elem_iter)
-		{
-			// Get the cell according to the index
-			CellPtr neighbour_cell_iter = rCellPopulation.GetCellUsingLocationIndex(*elem_iter);
-
-			// Get the neighbouring concentration
-            double neighbour_morphogen_concentration = neighbour_cell_iter->GetCellData()->GetItem("morphogen");
-
-            // Get the neighbour's location
-            c_vector<double, DIM> neighbour_location = rCellPopulation.GetNode(*elem_iter)->rGetLocation();
-
-            double grad = (neighbour_morphogen_concentration - current_morphogen_concentration)/norm_2(neighbour_location - current_location);
-
-            if (grad > morphogen_max_grad)
-            {
-                morphogen_max_grad = grad;
-           }
-		}
-
-        // Iterate again, now determining which neighbours have a grad equal to max grad.
-        std::vector<unsigned> maximal_gradient_indices; 
-
-        // Iterate over these elements
-		for (std::set<unsigned>::iterator elem_iter = neighbouring_indices.begin();
-				elem_iter != neighbouring_indices.end();
-				++elem_iter)
-		{
-			// Get the cell according to the index
-			CellPtr neighbour_cell_iter = rCellPopulation.GetCellUsingLocationIndex(*elem_iter);
-
-			// Get the neighbouring concentration
-            double neighbour_morphogen_concentration = neighbour_cell_iter->GetCellData()->GetItem("morphogen");
-
-            // Get the neighbour's location
-            c_vector<double, DIM> neighbour_location = rCellPopulation.GetNode(*elem_iter)->rGetLocation();
-
-            double grad = (neighbour_morphogen_concentration - current_morphogen_concentration)/norm_2(neighbour_location - current_location);
-
-            if (grad == morphogen_max_grad)
-            {
-                maximal_gradient_indices.push_back(*elem_iter);
-           }
-		}
-
-        if (!maximal_gradient_indices.empty())
+        if (!p_cell_type->IsType<PlateletCellProliferativeType>())
         {
-            // Now choose an index at random
-            unsigned chosen_index = floor(RandomNumberGenerator::Instance()->ranf() * maximal_gradient_indices.size());
+            // Get the node index
+            unsigned current_index = rCellPopulation.GetLocationIndexUsingCell(*cell_iter);
 
-            unsigned chosen_node_index = maximal_gradient_indices[chosen_index];
-            
-            c_vector<double, DIM> chosen_neighbour_location = rCellPopulation.GetNode(chosen_node_index)->rGetLocation();
+            // Get the location of the node
+            c_vector<double, DIM> current_location = rCellPopulation.GetNode(current_index)->rGetLocation();
 
-            c_vector<double, DIM> gradient_direction = rCellPopulation.rGetMesh().GetVectorFromAtoB(current_location, chosen_neighbour_location);
+            // Get the current morphogen concentration that we will compare for chemotaxis.
+            double current_morphogen_concentration = cell_iter->GetCellData()->GetItem("morphogen");
 
-            // Only add the chemotactic force when the change is positive
-            if (morphogen_max_grad > 0.0)
+            // Get the neighbouring node indices
+            std::set<unsigned> neighbouring_indices = p_tissue->GetNodesWithinNeighbourhoodRadius(current_index, neighbourhood_radius);
+
+            // We determine which neighbours result in a direction of maximal change. There may be more than one, in which case
+            // we will pick one at random.
+
+            // First figure out what the maximal change in morphogen is. 
+            double morphogen_max_grad = 0.0;
+
+            // Iterate over these elements
+            for (std::set<unsigned>::iterator elem_iter = neighbouring_indices.begin();
+                    elem_iter != neighbouring_indices.end();
+                    ++elem_iter)
             {
-                // Get the chemotactic strength parameter 
-                double chemotactic_strength = GetChemotacticStrength();
+                // Get the cell according to the index
+                CellPtr neighbour_cell_iter = rCellPopulation.GetCellUsingLocationIndex(*elem_iter);
 
-                // F += chi * gradC/|gradC|
-                c_vector<double, DIM> force = chemotactic_strength * morphogen_max_grad * gradient_direction / norm_2(gradient_direction);
-                rCellPopulation.GetNode(current_index)->AddAppliedForceContribution(force);
+                // Get the neighbouring concentration
+                double neighbour_morphogen_concentration = neighbour_cell_iter->GetCellData()->GetItem("morphogen");
 
-                // Also need to update the fibroblast migration direction, which is stored as cell data.
-                double gradient_angle = atan(gradient_direction[1]/gradient_direction[0]);
+                // Get the neighbour's location
+                c_vector<double, DIM> neighbour_location = rCellPopulation.GetNode(*elem_iter)->rGetLocation();
 
-                // Correct for the quadrants
-                if ( (gradient_direction[0] < 0.0) ) // Second or third quadrant quadrant
+                double grad = (neighbour_morphogen_concentration - current_morphogen_concentration)/norm_2(neighbour_location - current_location);
+
+                if (grad > morphogen_max_grad)
                 {
-                    gradient_angle += M_PI; 
-                }
-                else if ( (gradient_direction[0] > 0.0)&&(gradient_direction[1] < 0.0) ) // Third quadrant
-                {
-                    gradient_angle += 2.0*M_PI;
-                }
-
-                cell_iter->GetCellData()->SetItem("direction", gradient_angle); // Update the fibroblast migration direction
-
+                    morphogen_max_grad = grad;
             }
-            // else Fc=0
+            }
+
+            // Iterate again, now determining which neighbours have a grad equal to max grad.
+            std::vector<unsigned> maximal_gradient_indices; 
+
+            // Iterate over these elements
+            for (std::set<unsigned>::iterator elem_iter = neighbouring_indices.begin();
+                    elem_iter != neighbouring_indices.end();
+                    ++elem_iter)
+            {
+                // Get the cell according to the index
+                CellPtr neighbour_cell_iter = rCellPopulation.GetCellUsingLocationIndex(*elem_iter);
+
+                // Get the neighbouring concentration
+                double neighbour_morphogen_concentration = neighbour_cell_iter->GetCellData()->GetItem("morphogen");
+
+                // Get the neighbour's location
+                c_vector<double, DIM> neighbour_location = rCellPopulation.GetNode(*elem_iter)->rGetLocation();
+
+                double grad = (neighbour_morphogen_concentration - current_morphogen_concentration)/norm_2(neighbour_location - current_location);
+
+                if (grad == morphogen_max_grad)
+                {
+                    maximal_gradient_indices.push_back(*elem_iter);
+            }
+            }
+
+            if (!maximal_gradient_indices.empty())
+            {
+                // Now choose an index at random
+                unsigned chosen_index = floor(RandomNumberGenerator::Instance()->ranf() * maximal_gradient_indices.size());
+
+                unsigned chosen_node_index = maximal_gradient_indices[chosen_index];
+                
+                c_vector<double, DIM> chosen_neighbour_location = rCellPopulation.GetNode(chosen_node_index)->rGetLocation();
+
+                c_vector<double, DIM> gradient_direction = rCellPopulation.rGetMesh().GetVectorFromAtoB(current_location, chosen_neighbour_location);
+
+                // Only add the chemotactic force when the change is positive
+                if (morphogen_max_grad > 0.0)
+                {
+                    // Get the chemotactic strength parameter 
+                    double chemotactic_strength = GetChemotacticStrength();
+
+                    // F += chi * gradC/|gradC|
+                    c_vector<double, DIM> force = chemotactic_strength * morphogen_max_grad * gradient_direction / norm_2(gradient_direction);
+                    rCellPopulation.GetNode(current_index)->AddAppliedForceContribution(force);
+
+                    // Also need to update the fibroblast migration direction, which is stored as cell data.
+                    double gradient_angle = atan(gradient_direction[1]/gradient_direction[0]);
+
+                    // Correct for the quadrants
+                    if ( (gradient_direction[0] < 0.0) ) // Second or third quadrant quadrant
+                    {
+                        gradient_angle += M_PI; 
+                    }
+                    else if ( (gradient_direction[0] > 0.0)&&(gradient_direction[1] < 0.0) ) // Third quadrant
+                    {
+                        gradient_angle += 2.0*M_PI;
+                    }
+
+                    cell_iter->GetCellData()->SetItem("direction", gradient_angle); // Update the fibroblast migration direction
+                }
+                // else Fc=0
+            }
         }
     }
 }

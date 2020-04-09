@@ -89,7 +89,8 @@ double PlateletDerivedGrowthFactorCellwiseSourceParabolicPde<DIM>::ComputeSource
 
         if (p_cell_type->IsType<PlateletCellProliferativeType>())
         {
-            source_coefficient = mProductionCoefficient*u/(1.0 + mProductionCoefficient*u) - mDegradationCoefficient*u;
+            // source_coefficient = mProductionCoefficient*u/(1.0 + mProductionCoefficient*u) - mDegradationCoefficient*u;
+            source_coefficient = mProductionCoefficient*u - mDegradationCoefficient*u;
         }
         else
         {

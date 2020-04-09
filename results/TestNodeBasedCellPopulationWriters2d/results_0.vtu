@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<VTKFile type="UnstructuredGrid" version="0.1" byte_order="LittleEndian" header_type="UInt32" compressor="vtkZLibDataCompressor">
+  <UnstructuredGrid>
+    <Piece NumberOfPoints="4"                    NumberOfCells="0"                   >
+      <PointData>
+        <DataArray type="Float64" Name="Cell IDs" format="appended" RangeMin="0"                    RangeMax="3"                    offset="0"                   />
+        <DataArray type="Float64" Name="Cycle phases" format="appended" RangeMin="4"                    RangeMax="4"                    offset="52"                  />
+        <DataArray type="Float64" Name="Ages" format="appended" RangeMin="0"                    RangeMax="3"                    offset="100"                 />
+        <DataArray type="Float64" Name="Cell volumes" format="appended" RangeMin="0.75943639077"        RangeMax="1.0690141668"         offset="152"                 />
+        <DataArray type="Float64" Name="Ancestors" format="appended" RangeMin="0"                    RangeMax="3"                    offset="220"                 />
+        <DataArray type="Float64" Name="Mutation states" format="appended" RangeMin="3"                    RangeMax="5"                    offset="272"                 />
+        <DataArray type="Float64" Name="Cell applied force" NumberOfComponents="3" format="appended" RangeMin="2.5942243542"         RangeMax="7.1840100223"         offset="324"                 />
+        <DataArray type="Float64" Name="Cell types" format="appended" RangeMin="3"                    RangeMax="6"                    offset="400"                 />
+        <DataArray type="Float64" Name="Process rank" format="appended" RangeMin="0"                    RangeMax="0"                    offset="456"                 />
+        <DataArray type="Float64" Name="var0" format="appended" RangeMin="0"                    RangeMax="0"                    offset="496"                 />
+        <DataArray type="Float64" Name="var1" format="appended" RangeMin="3"                    RangeMax="3"                    offset="536"                 />
+      </PointData>
+      <CellData>
+      </CellData>
+      <Points>
+        <DataArray type="Float64" Name="Vertex positions" NumberOfComponents="3" format="appended" RangeMin="0"                    RangeMax="1.4142135624"         offset="584"                 />
+      </Points>
+      <Cells>
+        <DataArray type="Int64" Name="connectivity" format="appended" RangeMin=""                     RangeMax=""                     offset="636"                 />
+        <DataArray type="Int64" Name="offsets" format="appended" RangeMin=""                     RangeMax=""                     offset="652"                 />
+        <DataArray type="UInt8" Name="types" format="appended" RangeMin=""                     RangeMax=""                     offset="668"                 />
+      </Cells>
+    </Piece>
+  </UnstructuredGrid>
+  <AppendedData encoding="base64">
+   _AQAAAACAAAAgAAAAFAAAAA==eJxjYEAGH+yhDAcIxeEAABe/Abg=AQAAAACAAAAgAAAAEAAAAA==eJxjYAABAQcGHDQAEKABQQ==AQAAAACAAAAgAAAAFAAAAA==eJxjYEAGH+yhDAcIxeEAABe/Abg=AQAAAACAAAAgAAAAIQAAAA==eJyrEIicuU7qo71B545uX98X9hK6LiG/FV/C+QDiiQ4OAQAAAACAAAAgAAAAFAAAAA==eJxjYEAGH+yhDAcIxeEAABe/Abg=AQAAAACAAAAgAAAAFQAAAA==eJxjYAABEQcwxcABpQXgNAAQeAE9AQAAAACAAABgAAAAJwAAAA==eJwzNgaBz/ZpYMDkwAAFMD5Y2pgbLo7KF4KLw/gQfWJwcQBEFQ4JAQAAAACAAAAgAAAAFwAAAA==eJxjYAABEQcwxcABpQWgtIQDABCIAUU=AQAAAACAAAAgAAAACwAAAA==eJxjYMAPAAAgAAE=AQAAAACAAAAgAAAACwAAAA==eJxjYMAPAAAgAAE=AQAAAACAAAAgAAAAEAAAAA==eJxjYAABDgcGHDQADuABIQ==AQAAAACAAABgAAAAFAAAAA==eJxjYMAHPtjjFyckz8AAALNMBL0=AAAAAACAAAAAAAAAAAAAAACAAAAAAAAAAAAAAACAAAAAAAAA
+  </AppendedData>
+</VTKFile>
+
+<!-- Created by Chaste version 2019.1.f4f9636 (with uncommitted modifications) on Fri, 03 Apr 2020 21:21:07 +0000.  Chaste was built on Mon, 02 Mar 2020 07:58:05 +0000 by machine (uname) 'Linux' using settings: Debug.  Checked-out project versions: AxelA=58358c550748fedf6088863782fdd77870262cc6; MorphoCellBasedComparison=16de33a9744c65327e83bc3f0c912a1b99f2ee7d; WoundHealingModelling=c319efe19ed48d5983981300da6acd81f4f84eee.
+-->

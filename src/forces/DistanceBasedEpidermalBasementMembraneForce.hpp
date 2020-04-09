@@ -16,7 +16,9 @@
 
 /**
  * MODIFIED FOR PERSONAL USE BY AXEL ALMET
- * A force class that defines the force due to the basement membrane.
+ * A force class that defines the force due to the basement membrane, where
+ * the strength of attachment is based on the distance to the basement membrane,
+ * as based off the Du et al. (2018) and Wang et al. (2019) papers..
  */
 
 class DistanceBasedEpidermalBasementMembraneForce : public AbstractForce<2>
@@ -128,7 +130,7 @@ public :
      * @param rCellPopulation the cell population
      * @param epidermalIndex the considered epidermal node index
      */
-    unsigned GetNearestFibroblastNeighbour(AbstractCellPopulation<2>& rCellPopulation, unsigned epidermalIndex);
+    c_vector<unsigned,2> GetTwoNearestFibroblastNeighbours(AbstractCellPopulation<2>& rCellPopulation, unsigned epidermalIndex);
 
     /* Get method for cut off radius */
     double GetCutOffRadius();
@@ -184,4 +186,4 @@ public :
 #include "SerializationExportWrapper.hpp"
 CHASTE_CLASS_EXPORT(DistanceBasedEpidermalBasementMembraneForce)
 
-#endif /*DistanceBasedEpidermalBasementMembraneForce_HPP_*/
+#endif /*DISTANCEBASEDEPIDERMALBASEMENTMEMBRANEFORCE_HPP_*/

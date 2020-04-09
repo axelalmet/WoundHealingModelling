@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<VTKFile type="UnstructuredGrid" version="0.1" byte_order="LittleEndian" header_type="UInt32" compressor="vtkZLibDataCompressor">
+  <UnstructuredGrid>
+    <Piece NumberOfPoints="51"                   NumberOfCells="0"                   >
+      <PointData>
+        <DataArray type="Float64" Name="Cell volumes" format="appended" RangeMin="0.13933649659"        RangeMax="0.17009690268"        offset="0"                   />
+        <DataArray type="Float64" Name="Ages" format="appended" RangeMin="0"                    RangeMax="50"                   offset="160"                 />
+        <DataArray type="Float64" Name="Cycle phases" format="appended" RangeMin="4"                    RangeMax="4"                    offset="328"                 />
+        <DataArray type="Float64" Name="Mutation states" format="appended" RangeMin="0"                    RangeMax="0"                    offset="376"                 />
+        <DataArray type="Float64" Name="Cell applied force" NumberOfComponents="3" format="appended" RangeMin="0"                    RangeMax="9.8234413522"         offset="420"                 />
+        <DataArray type="Float64" Name="Ancestors" format="appended" RangeMin="0"                    RangeMax="50"                   offset="512"                 />
+        <DataArray type="Float64" Name="Cell types" format="appended" RangeMin="0"                    RangeMax="0"                    offset="680"                 />
+        <DataArray type="Float64" Name="Process rank" format="appended" RangeMin="0"                    RangeMax="0"                    offset="724"                 />
+      </PointData>
+      <CellData>
+      </CellData>
+      <Points>
+        <DataArray type="Float64" Name="Vertex positions" NumberOfComponents="3" format="appended" RangeMin="0"                    RangeMax="1.7320508076"         offset="768"                 />
+      </Points>
+      <Cells>
+        <DataArray type="Int64" Name="connectivity" format="appended" RangeMin=""                     RangeMax=""                     offset="964"                 />
+        <DataArray type="Int64" Name="offsets" format="appended" RangeMin=""                     RangeMax=""                     offset="980"                 />
+        <DataArray type="UInt8" Name="types" format="appended" RangeMin=""                     RangeMax=""                     offset="996"                 />
+      </Cells>
+    </Piece>
+  </UnstructuredGrid>
+  <AppendedData encoding="base64">
+   _AQAAAACAAACYAQAAZQAAAA==eJyzdftrf/zqQXt7KG2LRqOLo/N/Pv47X3bXUfs/aPRPHLTIvIQT8QlH7PnQaWtR2z1Hj9pzo9Ho6mZp3DQKLTuMqR9Kc0D1sUJpDhzmwGgeNH18aPpJpZlw0Lj8h8scAAZau9g=AQAAAACAAACYAQAAagAAAA==eJxNx7sOAQEARNEplQqFQiEiIiJivd+73vyVT/YJij2Fac7c5H/f0qlqGmyyxTY77LLHPgcccsQxJ5yy4IxzLrjkimtuuOWOex545Iklq9oPc9bMRTNXzdw0c9fMQzNPzbw0865+qZ8cEQ==AQAAAACAAACYAQAAEgAAAA==eJxjYAABAQeGUXpQ0QCI7A/xAQAAAACAAACYAQAADgAAAA==eJxjYBgFgxEAAAGYAAE=AQAAAACAAADIBAAAMgAAAA==eJwzNgaBz/ZpYMDkAOYaczug8xnAQAiDD1EnhsE/ewYEpKDio2AUjIJRQDsAAKtjF7U=AQAAAACAAACYAQAAagAAAA==eJxNx7sOAQEARNEplQqFQiEiIiJivd+73vyVT/YJij2Fac7c5H/f0qlqGmyyxTY77LLHPgcccsQxJ5yy4IxzLrjkimtuuOWOex545Iklq9oPc9bMRTNXzdw0c9fMQzNPzbw0865+qZ8cEQ==AQAAAACAAACYAQAADgAAAA==eJxjYBgFgxEAAAGYAAE=AQAAAACAAACYAQAADgAAAA==eJxjYBgFgxEAAAGYAAE=AQAAAACAAADIBAAAgAAAAA==eJyN0rsRwCAMA1A2Y/+OEVJSMkIqN+9OGDU+LH8kJ2PccOY93/HdXOvMv9Z9xEJ6v/alaH83T93y+it+k1/sW8TNWyRd8l1Ud7qHc9VdSD71o/+0L+mST9/1sH8/8tYl/ULeOu/hHdM+dRWs09drf5pnvz66/7fz5949f1QKgX8=AAAAAACAAAAAAAAAAAAAAACAAAAAAAAAAAAAAACAAAAAAAAA
+  </AppendedData>
+</VTKFile>
+
+<!-- Created by Chaste version 2019.1.f4f9636 (with uncommitted modifications) on Fri, 03 Apr 2020 21:21:07 +0000.  Chaste was built on Mon, 02 Mar 2020 07:58:05 +0000 by machine (uname) 'Linux' using settings: Debug.  Checked-out project versions: AxelA=58358c550748fedf6088863782fdd77870262cc6; MorphoCellBasedComparison=16de33a9744c65327e83bc3f0c912a1b99f2ee7d; WoundHealingModelling=c319efe19ed48d5983981300da6acd81f4f84eee.
+-->

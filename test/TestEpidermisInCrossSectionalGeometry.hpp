@@ -48,9 +48,9 @@
 
 static const std::string M_OUTPUT_DIRECTORY = "WoundHealingModel/CrossSection";
 static const double M_DT = 0.005;
-static const double M_END_TIME = 40.0;
+static const double M_END_TIME = 50.0;
 // static const double M_SAMPLING_TIMESTEP = 0.1*M_END_TIME / M_DT;
-static const double M_SAMPLING_TIMESTEP = 5.0/M_DT;
+static const double M_SAMPLING_TIMESTEP = M_END_TIME/M_DT;
 
 /*
 * A test model to study the various components that we think should be incorporated
@@ -72,8 +72,8 @@ public:
         double division_separation = 0.1; // Initial resting length upon division
 
         // Mechanical parameters
-        double spring_stiffness = 25.0; // Spring stiffness
-        double bm_stiffness = 5.0; // Basement membrane attachment strength
+        double spring_stiffness = 15.0; // Spring stiffness
+        double bm_stiffness = 10.0; // Basement membrane attachment strength
         double target_curvature = 0.0; // Target curvature
 
         // Set the probability of being an EPF fibroblast.
@@ -208,7 +208,7 @@ public:
             {
                 BasementMembraneBasedContactInhibitionCellCycleModel* p_cycle_model = new BasementMembraneBasedContactInhibitionCellCycleModel(); //Contact-inhibition-based cycle model yet.
                 p_cycle_model->SetEquilibriumVolume(0.25*M_PI);
-                p_cycle_model->SetQuiescentVolumeFraction(0.85);
+                p_cycle_model->SetQuiescentVolumeFraction(0.9);
                 p_cycle_model->SetStemCellG1Duration(1.0);
                 p_cycle_model->SetDimension(2);
 
@@ -235,7 +235,7 @@ public:
 
         //Set output directory
         std::stringstream out;
-        out << "/Epidermis/";
+        out << "/Epidermis/SteadyState";
         std::string output_directory = M_OUTPUT_DIRECTORY + out.str();
         simulator.SetOutputDirectory(output_directory);
 
@@ -280,6 +280,46 @@ public:
         simulator.AddCellKiller(p_cell_killer);
         
         simulator.Solve(); // Run the simulation.
+
+        // Save simulation in steady state
+		CellBasedSimulationArchiver<2, OffLatticeSimulation<2> >::Save(&simulator);
+
+        // Load the saved simulation
+        // OffLatticeSimulation<2>* p_simulator = CellBasedSimulationArchiver<2, OffLatticeSimulation<2> >::Load(output_directory, M_END_TIME);
+
+        // Now we can define the wound geometry
+        double wound_centre = 0.5*max_width;
+        double wound_width = 0.3*max_width;
+        double wound_base_height = 0.3*max_height;
+
+        // Kill the cells within the wound area
+        for (AbstractCellPopulation<2>::Iterator cell_iter = simulator.rGetCellPopulation().Begin();
+                cell_iter != simulator.rGetCellPopulation().End();
+                ++cell_iter)
+        {
+            //Get location of cell
+            double x = simulator.rGetCellPopulation().GetLocationOfCellCentre(*cell_iter)[0];
+            double y = simulator.rGetCellPopulation().GetLocationOfCellCentre(*cell_iter)[1];
+
+            //If the cell is within the 'wound area', we kill it.
+            if ( (x > (wound_centre - 0.5*wound_width))&&(x < (wound_centre + 0.5*wound_width))&&(y > wound_base_height) )
+            {
+                cell_iter->Kill();
+            }
+        
+        }
+
+        //Set output directory
+        output_directory = M_OUTPUT_DIRECTORY + "/Epidermis/Injury";
+        simulator.SetOutputDirectory(output_directory);
+
+        simulator.SetSamplingTimestepMultiple(5.0/M_DT); //Sample the simulation at every hour
+        simulator.SetEndTime(M_END_TIME + 100.0); //Hopefully this is long enough for a steady state
+
+        simulator.Solve(); // Run the simulation.
+
+        // Save simulation in after injury too
+		CellBasedSimulationArchiver<2, OffLatticeSimulation<2> >::Save(&simulator);
 
     }
 };
