@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<VTKFile type="UnstructuredGrid" version="0.1" byte_order="LittleEndian" header_type="UInt32" compressor="vtkZLibDataCompressor">
+  <UnstructuredGrid>
+    <Piece NumberOfPoints="140"                  NumberOfCells="0"                   >
+      <PointData>
+        <DataArray type="Float64" Name="Cell types" format="appended" RangeMin="0"                    RangeMax="7"                    offset="0"                   />
+        <DataArray type="Float64" Name="Process rank" format="appended" RangeMin="0"                    RangeMax="0"                    offset="92"                  />
+        <DataArray type="Float64" Name="attachment" format="appended" RangeMin="-1"                   RangeMax="1"                    offset="140"                 />
+        <DataArray type="Float64" Name="epf" format="appended" RangeMin="0"                    RangeMax="1"                    offset="212"                 />
+        <DataArray type="Float64" Name="volume" format="appended" RangeMin="0"                    RangeMax="0.78538686552"        offset="296"                 />
+      </PointData>
+      <CellData>
+      </CellData>
+      <Points>
+        <DataArray type="Float64" Name="Vertex positions" NumberOfComponents="3" format="appended" RangeMin="0"                    RangeMax="20.532497469"         offset="592"                 />
+      </Points>
+      <Cells>
+        <DataArray type="Int64" Name="connectivity" format="appended" RangeMin=""                     RangeMax=""                     offset="1636"                />
+        <DataArray type="Int64" Name="offsets" format="appended" RangeMin=""                     RangeMax=""                     offset="1652"                />
+        <DataArray type="UInt8" Name="types" format="appended" RangeMin=""                     RangeMax=""                     offset="1668"                />
+      </Cells>
+    </Piece>
+  </UnstructuredGrid>
+  <AppendedData encoding="base64">
+   _AQAAAACAAABgBAAAMwAAAA==eJxjYAABEQeGQU3LQGkJEmly9Q2UuYPNPlIBufYxUEqTCqhlL7E0qYDW5tMNAADtcCA1AQAAAACAAABgBAAAEgAAAA==eJxjYBgFo2AUjALaAAAEYAABAQAAAACAAABgBAAAIgAAAA==eJxjYACBD/sZRulRGoMmFdDLnlGACj7Yk0fT3h4AwbaNKQ==AQAAAACAAABgBAAALAAAAA==eJxjYACBD/YMZNHogFj1xMqTaj6p9lHqb2qbO9jsIxXQ275RMNgBAA9yS8E=AQAAAACAAABgBAAAywAAAA==eJwLbDCedeX/C/sQKtGBBGh09aFQ2h+NhqnP+Lyc88BdyukUKJ1EpPosKJ2IRsPk06H07I+J7BuB9Ew0ehoOGiY/FUpPRuOjq8NFT0PTB6PnQGmYuw4e1fs3A0jvR6P3otHo4gwkAph+XPbhosOjjyx6rPjSPgJKx0PpWBz8JDSaVHfGo5kLo2Nw2Mv6sq1yK5DmhNLofHSaC00dqe5DN48Vh70w/ouv3yI6gfnkLZR+h0a/RJOH8Ul1F7q579DMhdEv0OwBAKTxKHs=AQAAAACAAAAgDQAA/QIAAA==eJx91V1IU2EcBvCpqelAM106ps3NfevmtlNRF3VeAruoLqSQLlILshQKCZeUggRJF31oVFAkYRElSFCWRS1aJEQqmfNCU0sj0tpyZhqpF0tXnEMK53+ezuXvPDzn5X0ujkLxv2eaBy+YPK8Evgp4GvAM4JnAs4HrgRuAm4BbgNuA5wF3AHcCdwF3A+eIV7cE1ZP+Ub7/9pOEKF9oac8b1tq4sGeefyfxvrTN9QveGDYo60riFWebOxZHUoCrgKuBZxFfV+Dff3Iqmw3Jup44J7gBuAm4hQ3Luo24+N08cB4H8aZb5W38cSf7IPFrgrvYgKy7yT2IzrH3Ej9dWjZWN8Wxh8Feb7QvvOStfeeOPPd/56VeFCzY8DGwyLdLPPeXXvPDE88eyXoyk+bX1F5smPemAk8nPaJriKsE1xJP9HW9Do/o2GNZzwFuBD1mkLcCzwU9dpJXCp5PXNzFCdxF+kV3k/ustNYc3Vk5zD8otGlevV3B/nnJ9rWZl/fOEc83Jjd222OYvCuJX70U3zl+JQW4CriaPZT1LOI7uusPVL3JBq4HbgBuAm5h7bJuA54H3EG8ZbzD5T3oJPcg+t8dZd0N8hzdZTZyQjHqZsaNZ37repb/hw7BOeI9dxa1yTdDvNS/7IpciO9bIF7VGumMCcaRHtGTiD/tj4xFHUtlJllPB3kNyGuJF09EZhTPdMBzgBuBm4mXCG5lZlnPBW4HPfnExV2cxMUdXcRrZpuiw8UcO1RYtHp3UcqSby31tbzcMsiXS7xxz31rm3+WeOfdwbShQDST90TiYwOHEyc9KcBVwNXEPwuexSokPjOxPnbOmw1cD9xA+kU3gbwFuA14HvGfgjuIi7s4gbuAu8n5t/VW75se4djXhjlngk+5vEuXd0rZHOIDEi8bL56P9S8Q56ruhU8F4lhQ4m7Bk5g0r940WNfhSSWeIXg66RFdA1zLvkn8/PXQi09eHfAc0iO6EbgZ9FjZhKznArcDzyf94i5O4C7gbnKffwByFJO4AAAAAACAAAAAAAAAAAAAAACAAAAAAAAAAAAAAACAAAAAAAAA
+  </AppendedData>
+</VTKFile>
+
+<!-- Created by Chaste version 2019.1.f4f9636 (with uncommitted modifications) on Wed, 15 Apr 2020 01:55:08 +0000.  Chaste was built on Mon, 02 Mar 2020 07:58:05 +0000 by machine (uname) 'Linux' using settings: Debug.  Checked-out project versions: AxelA=58358c550748fedf6088863782fdd77870262cc6; MorphoCellBasedComparison=16de33a9744c65327e83bc3f0c912a1b99f2ee7d; WoundHealingModelling=92888707d6c6eb5cbafdb6b40960d7dffabcc466.
+-->

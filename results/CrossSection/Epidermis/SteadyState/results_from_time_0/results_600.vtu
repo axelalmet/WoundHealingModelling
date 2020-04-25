@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<VTKFile type="UnstructuredGrid" version="0.1" byte_order="LittleEndian" header_type="UInt32" compressor="vtkZLibDataCompressor">
+  <UnstructuredGrid>
+    <Piece NumberOfPoints="140"                  NumberOfCells="0"                   >
+      <PointData>
+        <DataArray type="Float64" Name="Cell types" format="appended" RangeMin="0"                    RangeMax="7"                    offset="0"                   />
+        <DataArray type="Float64" Name="Process rank" format="appended" RangeMin="0"                    RangeMax="0"                    offset="80"                  />
+        <DataArray type="Float64" Name="attachment" format="appended" RangeMin="-1"                   RangeMax="1"                    offset="128"                 />
+        <DataArray type="Float64" Name="epf" format="appended" RangeMin="0"                    RangeMax="1"                    offset="188"                 />
+        <DataArray type="Float64" Name="volume" format="appended" RangeMin="0.77644846469"        RangeMax="0.78539184485"        offset="272"                 />
+      </PointData>
+      <CellData>
+      </CellData>
+      <Points>
+        <DataArray type="Float64" Name="Vertex positions" NumberOfComponents="3" format="appended" RangeMin="0"                    RangeMax="20.653320257"         offset="1328"                />
+      </Points>
+      <Cells>
+        <DataArray type="Int64" Name="connectivity" format="appended" RangeMin=""                     RangeMax=""                     offset="3576"                />
+        <DataArray type="Int64" Name="offsets" format="appended" RangeMin=""                     RangeMax=""                     offset="3592"                />
+        <DataArray type="UInt8" Name="types" format="appended" RangeMin=""                     RangeMax=""                     offset="3608"                />
+      </Cells>
+    </Piece>
+  </UnstructuredGrid>
+  <AppendedData encoding="base64">
+   _AQAAAACAAABgBAAAKQAAAA==eJxjYAABEQeGQU3LQGkJEmly9Q2UuYPVPlL5pNKDHjiM0uTRAOPmJVE=AQAAAACAAABgBAAAEgAAAA==eJxjYBgFo2AUjALaAAAEYAABAQAAAACAAABgBAAAGwAAAA==eJxjYACBD/sZRulReuBo+8FNjwJyAQCEhJ5dAQAAAACAAABgBAAALQAAAA==eJxjYACBD/YMZNHogFj1xMqTaj6p9lHqb2qbO1jtI5VPaToaBcMFAADaqE9OAQAAAACAAABgBAAABQMAAA==eJwd0X1MzHEcB/A7eiBb3QPrkYkWSR1DEfND58hDelC6LjtFrlq0lQrzdHTjdDOXjulhkbXUXZ2Vlkt1ulrRA3qyI6rryV0t2i6Xp5Pf+/567fPZ5/t5f7bv0IHb9/aa9YRGSEmHhlUno+FgbAgH+rFaA6B12fRWOP/39y4oWewZBqfCG5JgXU3oLSiimkph7YnsVhj8hq6Dtl3GWejvzKFwSCcMs1TYNz/wC/07hjY9vBQT+x566KyqLbmZZY5yrZ5Qb5nWlpOO1F8rgfpTF69D2QgvDQ43VV2AedzJXChNi9RAk0umGSojZAT27HK4ewkGZuxVwtQpnhaa+/qNUMy3n4fnOHM/ofNy1gg8fP17PZR+6pdAryeDEfC88nSdgpS1MegyFLpQ2VBKzXSC+1Koln3M2s2/LbkdD+3QH8jI84W9vNI4eLA89zHUCluGYA3flllB+oWo3w4/z5i5sGLZUBJ8169JhnECIR+20xLZMLbYbQWMmg+bwZ5/4jqaklTj1v2xkjRl50IFzGdnSaBp1dUr8FiS4Aas9e3Kg7TmkxooIHaYYEyjz0bsKR5dFA+7acESuM5JJIfyLvorOHX0Txts78nSwNWhO55B1fBkDrzJSTgDW+MiAyE3ak+NL/nP9Eq1DD7nKzMggz3Hh+sf6MKhSKiweMop3tIvYoymw4iWiVy4khGpgv7CtUNQTjOZYZu3N5NFquxJcYcFKxLXwA3XxB6QftXVGaoyt9nAI1nV03gXdHO8G+72S3boczcQ+gYRBY6V9P7oJX2pPjsDdcsNFvf45TdNk8obWxZgrr3Gig4TGh1XwvHWtyy4Kc2egJ5lMYdgwf30SLj/zlfmN9IPrqXHUatkjtHQ7rh9GDQYjWyYmFCwCUoHbd0hN7F0FrnNnXWD8EYV0QnFj2hqmB2S/QLyaAIVDCzcPod7FXTee9SyQq8xqHBa8At2ZMisccdritwO6lIpDvBuiQ8DBqoEMci1+WS9FDWzSWTpFwXctszZ5HCXwOin+VbwP/Gya5c=AQAAAACAAAAgDQAAgwYAAA==eJx91ntUzGkYwPFMZaTIZFKhpOiumpJLF793K0apjdqyuYzbdlTkMtTEdpE9mxMrRU57yqBmapPLYLGWTLSVEsnEdnEZi6Ukiel0U+8+/6x9nN3fzp+fec477+885/s7o6X1f593DMsX5L95FIuPY3E+i5uy+GQWt2RxKxafxuI2LG7H4g4s7sTizizuyuICFndjcfd/eWGYuEhvSM1kz/QZHxjV8WmfAtu7Cb60l5nRLqoLQJ7ne1BYQLWJx11JFnaSz/m6gOqT/L7l0djXjzlwsYHyyKbHhkux796fVt5AjQn3xjIR9j3pj2oaqBl5eTs7Gft7/vmGBmpOonzk57BzSs03tFFLMuQY04O9NTphYxu1Iq0DNr74udJ9fMGnkdW1/lnYD1buiW2jNmSzPa8ZexV3+/o2akc6t+0xWoS8bGP4ujbqQFpOD8/Fnrj3kKiNOpFU5lwg9j3P5JFt1Jm07DXyw760Os1Bk+pKgmM7rbH7dWTZaVIFJLB20Tt8n7ePXWw1qW4kQuJ4Gvt5ustGk+pOxrhx12A3+8JLt526k/goqzuBUYOf/PtqzRXLoS4mfnRcMvYL3ksTs4Ypk3Ujfzb2yGePFy+kXGKw6QAHe8JyVexCakiKt2Q/D0A+p0bpJ6fjiXi46jF2xkU3VE5NSKta1Y29r+KeSE4nEfGym+b4/Jfu6mg5nUJKCgJXYp+5P3e2ik4l80zHlGKf0J49R0WtiVfR5o/YHVqFMD+dvJ0THLQIebD1I3cVtSUGFfXZ2K9XFzurqD2RNAqqsY/PcLRTUUfC+znuBXZOtsFUFZ1BLJaUtGOfVThgpqIuRGf2tgfYdTxVeu3Ulbgm1Z/AnukXxm2nAmIk0cRiL4hUwh7dSICFxgK7cKlYfK9XzXBE5xR9+3TI3/7CxXSjZqiXWZYmS8B+JnTr/IFhbRJiIRdiV4u0lw8M6xNO63Jb7EYtYZ7J0O/0eD0z7NwXHcJk6HeHrZ0Fdu3ed18lQ7/h13xnYVcOmaxOhn6ZxgER9hkaqwtK6NfQbH4O9p5VEZeU0K+e6H4D9kLTLeDTyJFrxWP7kQ+f3wzn2BD9TpkQe0x5xlkl9Kt090zAHvHr1JNK6Pcno/bD2CvyyuVK6Ld49SkZ9tErOEeV0O+1/cxR7JK1NYvU0O+kIo907F4fdALU0G/GyZcrsZt4Di5QQ79T6jzssfP1nsxXQ7/0iEcnfl43sw/fNkG/nG4j7eAo/U9+tCoktWugiznR4nMpCHlY361ayRBlApoVYuyvqsPeXh3mkqQ+HoPdIc5j8OqwITmevc8Su0+ata4I+vVnZk/8bD5Jd4wI+r1cUeuEvc07kS+Cfs8/lERgfx6nnCiCfpufWR767D5njhgqoN/cp1ceYX+zr2ycAvoNrPzgiJ93rlQGPp2onTSJ2LdWhsM5tsRzpVMZ9kRuj4EC+rXn8buwp1y+pqeAfo+m1xp8ifzsAq2RCujXpTvNCHtvnBlHAf2mTK6k+JzmGzNTm6DfzPsbfseuvFWU3AT9LuhPzMMuSUtPaoJ+X79RLMFe3XFnIF6jZl7U5Rzbbs/75JY3r283h341ufJ47N3vRlzMhH4bqSYU+6NbvykyoV+Lkb2e2P125YQLoV/JVGNX7DGqihwv2KODf1qf7/F//md9jK8NFUK/IaVl/ng+eN4hcHPCiROuxZ7LyT8hg34fCi0zsBPOklIZ9Lvqu+iL2H2KIk/KoN+ulVeeYc84k3dKBv36rJMaxCO3D9GclkG/xvX9ztgnWFU3SmGP4sFCU390/9VasWdl0G+jTtdiPO+ctvCcDPrlCyKCsYu9/2y+B/0euzfBG/uamm5wAfHwVltgL6qvAXcjgzdT+/D9hSs2gbsT8Z2S29hHjKrqqYd+JZk1O/3QPXs7TLKe9Hcx/Kq8IOzrL1+Y1vWRMlOa1dbYi/Y27pRAv7v68nU+m3e8vEoC/VZK33bjPaakNBd4Qb9JdspO7Pp1qjAhvLc9Jm9xx/dsKWvP8IJ+S8Y68/D5YdHrdntBv5dKQz2wl7yRlEuhX8E34WuwB0W/B7cmLroPsrB7NR2skEK/O340L8duos2/KYV++SmyV9jVT0fckUK/sdUJI/F+L0X7K2Tw3nZYk7IA78Ut55dWKfRryNs2Gc9n/eDwhxT6TXI8zMOeG0M+1EO/y6LN+/Hvcl9Pgn0JSM66mAfYjc0GwN1I3d1XJ7D/BUGDg7k=AAAAAACAAAAAAAAAAAAAAACAAAAAAAAAAAAAAACAAAAAAAAA
+  </AppendedData>
+</VTKFile>
+
+<!-- Created by Chaste version 2019.1.f4f9636 (with uncommitted modifications) on Sat, 18 Apr 2020 06:56:57 +0000.  Chaste was built on Mon, 02 Mar 2020 07:58:05 +0000 by machine (uname) 'Linux' using settings: Debug.  Checked-out project versions: AxelA=58358c550748fedf6088863782fdd77870262cc6; MorphoCellBasedComparison=16de33a9744c65327e83bc3f0c912a1b99f2ee7d; WoundHealingModelling=92888707d6c6eb5cbafdb6b40960d7dffabcc466.
+-->

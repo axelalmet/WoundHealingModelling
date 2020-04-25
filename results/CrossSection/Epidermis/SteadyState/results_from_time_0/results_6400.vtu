@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<VTKFile type="UnstructuredGrid" version="0.1" byte_order="LittleEndian" header_type="UInt32" compressor="vtkZLibDataCompressor">
+  <UnstructuredGrid>
+    <Piece NumberOfPoints="140"                  NumberOfCells="0"                   >
+      <PointData>
+        <DataArray type="Float64" Name="Cell types" format="appended" RangeMin="0"                    RangeMax="7"                    offset="0"                   />
+        <DataArray type="Float64" Name="Process rank" format="appended" RangeMin="0"                    RangeMax="0"                    offset="80"                  />
+        <DataArray type="Float64" Name="attachment" format="appended" RangeMin="-1"                   RangeMax="1"                    offset="128"                 />
+        <DataArray type="Float64" Name="epf" format="appended" RangeMin="0"                    RangeMax="1"                    offset="192"                 />
+        <DataArray type="Float64" Name="volume" format="appended" RangeMin="0.77699409487"        RangeMax="0.7853971162"         offset="276"                 />
+      </PointData>
+      <CellData>
+      </CellData>
+      <Points>
+        <DataArray type="Float64" Name="Vertex positions" NumberOfComponents="3" format="appended" RangeMin="0"                    RangeMax="20.531133913"         offset="536"                 />
+      </Points>
+      <Cells>
+        <DataArray type="Int64" Name="connectivity" format="appended" RangeMin=""                     RangeMax=""                     offset="1560"                />
+        <DataArray type="Int64" Name="offsets" format="appended" RangeMin=""                     RangeMax=""                     offset="1576"                />
+        <DataArray type="UInt8" Name="types" format="appended" RangeMin=""                     RangeMax=""                     offset="1592"                />
+      </Cells>
+    </Piece>
+  </UnstructuredGrid>
+  <AppendedData encoding="base64">
+   _AQAAAACAAABgBAAAKQAAAA==eJxjYAABEQeGQU3LQGkJEmly9Q2UuYPVPlL5pNIMozRl9KAFACRPJVE=AQAAAACAAABgBAAAEgAAAA==eJxjYBgFo2AUjALaAAAEYAABAQAAAACAAABgBAAAHAAAAA==eJxjYACBD/sZRulResDoUUAZ+GA/WGkA68KeXQ==AQAAAACAAABgBAAALQAAAA==eJxjYACBD/YMZNHogFj1xMqTaj6p9lHqb2qbO1jtI5VPaToaBcMFAADaqE9OAQAAAACAAABgBAAArwAAAA==eJzjuiBg2fr/hT0XnWg2NJqQ+gd/20LV7pJPP4bS9wjQN9Hox0Sa35Dx8KMKkG7GQTeg0TDxFhzq6giYh66fEL04NWSHEpBeSiS9koA4Or2KgL7FOGiYfKbNrFtfFF/aL0jhU/oJpOdB6QUk0osI0LjUw/iz0Oh5aOrSoe4kl84kkoapT4bSaVA6Fo2GiZsaWDnUAfMJqbQZGt8CTdwCjYapM8DBV0Xjw2gA5hdGOg==AQAAAACAAAAgDQAA7gIAAA==eJx91UtIFHEcB3DNHuaCOui2bbq5zq7rvh+zSkjE/NW1DhmpKV5UJAx6QIfNEC8eysiSigWlEA/tXuoQdKnDmgsVUctSYQgthR7KFoktyfDRy2iZoQ3mN9/m+Jkvv/9v+M1vJifnf9cXEdxg6pwPvBh4KfCdwMuBG4HzwM3ALcCtwO3AncDdwL3AfcAF4H7iubNXJi2JefHwNf2Tmlg6O8+H/aZbl4LrYpvCe6dCs4FoHjui6hri3vn4icgcB1zLlPVl14O8geRvnP5Q07pkBM6zVlU3g7yFnCu7FbiddSj8uuRO1q7qbpJv3hOcsA54gfvIubILpH/Z/eR5TcIQ17rkZyuP7n+qif3MelfgqYdPfBbXFO7kF3Rc6jfxHaHl0ZHgNqZ0neRFxEfj35oC0RLgOuBlwCuI7+/7xUfmKtm6wpskNwGvAl4N3Abcwb6ruovk5T49pH95Ll7gPuACW1V4b8yy0tLzRjx0dNfC4ovN7K933t2+b6xzTWxW+J3k8O6EI4+pu4b461MNRalxDrgWuJ54UnID8XRt+OLXhBE4z5TPJbsZ5C3ArcDtwJ3gXDfJr03MNA4e87KDqu4DeQG4n9TpEduLI12Z77Z1XHOyg8u6Tv82FJnzMxcX7657/u8/meYb97aNpUWlD4TCBltiQ3QrfDo+c7U0tZWpeyHxnr7jBy4HS4DrgJcBryDuEe6ZmqKVwE3Aq4BXA7cBdzCPqruAe4jLc/GS+rL7gAvEB5NF2mFrUlTO/f1q45bKxCrx5R/hc8WpTeQ9kb2A+OBGS/1IkAOuBa4HbiAeG7ptDESNwHngZuAW4FaWq+p24E7i05K7ict75yXeLbmP9CO7QP1deWk4s6dxMzdSG9NkfdIxeZ7P7Okzhb/SvqznMnuq9I8FizfzM3uq7oXE+y+caRnO7Km664iflbyM9Cl7BfEHj+usDZk9VXcT8CpyruzVwG2kzpTkDuAu4B5Sv0uaixe4D7hA/A9FBT8LAAAAAACAAAAAAAAAAAAAAACAAAAAAAAAAAAAAACAAAAAAAAA
+  </AppendedData>
+</VTKFile>
+
+<!-- Created by Chaste version 2019.1.f4f9636 (with uncommitted modifications) on Wed, 15 Apr 2020 01:52:51 +0000.  Chaste was built on Mon, 02 Mar 2020 07:58:05 +0000 by machine (uname) 'Linux' using settings: Debug.  Checked-out project versions: AxelA=58358c550748fedf6088863782fdd77870262cc6; MorphoCellBasedComparison=16de33a9744c65327e83bc3f0c912a1b99f2ee7d; WoundHealingModelling=92888707d6c6eb5cbafdb6b40960d7dffabcc466.
+-->

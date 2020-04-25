@@ -2,7 +2,7 @@
 
 	<OffLatticeSimulation-2-2>
 		<Dt>0.005</Dt>
-		<EndTime>2</EndTime>
+		<EndTime>5</EndTime>
 		<SamplingTimestepMultiple>20</SamplingTimestepMultiple>
 		<OutputDivisionLocations>0</OutputDivisionLocations>
 		<OutputCellVelocities>0</OutputCellVelocities>
@@ -25,7 +25,7 @@
 		<GrowthFactorBasedContactInhibitionCellCycleModel>
 			<QuiescentVolumeFraction>0.9</QuiescentVolumeFraction>
 			<EquilibriumVolume>0.785398</EquilibriumVolume>
-			<GrowthFactorThreshold>0.1</GrowthFactorThresholde>
+			<GrowthFactorThreshold>1</GrowthFactorThresholde>
 			<StemCellG1Duration>14</StemCellG1Duration>
 			<TransitCellG1Duration>2</TransitCellG1Duration>
 			<SDuration>5</SDuration>
@@ -43,7 +43,7 @@
 		<PlateletCellKiller>
 			<CellsRemovedByFibroblasts>0</CellsRemovedByFibroblasts> 
 			<CutOffRadius>1.5</CutOffRadius> 
-			<GrowthFactorThreshold>0.25</GrowthFactorThreshold> 
+			<GrowthFactorThreshold>0.1</GrowthFactorThreshold> 
 			<VolumeThreshold>0.706858</VolumeThreshold 
 		</PlateletCellKiller>
 	</CellKillers>
@@ -57,14 +57,14 @@
 
 	<Forces>
 		<GeneralisedLinearSpringForce-2-2>
-			<MeinekeSpringStiffness>30</MeinekeSpringStiffness>
+			<MeinekeSpringStiffness>15</MeinekeSpringStiffness>
 			<MeinekeDivisionRestingSpringLength>0.5</MeinekeDivisionRestingSpringLength>
 			<MeinekeSpringGrowthDuration>1</MeinekeSpringGrowthDuration>
 			<UseCutOffLength>1</UseCutOffLength>
 			<CutOffLength>1.5</CutOffLength>
 		</GeneralisedLinearSpringForce-2-2>
 		<WoundBasedChemotacticForce-2>
-			<ChemotacticStrength>0.01</ChemotacticStrength> 
+			<ChemotacticStrength>0.025</ChemotacticStrength> 
 			<NeighbourhoodRadius>1.5</NeighbourhoodRadius> 
 		</WoundBasedChemotacticForce-2>
 	</Forces>

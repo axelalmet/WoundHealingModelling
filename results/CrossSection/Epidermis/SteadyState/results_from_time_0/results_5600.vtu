@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<VTKFile type="UnstructuredGrid" version="0.1" byte_order="LittleEndian" header_type="UInt32" compressor="vtkZLibDataCompressor">
+  <UnstructuredGrid>
+    <Piece NumberOfPoints="140"                  NumberOfCells="0"                   >
+      <PointData>
+        <DataArray type="Float64" Name="Cell types" format="appended" RangeMin="0"                    RangeMax="7"                    offset="0"                   />
+        <DataArray type="Float64" Name="Process rank" format="appended" RangeMin="0"                    RangeMax="0"                    offset="80"                  />
+        <DataArray type="Float64" Name="attachment" format="appended" RangeMin="-1"                   RangeMax="1"                    offset="128"                 />
+        <DataArray type="Float64" Name="epf" format="appended" RangeMin="0"                    RangeMax="1"                    offset="192"                 />
+        <DataArray type="Float64" Name="volume" format="appended" RangeMin="0.77712596858"        RangeMax="0.7853731725"         offset="276"                 />
+      </PointData>
+      <CellData>
+      </CellData>
+      <Points>
+        <DataArray type="Float64" Name="Vertex positions" NumberOfComponents="3" format="appended" RangeMin="0"                    RangeMax="20.534318111"         offset="556"                 />
+      </Points>
+      <Cells>
+        <DataArray type="Int64" Name="connectivity" format="appended" RangeMin=""                     RangeMax=""                     offset="1616"                />
+        <DataArray type="Int64" Name="offsets" format="appended" RangeMin=""                     RangeMax=""                     offset="1632"                />
+        <DataArray type="UInt8" Name="types" format="appended" RangeMin=""                     RangeMax=""                     offset="1648"                />
+      </Cells>
+    </Piece>
+  </UnstructuredGrid>
+  <AppendedData encoding="base64">
+   _AQAAAACAAABgBAAAKQAAAA==eJxjYAABEQeGQU3LQGkJEmly9Q2UuYPVPlL5pNIMozRl9KAFACRPJVE=AQAAAACAAABgBAAAEgAAAA==eJxjYBgFo2AUjALaAAAEYAABAQAAAACAAABgBAAAHAAAAA==eJxjYACBD/sZRulResDoUUAZ+GA/WGkA68KeXQ==AQAAAACAAABgBAAALQAAAA==eJxjYACBD/YMZNHogFj1xMqTaj6p9lHqb2qbO1jtI5VPaToaBcMFAADaqE9OAQAAAACAAABgBAAAvgAAAA==eJzbVl9z1Y7hpf22Aaa3otGboLT6lTN7e++9GDBaHo1Gl1+1NKAxB0gvJ5FehUaTqh9GL0ajYeathtJJBrXu5kh0Ag4+ujghOgWHeDSUjsNBo9vTesb5coLiS/t218TXx4B0J5RuJ5FuQaMb0Whc4jC6Bk1dJxoNcyc63YRGw8QbcKhvQKNh+uqhdA2a+hoc4jD9F2If+s/4/wJOn4fS53Dw0enzaPrRaZi6U2jqYfzjUPoImvoTUBoAIK1gYg==AQAAAACAAAAgDQAACQMAAA==eJx91VtIFFEYB/C1LZU0c9VtW9bNdW/uzd3Z3YLKhzlF5uUxCCFy6SGiJ0lsvaSVYUQZXTYKKjLB7MlSQV/cVjCE6kGNBBsDp5um5OhSWoqYmc6hDeabr3n8zZ//nDnfHEah+N/1jUVuEHlORDwV8QzEtyOeibgBcSPiZsStiNsQdyDuQtyNOIO4F3Ef4n7gXTa7sZnj2brbkW29ESE2T3dx46up4CJbK3GNJX9iPqwk8p4E/Oot41wNr0JcjbiWnJF1PfCDRaqlSNQAeqgbifS9qJuRHiupkXUbkncg7kLcDfxR6+W6QBVDqiXeIroXrJ+6D3E/2Icfu9M6eqJ+8mFfQX9fZDnmV3YUfN7FzbLvJV50w/T9vvAb+OOXoerBYAKR962gf3i8MDIZTgd56hrEdYSX9SzgX8vNgQo+GzyXugn0U7cgPTlkTNbtSN6JeC7iHtBP58KQj7LuBe9F3QdceTwQam54xwpl1al3BjeSv77pXsnE1LEF4A0DzrkKRklmZD0J+P5J9dKeuyrE1UTaT12LuB549nzjr8wBA+JGxM2IWxG3Ie5A3AXcILob+M2a/HMpJxiwP9S9iPsQ95NZiT8fUjwrL/WTri8P+Z2HVTGfDpuGz/J+Uj9WRpQD//6TxaVVB8IdAiv1tvY8I8+tAC/h9KGoEA96qKcAfyJcL1wMpgN/KroGcR3wdtGzgI8GC1qXw9mIm4BzolsQzyEXZN0O8m9FdyKeC3pGRPeAPJ0LA/LUvUjeB/xQp7+v7CjHdkvmrplJ7tRxP1np97ClMn70mrABfCfUNwNPyFPOvAiqEFcDTxRdi7ge+MWmuMrxsAFxI+JmxK2I24h0fxpEd4A8dRfibtBDzx0D8tS9SN4H8vVDpzxH1s5pRig4NhRJivnCa200v01g0yW+MpW82DKyAny14lLtm+l4InXF6XVPgb63v/fk2jmVdw1Jk3UdyMeJngXycU2fAt1r51TeTYhbEM+B6xTdjrgTrl/0XOCrD9bdA/b/vDgXBnEv4j7gfwDz1KkqAAAAAACAAAAAAAAAAAAAAACAAAAAAAAAAAAAAACAAAAAAAAA
+  </AppendedData>
+</VTKFile>
+
+<!-- Created by Chaste version 2019.1.f4f9636 (with uncommitted modifications) on Wed, 15 Apr 2020 01:51:50 +0000.  Chaste was built on Mon, 02 Mar 2020 07:58:05 +0000 by machine (uname) 'Linux' using settings: Debug.  Checked-out project versions: AxelA=58358c550748fedf6088863782fdd77870262cc6; MorphoCellBasedComparison=16de33a9744c65327e83bc3f0c912a1b99f2ee7d; WoundHealingModelling=92888707d6c6eb5cbafdb6b40960d7dffabcc466.
+-->

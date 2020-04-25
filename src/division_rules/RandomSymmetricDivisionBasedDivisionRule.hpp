@@ -101,7 +101,7 @@ public:
      * @param rCellPopulation the cell population
      * @param epidermalIndex the considered epidermal node index
      */
-    c_vector<unsigned, 2> GetTwoNearestFibroblastNeighbours(AbstractCentreBasedCellPopulation<ELEMENT_DIM, SPACE_DIM>& rCellPopulation, unsigned epidermalIndex);
+    std::vector<unsigned> GetNearestFibroblastNeighbours(AbstractCentreBasedCellPopulation<ELEMENT_DIM, SPACE_DIM>& rCellPopulation, unsigned epidermalIndex);
 
     /**
      * Overridden CalculateCellDivisionVector() method.

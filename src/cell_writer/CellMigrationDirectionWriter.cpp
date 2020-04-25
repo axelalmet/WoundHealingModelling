@@ -61,7 +61,7 @@ c_vector<double, SPACE_DIM> CellMigrationDirectionWriter<ELEMENT_DIM, SPACE_DIM>
     {
         // Get the migration direction
         double direction = pCell->GetCellData()->GetItem("direction");
-
+        
         migration_direction[0] = cos(direction);
         migration_direction[1] = sin(direction);
     }

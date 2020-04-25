@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<VTKFile type="UnstructuredGrid" version="0.1" byte_order="LittleEndian" header_type="UInt32" compressor="vtkZLibDataCompressor">
+  <UnstructuredGrid>
+    <Piece NumberOfPoints="140"                  NumberOfCells="0"                   >
+      <PointData>
+        <DataArray type="Float64" Name="Cell types" format="appended" RangeMin="0"                    RangeMax="7"                    offset="0"                   />
+        <DataArray type="Float64" Name="Process rank" format="appended" RangeMin="0"                    RangeMax="0"                    offset="100"                 />
+        <DataArray type="Float64" Name="attachment" format="appended" RangeMin="-1"                   RangeMax="1"                    offset="148"                 />
+        <DataArray type="Float64" Name="epf" format="appended" RangeMin="0"                    RangeMax="1"                    offset="232"                 />
+        <DataArray type="Float64" Name="volume" format="appended" RangeMin="0.77645708603"        RangeMax="0.78539814042"        offset="316"                 />
+      </PointData>
+      <CellData>
+      </CellData>
+      <Points>
+        <DataArray type="Float64" Name="Vertex positions" NumberOfComponents="3" format="appended" RangeMin="0"                    RangeMax="20.654051793"         offset="620"                 />
+      </Points>
+      <Cells>
+        <DataArray type="Int64" Name="connectivity" format="appended" RangeMin=""                     RangeMax=""                     offset="1628"                />
+        <DataArray type="Int64" Name="offsets" format="appended" RangeMin=""                     RangeMax=""                     offset="1644"                />
+        <DataArray type="UInt8" Name="types" format="appended" RangeMin=""                     RangeMax=""                     offset="1660"                />
+      </Cells>
+    </Piece>
+  </UnstructuredGrid>
+  <AppendedData encoding="base64">
+   _AQAAAACAAABgBAAAOQAAAA==eJxjYAABEQeGQU3LQGkJEmly9Q2UuYPVPlL5pNIMMJpSgG4OIT6p5gxWmlR3oqsnxCfbXgBcBCVRAQAAAACAAABgBAAAEgAAAA==eJxjYBgFo2AUjALaAAAEYAABAQAAAACAAABgBAAAKwAAAA==eJxjYACBD/sZRulResBoGPhgTxmNbg4hPqnmDFZAqjtJDS/y7QUAj/ueXQ==AQAAAACAAABgBAAALQAAAA==eJxjYACBD/YMZNHogFj1xMqTaj6p9lHqb2qbO1jtI5VPaToaBcMFAADaqE9OAQAAAACAAABgBAAA0AAAAA==eJzL+SvX7Pf3hX0eAboQjSakjlTz0PXB+B8lXrTvufHC/j0B+iMa/Q4HTcic92jqcdkPE98uDqF3oNF70Gh0cVzqcelHp/fhMGcblN4Ppb+KQmhmMew0OwFxXPLE0hxQ+q8oKv0LShte+af/W/Gl/dHHDtmg+D4IpWH84zjok2i0HtSc4zj42mj2oNsHU6eKpu9lxjt3EB8X/RyN/wSNfk6ARjfvFRr9BI2Pbi/M/bpQd8PCE8bXQ+Ojhw+u8IOFFzqthxaOqmji6DQAXBGWrw==AQAAAACAAAAgDQAA4QIAAA==eJx91ktIVFEcBnDB3iZmOk7jgxnHmXFmnNe9NwvazG0hBeWuhagISoOBhlEuhKIWgouMIoKIIrDatZAIk4yKJttEL91kEaQ9NCnQEQR7jad77qEJzv98zfI3H2fuOf/zXSYv73+fTBJ8Yap5A/AtwEuBbwNeCdwD3AvcBzwAPAg8DDwCPAY8AVwDrgM3iPc0DqzNsunkwtf+0rbUt9w8Wy+072ZsJbko+fDTW0OM5ZtqLyA+dbBpgrFi4A4zo3QX8CqyTpcemWfMA9wL3EfWFx4A+aApn4/wMPAI8W7bY8R3uMqW2amEuaR0jTyPcB24Qfa1afiD9buGOW/7r5xvT9dXZtlick7yizPlZ1cZI77vSOEextabai8i7r87cIOxEuBO4BXA3eas5CWt45OMVQOvAe4n6wuvBfkQ8DrgUfOz0uMkL+aSMD8pXSPPKVwnfrmjZXzF6m91puPcujNrzL9+883rTNbqr+wHuru+r1r9VXsB8fBo/QneX7U7gLuAV5keyR3vyh/y/qrdC9xHvMz2APAg8DDwCPAY8cHDhdO8v26layR/2nadnI/IG8RTC4Vty9Z8O9j+zpOh4pxfa/g4+9Pq72P7PhTk/JV36WjW6q/snef7xlat/qq9iPjI3vutvL9qdwKvAO4m3tuTuc7n2y7tq9nXNsz7m1bmAyBfC/JhkK8jeeFR4HHzkeTRrfEp3l95X/d29k3y+crzEnmd5K+knk38sOZYvrHpSePQv/87L26n5n9bc5S9863ey+co+yHbi4iPdLt28Tm6lF5B8ndsd5N88+jmq/x9q/Ya4H7gtcBDwKPA48SjLQMv+VzUrpH9CtdB3gDn5iTriOepo+vYczfIvbp0vN/J38/yPXn+ID3I38Oyz72faeDvYdm/2F5FXNx/D7j/1aAvPpD3k/sv8kGQD5H1j9n5CMkLjxEfs3uUAK6BfmmkXyJvkHXEOeeD83QBdxD/A4CWrOw=AAAAAACAAAAAAAAAAAAAAACAAAAAAAAAAAAAAACAAAAAAAAA
+  </AppendedData>
+</VTKFile>
+
+<!-- Created by Chaste version 2019.1.f4f9636 (with uncommitted modifications) on Sat, 18 Apr 2020 07:02:07 +0000.  Chaste was built on Mon, 02 Mar 2020 07:58:05 +0000 by machine (uname) 'Linux' using settings: Debug.  Checked-out project versions: AxelA=58358c550748fedf6088863782fdd77870262cc6; MorphoCellBasedComparison=16de33a9744c65327e83bc3f0c912a1b99f2ee7d; WoundHealingModelling=92888707d6c6eb5cbafdb6b40960d7dffabcc466.
+-->

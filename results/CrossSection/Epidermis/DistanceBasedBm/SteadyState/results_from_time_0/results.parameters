@@ -1,0 +1,86 @@
+<Chaste>
+
+	<OffLatticeSimulation-2-2>
+		<Dt>0.005</Dt>
+		<EndTime>40</EndTime>
+		<SamplingTimestepMultiple>800</SamplingTimestepMultiple>
+		<OutputDivisionLocations>0</OutputDivisionLocations>
+		<OutputCellVelocities>0</OutputCellVelocities>
+	</OffLatticeSimulation-2-2>
+
+	<NodeBasedCellPopulation-2>
+		<MechanicsCutOffLength>5</MechanicsCutOffLength>
+		<UseVariableRadii>0</UseVariableRadii>
+		<MeinekeDivisionSeparation>0.1</MeinekeDivisionSeparation>
+		<CentreBasedDivisionRule>
+			<RandomSymmetricDivisionBasedDivisionRule-2-2>
+			</RandomSymmetricDivisionBasedDivisionRule-2-2>
+		</CentreBasedDivisionRule>
+		<DampingConstantNormal>1</DampingConstantNormal>
+		<DampingConstantMutant>1</DampingConstantMutant>
+		<OutputResultsForChasteVisualizer>1</OutputResultsForChasteVisualizer>
+	</NodeBasedCellPopulation-2>
+
+	<CellCycleModels>
+		<NoCellCycleModel>
+		</NoCellCycleModel>
+		<BasementMembraneBasedContactInhibitionCellCycleModel>
+			<QuiescentVolumeFraction>0.9</QuiescentVolumeFraction>
+			<EquilibriumVolume>0.785398</EquilibriumVolume>
+			<StemCellG1Duration>1</StemCellG1Duration>
+			<TransitCellG1Duration>2</TransitCellG1Duration>
+			<SDuration>5</SDuration>
+			<G2Duration>4</G2Duration>
+			<MDuration>1</MDuration>
+		</BasementMembraneBasedContactInhibitionCellCycleModel>
+	</CellCycleModels>
+
+	<SrnModels>
+		<NullSrnModel>
+		</NullSrnModel>
+	</SrnModels>
+
+	<CellKillers>
+		<BasementMembraneDistanceBasedCellKiller>
+			<mRadius>3.2909</mRadius>
+		</BasementMembraneDistanceBasedCellKiller>
+	</CellKillers>
+
+	<SimulationModifiers>
+		<VolumeTrackingModifier-2>
+		</VolumeTrackingModifier-2>
+		<BasementMembraneAttachmentTrackingModifier-2>
+		</BasementMembraneAttachmentTrackingModifier-2>
+	</SimulationModifiers>
+
+	<Forces>
+		<GeneralisedLinearSpringForce-2-2>
+			<MeinekeSpringStiffness>15</MeinekeSpringStiffness>
+			<MeinekeDivisionRestingSpringLength>0.5</MeinekeDivisionRestingSpringLength>
+			<MeinekeSpringGrowthDuration>1</MeinekeSpringGrowthDuration>
+			<UseCutOffLength>1</UseCutOffLength>
+			<CutOffLength>1.5</CutOffLength>
+		</GeneralisedLinearSpringForce-2-2>
+		<DistanceBasedEpidermalBasementMembraneForce>
+			<BasementMembraneParameter>1</BasementMembraneParameter> 
+			<TargetCurvature>0</TargetCurvature> 
+		</DistanceBasedEpidermalBasementMembraneForce>
+	</Forces>
+
+	<CellPopulationBoundaryConditions>
+		<FixedRegionPlaneBoundaryCondition-2>
+			<PointOnPlane>0,0.25</PointOnPlane>
+			<NormalToPlane>0,-1</NormalToPlane>
+			<UseJiggledNodesOnPlane>0</UseJiggledNodesOnPlane>
+		</FixedRegionPlaneBoundaryCondition-2>
+	</CellPopulationBoundaryConditions>
+
+	<NumericalMethod>
+		<ForwardEulerNumericalMethod-2-2>
+			<UseAdaptiveTimestep>0</UseAdaptiveTimestep> 
+			<UseUpdateNodeLocation>0</UseUpdateNodeLocation> 
+			<GhostNodeForcesEnabled>0</GhostNodeForcesEnabled> 
+		</ForwardEulerNumericalMethod-2-2>
+	</NumericalMethod>
+
+</Chaste>

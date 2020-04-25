@@ -48,7 +48,7 @@
 
 static const std::string M_OUTPUT_DIRECTORY = "WoundHealingModel/CrossSection";
 static const double M_DT = 0.005;
-static const double M_END_TIME = 2.0;
+static const double M_END_TIME = 5.0;
 // static const double M_SAMPLING_TIMESTEP = M_END_TIME / M_DT;
 static const double M_SAMPLING_TIMESTEP = 0.1/M_DT;
 
@@ -73,7 +73,7 @@ public:
         double division_separation = 0.1; // Initial resting length upon division
 
         // Mechanical parameters
-        double spring_stiffness = 30.0; // Spring stiffness
+        double spring_stiffness = 15.0; // Spring stiffness
         // double bm_stiffness = 6.0; // Basement membrane attachment strength
         // double target_curvature = 0.0; // Target curvature
 
@@ -109,7 +109,7 @@ public:
             GrowthFactorBasedContactInhibitionCellCycleModel* p_cycle_model = new GrowthFactorBasedContactInhibitionCellCycleModel(); //Contact-inhibition-based cycle model yet.
             p_cycle_model->SetEquilibriumVolume(0.25*M_PI);
             p_cycle_model->SetQuiescentVolumeFraction(0.9);
-            p_cycle_model->SetGrowthFactorThreshold(0.1);
+            p_cycle_model->SetGrowthFactorThreshold(1.0);
             p_cycle_model->SetDimension(2);
 
             // Randomly fill the fibroblast population with EPF and ENF fibroblasts, according to proportions
@@ -256,7 +256,7 @@ public:
         // Add the chemotactic force
         MAKE_PTR(WoundBasedChemotacticForce<2>, p_chemotactic_force);
         p_chemotactic_force->SetNeighbourhoodRadius(radius_of_interaction);
-        p_chemotactic_force->SetChemotacticStrength(2.0*M_DT);
+        p_chemotactic_force->SetChemotacticStrength(5.0*M_DT);
         simulator.AddForce(p_chemotactic_force);
 
         // Define a fixed-regions boundary condition so that cells can't move past y = 0
@@ -275,7 +275,7 @@ public:
 		simulator.AddSimulationModifier(p_volume_tracking_modifier);
 
         // Define the reaction-diffusion PDE, using the value's from YangYang's paper.
-        MAKE_PTR_ARGS(PlateletDerivedGrowthFactorCellwiseSourceParabolicPde<2>, p_pde, (simulator.rGetCellPopulation(), 1.0, 0.36, 0.0, 0.1));
+        MAKE_PTR_ARGS(PlateletDerivedGrowthFactorCellwiseSourceParabolicPde<2>, p_pde, (simulator.rGetCellPopulation(), 1.0, 0.36, 1.0, 0.1));
         MAKE_PTR_ARGS(ConstBoundaryCondition<2>, p_bc, (0.0));
 
         // Create a PDE Modifier object using this pde and bcs object
@@ -318,8 +318,8 @@ public:
         // // Add the platelet cell killer
         MAKE_PTR_ARGS(PlateletCellKiller, p_platelet_cell_killer, (&cell_population));
         p_platelet_cell_killer->SetCutOffRadius(radius_of_interaction);
-        p_platelet_cell_killer->SetGrowthFactorThreshold(0.25);
-        p_platelet_cell_killer->SetVolumeThreshold(0.9*0.25*M_PI); // Platelet cells can be compressed to half their size before dying
+        p_platelet_cell_killer->SetGrowthFactorThreshold(0.1);
+        p_platelet_cell_killer->SetVolumeThreshold(0.95*0.25*M_PI); // Platelet cells can be compressed to half their size before dying
         simulator.AddCellKiller(p_platelet_cell_killer);
 
         simulator.Solve(); // Run the simulation.

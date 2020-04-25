@@ -114,6 +114,18 @@ void BasementMembraneAttachmentTrackingModifier<DIM>::UpdateCellData(AbstractCel
             // Count the number of fibroblast neighbours
             if (!neighbour_indices.empty())
             {
+                // Initialise the average force direction
+                c_vector<double, 2> force_direction;
+                force_direction[0] = 0.0;
+                force_direction[1] = 0.0;
+
+                // Get the cell location and its radius (assuming OS model)
+                c_vector<double, 2> node_location = rCellPopulation.GetNode(node_index)->rGetLocation();
+                double node_radius = rCellPopulation.GetNode(node_index)->GetRadius();
+
+                // Initialise the likely force direction to the BM and mark the stem cell neighbours
+                std::vector<unsigned> stem_cell_neighbours;
+
                 for (std::set<unsigned>::iterator iter = neighbour_indices.begin();
                     iter != neighbour_indices.end();
                     ++iter)
@@ -125,10 +137,59 @@ void BasementMembraneAttachmentTrackingModifier<DIM>::UpdateCellData(AbstractCel
                     if (p_neighbour_cell_type->template IsType<FibroblastCellProliferativeType>())
                     {
                         num_fibroblast_neighbours += 1;
-                        cell_iter->GetCellData()->SetItem("attachment", 1.0);
-                        break;
+
+                        c_vector<double, 2> fibroblast_location = rCellPopulation.GetNode(*iter)->rGetLocation();
+                        double fibroblast_radius = rCellPopulation.GetNode(*iter)->GetRadius();
+                        // Get the vector from the node location to the fibroblast location
+                        c_vector<double, 2> node_to_fibroblast = rCellPopulation.rGetMesh().GetVectorFromAtoB(node_location, fibroblast_location);
+
+                        // Get the distance to the basement membrane
+                        double distance_to_bm = norm_2(node_to_fibroblast);
+
+                        // If the fibroblast is within the distance to be adhering to the BM, add the vector to the force direction
+                        if (distance_to_bm > node_radius + fibroblast_radius)
+                        {
+                            force_direction += node_to_fibroblast / distance_to_bm;
+                        }
+                    }
+                    else if (p_neighbour_cell_type->template IsType<StemCellProliferativeType>())
+                    {
+                        stem_cell_neighbours.push_back(*iter);
+                    }
+
+                }
+                
+                if (num_fibroblast_neighbours > 0)
+                {
+                    // Say that the cell is attached for now, but now check to see if it intersects with another stem cell
+                    cell_iter->GetCellData()->SetItem("attachment", 1.0);
+
+                     // If the force direction vector has been updated, we need to check it doesn't run over another stem cell
+                    if ( (force_direction[0] != 0.0)||(force_direction[1] != 0.0) )
+                    {
+                        force_direction /= norm_2(force_direction); // Normalise the force direction if it's been updated.
+
+                        // Now check the stem cell neighbours and make sure that the cell is unimpeded by other stem cells
+                        // The reason we care about this is that if there's another stem cell in the way, it will get stuck
+                        // in the dermis, due to the adhesive BM force.
+                        for (unsigned i = 0; i < stem_cell_neighbours.size(); i++)
+                        {
+                            unsigned stem_index = stem_cell_neighbours[i];
+                            c_vector<double, 2> stem_location = rCellPopulation.GetNode(stem_index)->rGetLocation();
+
+                            // Get the vector from the norm to stem   
+                            c_vector<double, 2> node_to_stem = rCellPopulation.rGetMesh().GetVectorFromAtoB(node_location, stem_location);
+                            node_to_stem /= norm_2(node_to_stem); // Normalise the vector
+
+                            if (inner_prod(force_direction, node_to_stem) > 0.98) // This refers to about a 10-degree angle between vectors
+                            {
+                                cell_iter->GetCellData()->SetItem("attachment", 0.0);
+                            }
+                        }
+
                     }
                 }
+
             }
 
             // Else the cell has been detached from the basement membrane.

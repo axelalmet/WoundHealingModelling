@@ -36,6 +36,8 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParabolicGrowingDomainWithCellDeathPdeModifier.hpp"
 #include "CellBasedParabolicPdeSolver.hpp"
 #include "AveragedSourceParabolicPde.hpp"
+#include "PlateletCellProliferativeType.hpp"
+#include "Debug.hpp"
 
 template<unsigned DIM>
 ParabolicGrowingDomainWithCellDeathPdeModifier<DIM>::ParabolicGrowingDomainWithCellDeathPdeModifier(boost::shared_ptr<AbstractLinearPde<DIM,DIM> > pPde,
@@ -57,13 +59,11 @@ ParabolicGrowingDomainWithCellDeathPdeModifier<DIM>::~ParabolicGrowingDomainWith
 template<unsigned DIM>
 void ParabolicGrowingDomainWithCellDeathPdeModifier<DIM>::UpdateAtEndOfTimeStep(AbstractCellPopulation<DIM,DIM>& rCellPopulation)
 {   
-    // Update the cell population to check for apoptotic cells
-    rCellPopulation.Update();
-
-    this->GenerateFeMesh(rCellPopulation);
 
     // Set up boundary conditions
     std::shared_ptr<BoundaryConditionsContainer<DIM,DIM,1> > p_bcc = ConstructBoundaryConditionsContainer();
+
+    this->GenerateFeMesh(rCellPopulation);
 
     // Construct the solution vector from cell data (takes care of cells dividing);
     UpdateSolutionVector(rCellPopulation);
@@ -88,6 +88,7 @@ void ParabolicGrowingDomainWithCellDeathPdeModifier<DIM>::UpdateAtEndOfTimeStep(
     // in order to destroy it
     this->mSolution = solver.Solve();
     PetscTools::Destroy(previous_solution);
+
     this->UpdateCellData(rCellPopulation);
 }
 
@@ -100,9 +101,6 @@ void ParabolicGrowingDomainWithCellDeathPdeModifier<DIM>::SetupSolve(AbstractCel
     {
         EXCEPTION("ParabolicGrowingDomainWithCellDeathPdeModifier cannot be used with an AveragedSourceParabolicPde. Use a ParabolicBoxDomainPdeModifier instead.");
     }
-
-    // Update the cell population to check for apoptotic cells
-    rCellPopulation.Update();
 
     // Setup a finite element mesh on which to save the initial condition
     this->GenerateFeMesh(rCellPopulation);
@@ -145,8 +143,8 @@ std::shared_ptr<BoundaryConditionsContainer<DIM,DIM,1> > ParabolicGrowingDomainW
 
 template<unsigned DIM>
 void ParabolicGrowingDomainWithCellDeathPdeModifier<DIM>::UpdateSolutionVector(AbstractCellPopulation<DIM,DIM>& rCellPopulation)
-{
-
+{   
+    
     // Clear (if it's not the first time) and resize the solution vector
     if (this->mSolution)
     {
@@ -154,28 +152,22 @@ void ParabolicGrowingDomainWithCellDeathPdeModifier<DIM>::UpdateSolutionVector(A
     }
     this->mSolution = PetscTools::CreateAndSetVec(this->mpFeMesh->GetNumNodes(), 0.0);
 
-    std::string& variable_name = this->mDependentVariableName;
+    std::string& variable_name = this->mDependentVariableName;    
 
+    // Loop over nodes of the finite element mesh and get appropriate solution values from CellData
     for (typename TetrahedralMesh<DIM,DIM>::NodeIterator node_iter = this->mpFeMesh->GetNodeIteratorBegin();
-         node_iter != this->mpFeMesh->GetNodeIteratorEnd();
-         ++node_iter)
-    {          
+    node_iter != this->mpFeMesh->GetNodeIteratorEnd();
+    ++node_iter)
+    {
+        unsigned node_index = node_iter->GetIndex();
 
-        // Loop over nodes of the finite element mesh and get appropriate solution values from CellData
-        for (typename TetrahedralMesh<DIM,DIM>::NodeIterator node_iter = this->mpFeMesh->GetNodeIteratorBegin();
-        node_iter != this->mpFeMesh->GetNodeIteratorEnd();
-        ++node_iter)
+        if (rCellPopulation.IsPdeNodeAssociatedWithNonApoptoticCell(node_index))
         {
-            unsigned node_index = node_iter->GetIndex();
+            bool dirichlet_bc_applies = (node_iter->IsBoundaryNode()) && (!(this->IsNeumannBoundaryCondition()));
+            double boundary_value = this->GetBoundaryCondition()->GetValue(node_iter->rGetLocation());     
+            double solution_at_node = rCellPopulation.GetCellDataItemAtPdeNode(node_index, variable_name, dirichlet_bc_applies, boundary_value);
 
-            if (rCellPopulation.IsPdeNodeAssociatedWithNonApoptoticCell(node_index))
-            {         
-                bool dirichlet_bc_applies = (node_iter->IsBoundaryNode()) && (!(this->IsNeumannBoundaryCondition()));
-                double boundary_value = this->GetBoundaryCondition()->GetValue(node_iter->rGetLocation());     
-                double solution_at_node = rCellPopulation.GetCellDataItemAtPdeNode(node_index, variable_name, dirichlet_bc_applies, boundary_value);
-
-                PetscVecTools::SetElement(this->mSolution, node_index, solution_at_node);
-            }
+            PetscVecTools::SetElement(this->mSolution, node_index, solution_at_node);
         }
     }
 }

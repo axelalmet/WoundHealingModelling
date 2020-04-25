@@ -79,7 +79,7 @@ void FibroblastStateDependentCollagenOdeSystem::EvaluateYDerivatives(double time
     double d_c = this->mParameters[3]; // Degradation rate of collagen
 
     // calculations
-    double reaction_1 = is_epf * p_c * C;
+    double reaction_1 = is_epf * p_c;
     // double reaction_1 = is_epf * p_c * C / (1.0 + C);
     double reaction_2 = d_c * C;
 

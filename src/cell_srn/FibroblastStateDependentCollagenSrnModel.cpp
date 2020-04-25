@@ -124,7 +124,7 @@ void FibroblastStateDependentCollagenSrnModel::UpdateEpfStatus()
 
     double is_activated = 0.0; // Initialise activation status
 
-    if (morphogen > 0.0)
+    if (morphogen > 2.5)
     {
         is_activated = 1.0;
     }

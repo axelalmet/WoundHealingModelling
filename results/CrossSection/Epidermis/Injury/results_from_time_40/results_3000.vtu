@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<VTKFile type="UnstructuredGrid" version="0.1" byte_order="LittleEndian" header_type="UInt32" compressor="vtkZLibDataCompressor">
+  <UnstructuredGrid>
+    <Piece NumberOfPoints="117"                  NumberOfCells="0"                   >
+      <PointData>
+        <DataArray type="Float64" Name="Cell types" format="appended" RangeMin="0"                    RangeMax="7"                    offset="0"                   />
+        <DataArray type="Float64" Name="Process rank" format="appended" RangeMin="0"                    RangeMax="0"                    offset="88"                  />
+        <DataArray type="Float64" Name="attachment" format="appended" RangeMin="-1"                   RangeMax="1"                    offset="136"                 />
+        <DataArray type="Float64" Name="epf" format="appended" RangeMin="0"                    RangeMax="1"                    offset="208"                 />
+        <DataArray type="Float64" Name="volume" format="appended" RangeMin="0.775222492"          RangeMax="0.7853978334"         offset="284"                 />
+      </PointData>
+      <CellData>
+      </CellData>
+      <Points>
+        <DataArray type="Float64" Name="Vertex positions" NumberOfComponents="3" format="appended" RangeMin="0"                    RangeMax="19.967690186"         offset="1484"                />
+      </Points>
+      <Cells>
+        <DataArray type="Int64" Name="connectivity" format="appended" RangeMin=""                     RangeMax=""                     offset="3632"                />
+        <DataArray type="Int64" Name="offsets" format="appended" RangeMin=""                     RangeMax=""                     offset="3648"                />
+        <DataArray type="UInt8" Name="types" format="appended" RangeMin=""                     RangeMax=""                     offset="3664"                />
+      </Cells>
+    </Piece>
+  </UnstructuredGrid>
+  <AppendedData encoding="base64">
+   _AQAAAACAAACoAwAALgAAAA==eJxjYAABEQeGQU3LQGkJEmly9Q2UucPFPgYYTSkg1Tx09YOVxgVw6gMAMY4gNQ==AQAAAACAAACoAwAAEQAAAA==eJxjYBgFo2AUDHYAAAOoAAE=AQAAAACAAACoAwAAIwAAAA==eJxjYACBD/sZRulRmmo0DHywp4xGB6SqH6yAdPcDAIEpjlg=AQAAAACAAACoAwAAJwAAAA==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
+  </AppendedData>
+</VTKFile>
+
+<!-- Created by Chaste version 2019.1.f4f9636 (with uncommitted modifications) on Tue, 14 Apr 2020 18:59:48 +0000.  Chaste was built on Mon, 02 Mar 2020 07:58:05 +0000 by machine (uname) 'Linux' using settings: Debug.  Checked-out project versions: AxelA=58358c550748fedf6088863782fdd77870262cc6; MorphoCellBasedComparison=16de33a9744c65327e83bc3f0c912a1b99f2ee7d; WoundHealingModelling=92888707d6c6eb5cbafdb6b40960d7dffabcc466.
+-->

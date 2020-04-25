@@ -30,9 +30,6 @@ private :
     /** Parameter that multiplies the curvature to give the basement membrane force */
     double mBasementMembraneParameter;
 
-    /** Target curvature for the ring of cells (NodeBased) */
-    double mTargetCurvature;
-
     /** The cut off radius for defining neighbouring nodes */
     double mCutOffRadius;
 
@@ -51,7 +48,6 @@ private :
         // If Archive is an input archive, then '&' resolves to '>>'
         archive & boost::serialization::base_object<AbstractForce<2> >(*this);
         archive & mBasementMembraneParameter;
-        archive & mTargetCurvature;
         archive & mCutOffRadius;
     }
 
@@ -75,93 +71,46 @@ public :
      */
     double GetBasementMembraneParameter();
 
-    /* Value of curvature at Epidermis base */
-    void SetTargetCurvature(double targetCurvature = 0.0);
-
-    /*
-     * Get method for Target Curvature Parameters
-     */
-    double GetTargetCurvature();
-
-    /* Returns Epidermis height extremes to apply non-zero curvature to base */
-    c_vector<double, 2> GetEpidermisHeightExtremes(AbstractCellPopulation<2>& rCellPopulation, c_vector<double, 2> epidermalWidthExtremes);
-
-    /* Returns Epidermis width extremes */
-    c_vector<double, 2> GetEpidermisWidthExtremes(AbstractCellPopulation<2>& rCellPopulation);
-
-    /* Return tangent vector at point based on cosine parametrisation */
-    c_vector<double, 2> GetCosineBasedTangentVector(AbstractCellPopulation<2>& rCellPopulation,
-                                                    c_vector<double, 2> epidermalHeightExtremes,
-                                                    c_vector<double, 2> epidermalWidthExtremes,
-                                                    c_vector<double, 2> point);
-
-    /*
-     * Return vector of Epidermal indices that are close to the considered Epidermal node,
-     * but based on an approximated cosine approximation
-     * 
-     * @param rCellPopulation the cell population
-     * @param epidermalIndex the considered epidermal node index
-     * @param leftOrRight, should be 1.0 or -1.0, determines whether we consider 'left' or 'right' neighbours
-     */
-    std::vector<unsigned> GetClosestNeighboursBasedOnCosineApproximation(AbstractCellPopulation<2>& rCellPopulation, 
-                                                                        std::vector<unsigned> epidermalIndices,
-                                                                        c_vector<double, 2> epidermalHeightExtremes,
-                                                                        c_vector<double, 2> epidermalWidthExtremes,
-                                                                        unsigned epidermalIndex,
-                                                                        double leftOrRight);
-
-    /*
-     * Return closest epidermal node indice to the considered Epidermal node,
-     * 
-     * @param rCellPopulation the cell population
-     * @param epidermalIndex the considered epidermal node index
-     * @param leftOrRight, should be 1.0 or -1.0, determines whether we consider 'left' or 'right' neighbours
-     */
-    unsigned GetNearestNeighbourAlongCosineApproximation(AbstractCellPopulation<2>& rCellPopulation, 
-                                                        std::vector<unsigned> epidermalIndices,
-                                                        c_vector<double, 2> epidermalHeightExtremes,
-                                                        c_vector<double, 2> epidermalWidthExtremes,
-                                                        unsigned epidermalIndex,
-                                                        double leftOrRight);
-
-    /*
-     * Return closest fibroblast index to the considered epidermal index
-     * 
-     * @param rCellPopulation the cell population
-     * @param epidermalIndex the considered epidermal node index
-     */
-    c_vector<unsigned,2> GetTwoNearestFibroblastNeighbours(AbstractCellPopulation<2>& rCellPopulation, unsigned epidermalIndex);
-
     /* Get method for cut off radius */
     double GetCutOffRadius();
 
     /* Set method for cut off radius */
     void SetCutOffRadius(double cutOffRadius);
 
-    /* Method to calculate parametre */ 
-    double FindParametricCurvature(AbstractCellPopulation<2>& rCellPopulation,
-    								c_vector<double, 2> leftPoint,
-									c_vector<double, 2> centrePoint,
-									c_vector<double, 2> rightPoint);
-
     /*
      * Method to get the indices of the monolayer
      */
     std::vector<unsigned> GetEpidermalIndices(AbstractCellPopulation<2>& rCellPopulation);
 
+
     /*
-     * Method to return the nodes connected to a particular node within a defined cut-off
-     * radius
+     * Return vector of fibroblast indices that are close to the considered Epidermal node,
+     * based on a specified neighbourhood radius
+     * 
+     * @param rCellPopulation the cell population
+     * @param epidermalIndex the considered epidermal node index
      */
-    std::vector<unsigned> GetNeighbouringEpidermalIndices(AbstractCellPopulation<2>& rCellPopulation, unsigned nodeIndex);
+    std::vector<unsigned> GetNeighbouringFibroblastIndices(AbstractCellPopulation<2>& rCellPopulation, 
+                                                                        unsigned epidermalIndex);
+
+    /*
+     * Return force direction with respect ot the basement membrane, which accounts for whether
+     * or not the direction from the epidermal index to the average fibroblast position should be 
+     * reflected.
+     * 
+     * @param rCellPopulation the cell population
+     * @param fibroblastIndices the neighbouring fibroblast indices to the epidermal cell
+     * @param epidermalIndex the epidermal cell
+     */
+    // c_vector<double, 2> CalculateForceDirection(AbstractCellPopulation<2>& rCellPopulation, 
+    //                                                                 std::vector<unsigned> fibroblastIndices,
+    //                                                                 unsigned epidermalIndex);
 
     /*
      * Method to calculate the force due to basement membrane on an Epidermal cell
      */
     c_vector<double, 2> CalculateForceDueToBasementMembrane(AbstractCellPopulation<2>& rCellPopulation, 
                                                             std::vector<unsigned> epidermalIndices,
-                                                            c_vector<double, 2> epidermalHeightExtremes,
-                                                            c_vector<double, 2> epidermalWidthExtremes,
                                                             unsigned nodeIndex);
 
     /**

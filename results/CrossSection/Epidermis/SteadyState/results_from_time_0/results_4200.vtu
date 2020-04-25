@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<VTKFile type="UnstructuredGrid" version="0.1" byte_order="LittleEndian" header_type="UInt32" compressor="vtkZLibDataCompressor">
+  <UnstructuredGrid>
+    <Piece NumberOfPoints="140"                  NumberOfCells="0"                   >
+      <PointData>
+        <DataArray type="Float64" Name="Cell types" format="appended" RangeMin="0"                    RangeMax="7"                    offset="0"                   />
+        <DataArray type="Float64" Name="Process rank" format="appended" RangeMin="0"                    RangeMax="0"                    offset="100"                 />
+        <DataArray type="Float64" Name="attachment" format="appended" RangeMin="-1"                   RangeMax="1"                    offset="148"                 />
+        <DataArray type="Float64" Name="epf" format="appended" RangeMin="0"                    RangeMax="1"                    offset="232"                 />
+        <DataArray type="Float64" Name="volume" format="appended" RangeMin="0.77645708603"        RangeMax="0.78539816095"        offset="316"                 />
+      </PointData>
+      <CellData>
+      </CellData>
+      <Points>
+        <DataArray type="Float64" Name="Vertex positions" NumberOfComponents="3" format="appended" RangeMin="0"                    RangeMax="20.654054345"         offset="564"                 />
+      </Points>
+      <Cells>
+        <DataArray type="Int64" Name="connectivity" format="appended" RangeMin=""                     RangeMax=""                     offset="1576"                />
+        <DataArray type="Int64" Name="offsets" format="appended" RangeMin=""                     RangeMax=""                     offset="1592"                />
+        <DataArray type="UInt8" Name="types" format="appended" RangeMin=""                     RangeMax=""                     offset="1608"                />
+      </Cells>
+    </Piece>
+  </UnstructuredGrid>
+  <AppendedData encoding="base64">
+   _AQAAAACAAABgBAAAOQAAAA==eJxjYAABEQeGQU3LQGkJEmly9Q2UuYPVPlL5pNIMMJpSgG4OIT6p5gxWmlR3oqsnxCfbXgBcBCVRAQAAAACAAABgBAAAEgAAAA==eJxjYBgFo2AUjALaAAAEYAABAQAAAACAAABgBAAAKwAAAA==eJxjYACBD/sZRulResBoGPhgTxmNbg4hPqnmDFZAqjtJDS/y7QUAj/ueXQ==AQAAAACAAABgBAAALQAAAA==eJxjYACBD/YMZNHogFj1xMqTaj6p9lHqb2qbO1jtI5VPaToaBcMFAADaqE9OAQAAAACAAABgBAAAqAAAAA==eJyL+SnX7Pf3hX0MjeloHHQEAX1Wgi/a99x4YW9HgCakDpe8FQ7aAkobE6nOEo1Gtw9dHBcfl3kWOGg9NHeiy8PETQiYY0KANiZAo6uDuUuHgL4zLBkBvxVf2svtntIAim9y6XNo5qDzT0H5klA+LvoEmro6+S9BIH4DlK7DQTeQSdeg8SugdAmafA2afTC+NJp/CdHEhhcsHM6g0ejhc4KAfQBnRFlfAQAAAACAAAAgDQAA5QIAAA==eJx91ktIlFEUB3DB0GCKUXJQm2x8zNtxnG+GaFVzQ9olFD01bSFEghSBJbXIDKkxCdqFu8RFFJIURKC1iYw2LWoRSNoDIqHUfIRajs3N+93RD875/s3yN4d7z9xz/5fJyfnfZy4JvhD2vBl4AfAi4CXAdwAvB14J3AvcDzwIPAw8AjwKPAbcAB4HnmA+UTc+JOXnZM/37qJTp6c25pl++3RKymXmna3ji1LmipvEr5juYJ58MrMiZaHoJb7XdBfwUuBlbH3Ph46/UpYL2qf2SpGydS+o9wMPgnXC4oatR4BHmTvPPsvIqzFx3dYNtq/2OPAE89Zw79q+iez6aau+fv9jKWeTKeKpewNjUsrs3C2vO3xoWsr87PlTdzIfeBBcknIb8OLsfKm7Qb1H0H7eHSlKS1khaP/aq4D7wDoBUB8CXp2dI/Ua4LXs/PVcYsANto72OOunL9XnUfn1zbbczru1Saz7t4rJ1yq/fuILBb++qvwGbN3B/HLPn3mVX3t3AS8FXiZoP3tGV3+r/Np7paC/S7sX1PuBB8E6YeAR4bX1KPOdLZ2rKr/2bgCPs321J5h3tLleZtbmezJz4ExnqHDD77TlXLTy69jwN7u6Rqz8Wj65XXy08kvdybx9a/9PK7/Ui4G7Bd33gukeQftsHixZUvOlv2sk7+CylV9a7wf1AVAfBvXr+XUQr8nmkXotq2/OvZ+28mv50NEtaTXfRrKvro+zdWbau4+rOc7nnxit77f+76SHXwyqOS4Qz0x8ea/mSF2a7mTedW7uh5oj9Wumu4F7BO1n3+5Li+q9tfcq4D7gAeAh5sL0GjFn67XM+93PV9RcqN813QAeB55grs+zmJ2b7r+a9a/nnmBz/9T46pF6n+n9PP+wZUy9w03Eh48Z0+odtvcyds/1/S8H978C5MUL6n2gPgjqQ6y+yayPsFxojzLXOYoBN0SDbb4Mds66PsHW0eecC86zFLiL+T8rLtXMAAAAAACAAAAAAAAAAAAAAACAAAAAAAAAAAAAAACAAAAAAAAA
+  </AppendedData>
+</VTKFile>
+
+<!-- Created by Chaste version 2019.1.f4f9636 (with uncommitted modifications) on Sat, 18 Apr 2020 07:02:34 +0000.  Chaste was built on Mon, 02 Mar 2020 07:58:05 +0000 by machine (uname) 'Linux' using settings: Debug.  Checked-out project versions: AxelA=58358c550748fedf6088863782fdd77870262cc6; MorphoCellBasedComparison=16de33a9744c65327e83bc3f0c912a1b99f2ee7d; WoundHealingModelling=92888707d6c6eb5cbafdb6b40960d7dffabcc466.
+-->

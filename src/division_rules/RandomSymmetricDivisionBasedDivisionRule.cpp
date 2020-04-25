@@ -63,22 +63,13 @@ const double& RandomSymmetricDivisionBasedDivisionRule<ELEMENT_DIM, SPACE_DIM>::
 * @param epidermalIndex the considered epidermal node index
 */
 template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
-c_vector<unsigned, 2> RandomSymmetricDivisionBasedDivisionRule<ELEMENT_DIM, SPACE_DIM>::GetTwoNearestFibroblastNeighbours(AbstractCentreBasedCellPopulation<ELEMENT_DIM, SPACE_DIM>& rCellPopulation, unsigned epidermalIndex)
+std::vector<unsigned> RandomSymmetricDivisionBasedDivisionRule<ELEMENT_DIM, SPACE_DIM>::GetNearestFibroblastNeighbours(AbstractCentreBasedCellPopulation<ELEMENT_DIM, SPACE_DIM>& rCellPopulation, unsigned epidermalIndex)
 {
-    double min_fibroblast_distance = DBL_MAX;
-    double second_min_fibroblast_distance = min_fibroblast_distance;
-	unsigned closest_fibroblast_index = 0;
-    unsigned second_closest_fibroblast_index = closest_fibroblast_index;
-
-    c_vector<unsigned, 2> closest_fibroblast_indices;
-
-	// Get the location of the considered Epidermal node
-	c_vector<double, SPACE_DIM> epidermal_location = rCellPopulation.GetNode(epidermalIndex)->rGetLocation();
+    std::vector<unsigned> closest_fibroblast_indices;
 
 	// This method really only applies to NodeBasedCellPopulations
 	if (bool(dynamic_cast<NodeBasedCellPopulation<SPACE_DIM>*>(&rCellPopulation)))
 	{
-		// NodeBasedCellPopulation<SPACE_DIM>* p_tissue = static_cast<NodeBasedCellPopulation<SPACE_DIM>*>(&rCellPopulation);
 
         CellPtr p_cell = rCellPopulation.GetCellUsingLocationIndex(epidermalIndex);
 		// Find the indices of the elements owned by this node
@@ -98,34 +89,16 @@ c_vector<unsigned, 2> RandomSymmetricDivisionBasedDivisionRule<ELEMENT_DIM, SPAC
 			// Only consider fibroblasts
 			if(p_type->IsType<FibroblastCellProliferativeType>())
 			{
-				
-				c_vector<double, 2> fibroblast_location = rCellPopulation.GetNode(*elem_iter)->rGetLocation();
-                unsigned fibroblast_index = rCellPopulation.GetNode(*elem_iter)->GetIndex();
 
-				// By the end of this loop, we should end up with the two closest fibroblast neighbour
-
-                // Update first-closest fibroblast index
-				if (norm_2(fibroblast_location - epidermal_location) < min_fibroblast_distance)
-				{
-                    second_min_fibroblast_distance = min_fibroblast_distance;
-                    second_closest_fibroblast_index = closest_fibroblast_index;
-
-					min_fibroblast_distance = norm_2(fibroblast_location - epidermal_location);
-					closest_fibroblast_index = fibroblast_index; // Roundabout way of storing the index, as we can't convert the iterator to an unsigned
-				}
-                // Second-closest index (must be distinct)//
-                else if ( (fibroblast_index != closest_fibroblast_index)&&(norm_2(fibroblast_location - epidermal_location) < second_min_fibroblast_distance) )
+				if (!rCellPopulation.GetNode(*elem_iter)->IsDeleted() )
                 {
-                    second_min_fibroblast_distance = norm_2(fibroblast_location - epidermal_location);
-					second_closest_fibroblast_index = fibroblast_index; // Roundabout way of storing the index, as we can't convert the iterator to an unsigned
+                    unsigned fibroblast_index = rCellPopulation.GetNode(*elem_iter)->GetIndex();
+                    closest_fibroblast_indices.push_back(fibroblast_index);
                 }
 			}
 
 		}
 	}
-
-    closest_fibroblast_indices[0] = closest_fibroblast_index;
-    closest_fibroblast_indices[1] = second_closest_fibroblast_index;
 
 	return closest_fibroblast_indices;
 
@@ -149,23 +122,29 @@ std::pair<c_vector<double, SPACE_DIM>, c_vector<double, SPACE_DIM> > RandomSymme
     {
         if (p_type->IsType<StemCellProliferativeType>()) // Epidermal stem cells
         {
-            // Get the cell location index
+            // Get the cell location index and location
             unsigned parent_cell_index = rCellPopulation.GetLocationIndexUsingCell(pParentCell);
+            c_vector<double, SPACE_DIM> stem_position = rCellPopulation.GetLocationOfCellCentre(pParentCell);
 
-            // Determine where the two nearest fibroblast neighbours are
-            c_vector<unsigned, 2> nearest_fibroblast_indices = GetTwoNearestFibroblastNeighbours(rCellPopulation, parent_cell_index);
+            // Get a vector of the neighbouring fibroblast neighbours
+            std::vector<unsigned> nearest_fibroblast_indices = GetNearestFibroblastNeighbours(rCellPopulation, parent_cell_index);
+            unsigned num_fibroblast_indices = nearest_fibroblast_indices.size();
+
+            c_vector<double, SPACE_DIM> initial_division_vector; // Initilialise the division vector
+
+            for (unsigned i = 0; i < num_fibroblast_indices; i++)
+            {
+                unsigned fibroblast_index = nearest_fibroblast_indices[i];
+                c_vector<double, SPACE_DIM> fibroblast_position = rCellPopulation.GetNode(fibroblast_index)->rGetLocation();
+
+                // Get the vector from the epidermal cell to the fibroblast
+                c_vector<double, SPACE_DIM> stem_to_fibroblast = rCellPopulation.rGetMesh().GetVectorFromAtoB(stem_position, fibroblast_position);
+
+                initial_division_vector += stem_to_fibroblast / num_fibroblast_indices;
 
 
-            // Get the locations of the cells
-            c_vector<double, SPACE_DIM> stem_position = rCellPopulation.GetLocationOfCellCentre(pParentCell); // Parent cell
+            }
 
-            c_vector<double, SPACE_DIM> left_fibroblast_position = rCellPopulation.GetNode(nearest_fibroblast_indices[0])->rGetLocation(); // "left" fibroblast
-            c_vector<double, SPACE_DIM> right_fibroblast_position = rCellPopulation.GetNode(nearest_fibroblast_indices[1])->rGetLocation(); // "right" fibroblast
-
-            // Get the initial division vector
-            c_vector<double, SPACE_DIM> mean_fibroblast_position = right_fibroblast_position + 0.5*rCellPopulation.rGetMesh().GetVectorFromAtoB(right_fibroblast_position, left_fibroblast_position); // Average the two fibroblast positions
-            
-            c_vector<double, SPACE_DIM> initial_division_vector = rCellPopulation.rGetMesh().GetVectorFromAtoB(mean_fibroblast_position, stem_position);
             initial_division_vector /= norm_2(initial_division_vector); // Normalise the vector
 
             /* If the probability is less than mSymmetricDivisionProbability, the division direction is
