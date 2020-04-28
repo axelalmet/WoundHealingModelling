@@ -90,7 +90,7 @@ public:
 
         // Construct a periodic mesh
         Cylindrical2dNodesOnlyMesh* p_mesh = new Cylindrical2dNodesOnlyMesh(1.0*cells_across);
-		p_mesh->ConstructNodesWithoutMesh(*p_generating_mesh, 20.0); //Construct mesh
+		p_mesh->ConstructNodesWithoutMesh(*p_generating_mesh, 25.0); //Construct mesh
 
         //Create shared pointers for cell and mutation states
         boost::shared_ptr<AbstractCellProperty> p_diff_type(CellPropertyRegistry::Instance()->Get<DifferentiatedCellProliferativeType>());
