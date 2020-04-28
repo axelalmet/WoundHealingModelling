@@ -48,8 +48,8 @@
 
 static const std::string M_OUTPUT_DIRECTORY = "WoundHealingModel/CrossSection";
 static const double M_DT = 0.005;
-static const double M_END_TIME = 168.0;
-static const double M_SAMPLING_TIMESTEP = 12.0/M_DT;
+static const double M_END_TIME = 168.0; // 7 days
+static const double M_SAMPLING_TIMESTEP = 12.0/M_DT; // Sample every half-day
 
 /*
 * A test model to study the various components that we think should be incorporated
@@ -89,7 +89,7 @@ public:
         MutableMesh<2, 2>* p_generating_mesh = generator.GetMesh(); //Generate mesh
 
         // Construct a periodic mesh
-        Cylindrical2dNodesOnlyMesh* p_mesh = new Cylindrical2dNodesOnlyMesh(1.0*cells_across);
+        Cylindrical2dNodesOnlyMesh* p_mesh = new Cylindrical2dNodesOnlyMesh(25.0);
 		p_mesh->ConstructNodesWithoutMesh(*p_generating_mesh, 25.0); //Construct mesh
 
         //Create shared pointers for cell and mutation states
@@ -383,7 +383,7 @@ public:
 
         // Define the box domain for the PDE
         ChastePoint<2> lower(-1.0, -1.0);
-        ChastePoint<2> upper(1.0*(cells_across + 1), 0.5*sqrt(3)*(cells_up + 2));
+        ChastePoint<2> upper(26.0, 14.0);
         MAKE_PTR_ARGS(ChasteCuboid<2>, p_box_domain, (lower, upper));
 
         // Create a PDE Modifier object using this pde and bcs object
