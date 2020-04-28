@@ -37,7 +37,8 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "EpfFibroblastCellMutationState.hpp"
 
 FibroblastStateDependentCollagenSrnModel::FibroblastStateDependentCollagenSrnModel(boost::shared_ptr<AbstractCellCycleModelOdeSolver> pOdeSolver)
-    : AbstractOdeSrnModel(1, pOdeSolver)
+    : AbstractOdeSrnModel(1, pOdeSolver),
+    mMorphogenThreshold(DOUBLE_UNSET)
 {
     if (mpOdeSolver == boost::shared_ptr<AbstractCellCycleModelOdeSolver>())
     {
@@ -124,7 +125,7 @@ void FibroblastStateDependentCollagenSrnModel::UpdateEpfStatus()
 
     double is_activated = 0.0; // Initialise activation status
 
-    if (morphogen > 2.5)
+    if (morphogen > mMorphogenThreshold)
     {
         is_activated = 1.0;
     }
@@ -159,6 +160,16 @@ void FibroblastStateDependentCollagenSrnModel::SetCollagen()
 
     mpOdeSystem->SetStateVariables(state_variables);
 
+}
+
+double FibroblastStateDependentCollagenSrnModel::GetMorphogenThreshold()
+{
+    return mMorphogenThreshold;
+}
+
+void FibroblastStateDependentCollagenSrnModel::SetMorphogenThreshold(double morphogenThreshold)
+{
+    mMorphogenThreshold = morphogenThreshold;
 }
 
 // Declare identifier for the serializer

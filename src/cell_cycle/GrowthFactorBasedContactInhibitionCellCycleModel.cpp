@@ -92,6 +92,9 @@ void GrowthFactorBasedContactInhibitionCellCycleModel::UpdateCellCyclePhase()
     // Get the threshold to determine proliferation
     double growth_factor_threshold = GetGrowthFactorThreshold();
 
+    // Get the attachment to BM
+    double attachment = mpCell->GetCellData()->GetItem("attachment");
+
     if (mCurrentCellCyclePhase == G_ONE_PHASE)
     {
         // Update G1 duration based on cell volume
@@ -100,7 +103,7 @@ void GrowthFactorBasedContactInhibitionCellCycleModel::UpdateCellCyclePhase()
 
         // Pause proliferation if the cell is either sufficiently stressed or is not exposed to a sufficiently
         // high morphogen concentration
-        if ( (cell_volume < quiescent_volume)||(growth_factor_level < growth_factor_threshold) )
+        if ( (cell_volume < quiescent_volume)||(growth_factor_level < growth_factor_threshold)||(attachment > 0.0) )
         {
             // Update the duration of the current period of contact inhibition.
             mCurrentQuiescentDuration = SimulationTime::Instance()->GetTime() - mCurrentQuiescentOnsetTime;
@@ -171,7 +174,7 @@ void GrowthFactorBasedContactInhibitionCellCycleModel::SetG1Duration()
     }
     else if (mpCell->GetCellProliferativeType()->IsType<FibroblastCellProliferativeType>())
     {
-        mG1Duration = GetTransitCellG1Duration();
+        mG1Duration = GetStemCellG1Duration();
     }
     else if (mpCell->GetCellProliferativeType()->IsType<PlateletCellProliferativeType>())
     {

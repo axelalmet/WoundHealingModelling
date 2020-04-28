@@ -36,16 +36,23 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "NodeBasedCellPOpulation.hpp"
 #include "DifferentiatedCellProliferativeType.hpp"
 #include "FibroblastCellProliferativeType.hpp"
+#include "PlateletCellProliferativeType.hpp"
 
-BasementMembraneDistanceBasedCellKiller::BasementMembraneDistanceBasedCellKiller(AbstractCellPopulation<2>* pCellPopulation, double radius)
+BasementMembraneDistanceBasedCellKiller::BasementMembraneDistanceBasedCellKiller(AbstractCellPopulation<2>* pCellPopulation, double radius, double maxHeight)
     : AbstractCellKiller<2>(pCellPopulation),
-      mRadius(radius)
+      mRadius(radius),
+      mMaxHeight(maxHeight)
 {
 }
 
 double BasementMembraneDistanceBasedCellKiller::GetRadius() const
 {
     return mRadius;
+}
+
+double BasementMembraneDistanceBasedCellKiller::GetMaxHeight() const
+{
+    return mMaxHeight;
 }
 
 void BasementMembraneDistanceBasedCellKiller::CheckAndLabelCellsForApoptosisOrDeath()
@@ -60,9 +67,6 @@ void BasementMembraneDistanceBasedCellKiller::CheckAndLabelCellsForApoptosisOrDe
          ++cell_iter)
     {
 
-        // Initialise boolean to determine whether or not we should kill cells.
-        bool should_cell_be_sloughed = true;
-
         // Only consider differentiated cells (these are assumed to be epidermal cells)
         boost::shared_ptr<AbstractCellProperty> p_cell_type = cell_iter->GetCellProliferativeType();
 
@@ -71,36 +75,57 @@ void BasementMembraneDistanceBasedCellKiller::CheckAndLabelCellsForApoptosisOrDe
             // Get the node index
             unsigned node_index = this->mpCellPopulation->GetLocationIndexUsingCell(*cell_iter);
 
-            // Now get the neighbours within mRadius
-            std::set<unsigned> neighbour_indices = p_tissue->GetNodesWithinNeighbourhoodRadius(node_index, mRadius);
-            
-            for (std::set<unsigned>::iterator iter = neighbour_indices.begin();
-                iter != neighbour_indices.end();
-                ++iter)
+            double y = this->mpCellPopulation->GetNode(node_index)->rGetLocation()[1];
+            if (y > mMaxHeight)
             {
-                CellPtr p_cell = this->mpCellPopulation->GetCellUsingLocationIndex(*iter);
-                boost::shared_ptr<AbstractCellProperty> p_neighbour_cell_type = p_cell->GetCellProliferativeType();
-
-                // If there are ANY fibroblast neighbours, we immediately know that it's attached to the BM and can stop the iterations.
-                if (p_neighbour_cell_type->IsType<FibroblastCellProliferativeType>())
+                cell_iter->Kill();
+            }
+            else
+            {
+                unsigned num_fibroblast_neighbours = 0;
+                // Now get the neighbours within mRadius
+                std::set<unsigned> neighbour_indices = p_tissue->GetNodesWithinNeighbourhoodRadius(node_index, mRadius);
+                
+                for (std::set<unsigned>::iterator iter = neighbour_indices.begin();
+                    iter != neighbour_indices.end();
+                    ++iter)
                 {
-                    should_cell_be_sloughed = false;
-                    break;
+                    CellPtr p_cell = this->mpCellPopulation->GetCellUsingLocationIndex(*iter);
+                    boost::shared_ptr<AbstractCellProperty> p_neighbour_cell_type = p_cell->GetCellProliferativeType();
+
+                    // If there are ANY fibroblast neighbours, we immediately know that it's attached to the BM and can stop the iterations.
+                    if (p_neighbour_cell_type->IsType<FibroblastCellProliferativeType>())
+                    {
+                        num_fibroblast_neighbours += 1;
+                        break;
+                    }
+                }
+
+                if (num_fibroblast_neighbours == 0)
+                {
+                    cell_iter->Kill();
                 }
             }
+        }
+        else if (p_cell_type->IsType<PlateletCellProliferativeType>()) // Slough off platelet cells if they're too high up
+        {
+            // Get the node index
+            unsigned node_index = this->mpCellPopulation->GetLocationIndexUsingCell(*cell_iter);
 
-            if (should_cell_be_sloughed)
+            double y = this->mpCellPopulation->GetNode(node_index)->rGetLocation()[1];
+
+            if (y > mMaxHeight)
             {
                 cell_iter->Kill();
             }
         }
-
     }
 }
 
 void BasementMembraneDistanceBasedCellKiller::OutputCellKillerParameters(out_stream& rParamsFile)
 {
     *rParamsFile << "\t\t\t<mRadius>" << mRadius << "</mRadius>\n";
+    *rParamsFile << "\t\t\t<mMaxHeight>" << mMaxHeight << "</mMaxHeight>\n";
 
     // Call method on direct parent class
     AbstractCellKiller<2>::OutputCellKillerParameters(rParamsFile);

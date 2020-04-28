@@ -2,8 +2,8 @@
 
 	<OffLatticeSimulation-2-2>
 		<Dt>0.005</Dt>
-		<EndTime>10</EndTime>
-		<SamplingTimestepMultiple>200</SamplingTimestepMultiple>
+		<EndTime>50</EndTime>
+		<SamplingTimestepMultiple>500</SamplingTimestepMultiple>
 		<OutputDivisionLocations>0</OutputDivisionLocations>
 		<OutputCellVelocities>0</OutputCellVelocities>
 	</OffLatticeSimulation-2-2>
@@ -25,13 +25,22 @@
 		<GrowthFactorBasedContactInhibitionCellCycleModel>
 			<QuiescentVolumeFraction>0.9</QuiescentVolumeFraction>
 			<EquilibriumVolume>0.785398</EquilibriumVolume>
-			<GrowthFactorThreshold>0.1</GrowthFactorThresholde>
-			<StemCellG1Duration>14</StemCellG1Duration>
+			<GrowthFactorThreshold>1</GrowthFactorThresholde>
+			<StemCellG1Duration>7</StemCellG1Duration>
 			<TransitCellG1Duration>2</TransitCellG1Duration>
 			<SDuration>5</SDuration>
 			<G2Duration>4</G2Duration>
 			<MDuration>1</MDuration>
 		</GrowthFactorBasedContactInhibitionCellCycleModel>
+		<BasementMembraneBasedContactInhibitionCellCycleModel>
+			<QuiescentVolumeFraction>0.9</QuiescentVolumeFraction>
+			<EquilibriumVolume>0.785398</EquilibriumVolume>
+			<StemCellG1Duration>7</StemCellG1Duration>
+			<TransitCellG1Duration>2</TransitCellG1Duration>
+			<SDuration>5</SDuration>
+			<G2Duration>4</G2Duration>
+			<MDuration>1</MDuration>
+		</BasementMembraneBasedContactInhibitionCellCycleModel>
 	</CellCycleModels>
 
 	<SrnModels>
@@ -40,21 +49,27 @@
 	</SrnModels>
 
 	<CellKillers>
+		<BasementMembraneDistanceBasedCellKiller>
+			<mRadius>2.59808</mRadius>
+			<mMaxHeight>7.79423</mMaxHeight>
+		</BasementMembraneDistanceBasedCellKiller>
 		<PlateletCellKiller>
 			<CellsRemovedByFibroblasts>0</CellsRemovedByFibroblasts> 
 			<CutOffRadius>1.5</CutOffRadius> 
-			<GrowthFactorThreshold>2.5</GrowthFactorThreshold> 
+			<GrowthFactorThreshold>1</GrowthFactorThreshold> 
 			<VolumeThreshold>0.746128</VolumeThreshold 
 		</PlateletCellKiller>
 	</CellKillers>
 
 	<SimulationModifiers>
+		<ModifiedParabolicBoxDomainPdeModifier-2>
+		</ModifiedParabolicBoxDomainPdeModifier-2>
 		<VolumeTrackingModifier-2>
 		</VolumeTrackingModifier-2>
 		<CollagenAlignmentTrackingModifier-2>
 		</CollagenAlignmentTrackingModifier-2>
-		<ModifiedParabolicBoxDomainPdeModifier-2>
-		</ModifiedParabolicBoxDomainPdeModifier-2>
+		<BasementMembraneAttachmentTrackingModifier-2>
+		</BasementMembraneAttachmentTrackingModifier-2>
 	</SimulationModifiers>
 
 	<Forces>
@@ -65,8 +80,11 @@
 			<UseCutOffLength>1</UseCutOffLength>
 			<CutOffLength>1.5</CutOffLength>
 		</GeneralisedLinearSpringForce-2-2>
+		<DistanceBasedEpidermalBasementMembraneForce>
+			<BasementMembraneParameter>0.25</BasementMembraneParameter> 
+		</DistanceBasedEpidermalBasementMembraneForce>
 		<WoundBasedChemotacticForce-2>
-			<ChemotacticStrength>0.0125</ChemotacticStrength> 
+			<ChemotacticStrength>0.025</ChemotacticStrength> 
 			<NeighbourhoodRadius>1.5</NeighbourhoodRadius> 
 		</WoundBasedChemotacticForce-2>
 	</Forces>

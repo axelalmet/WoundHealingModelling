@@ -54,6 +54,9 @@ private:
     /** Radius of death. */
     double mRadius;
 
+    /** Max epidermis height */
+    double mMaxHeight;
+
     friend class boost::serialization::access;
     /**
      * Boost Serialization method for archiving/checkpointing.
@@ -75,14 +78,20 @@ public:
      *
      * @param pCellPopulation pointer to the cell population.
      * @param radius the radius of death.
+     * @param maxHeight the maximum height of the epidermis
      */
     BasementMembraneDistanceBasedCellKiller(AbstractCellPopulation<2>* pCellPopulation,
-                              double radius);
+                              double radius, double maxHeight);
 
-    /**
-     * @return mRadius.
+    /** 
+     * @return radius
      */
     double GetRadius() const;
+
+    /*
+     * @return maxHeight
+     */
+    double GetMaxHeight() const;
 
     /**
      * Loop over cells and kills cells outside boundary.
@@ -119,6 +128,8 @@ inline void save_construct_data(
     ar & p_cell_population;
     double radius = t->GetRadius();
     ar & radius;
+    double max_height = t->GetMaxHeight();
+    ar & max_height;
 }
 
 /**
@@ -133,9 +144,11 @@ inline void load_construct_data(
     ar & p_cell_population;
     double radius;
     ar & radius;
+    double max_height;
+    ar & max_height;
 
     // Invoke inplace constructor to initialise instance
-    ::new(t)BasementMembraneDistanceBasedCellKiller(p_cell_population, radius);
+    ::new(t)BasementMembraneDistanceBasedCellKiller(p_cell_population, radius, max_height);
 }
 }
 } // namespace ...

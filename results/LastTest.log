@@ -1,10 +1,10 @@
-Start testing: Apr 24 19:47 PDT
+Start testing: Apr 28 10:42 PDT
 ----------------------------------------------------------
 490/496 Testing: TestScarFormationInCrossSectionalGeometry
 490/496 Test: TestScarFormationInCrossSectionalGeometry
 Command: "/home/axel/BuildChaste/projects/WoundHealingModelling/test/TestScarFormationInCrossSectionalGeometry"
 Directory: /media/sf_SimulationPackages/Chaste/
-"TestScarFormationInCrossSectionalGeometry" start time: Apr 24 19:47 PDT
+"TestScarFormationInCrossSectionalGeometry" start time: Apr 28 10:42 PDT
 Output:
 ----------------------------------------------------------
 Running 1 test
@@ -16,14 +16,14 @@ Entering TestScarFormation
 Passed
 OK!
 <end of output>
-Test time = 857.83 sec
+Test time = 3887.61 sec
 ----------------------------------------------------------
 Test Passed.
-"TestScarFormationInCrossSectionalGeometry" end time: Apr 24 20:02 PDT
-"TestScarFormationInCrossSectionalGeometry" time elapsed: 00:14:17
+"TestScarFormationInCrossSectionalGeometry" end time: Apr 28 11:47 PDT
+"TestScarFormationInCrossSectionalGeometry" time elapsed: 01:04:47
 ----------------------------------------------------------
 
-End testing: Apr 24 20:02 PDT
+End testing: Apr 28 11:47 PDT
 
-Continuous_project_WoundHealingModelling = 857.83 sec*proc
+Continuous_project_WoundHealingModelling = 3887.61 sec*proc
 

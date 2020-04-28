@@ -52,6 +52,11 @@ class FibroblastStateDependentCollagenSrnModel : public AbstractOdeSrnModel
 {
 private:
 
+    /** 
+     * @double Morphogen threshold to activate collagen production/degradation
+     */
+    double mMorphogenThreshold;
+
     /** Needed for serialization. */
     friend class boost::serialization::access;
     /**
@@ -64,6 +69,7 @@ private:
     void serialize(Archive & archive, const unsigned int version)
     {
         archive & boost::serialization::base_object<AbstractOdeSrnModel>(*this);
+        archive & mMorphogenThreshold;
     }
 
 protected:
@@ -134,6 +140,16 @@ public:
      * Set collagen according to cell data
      */
     void SetCollagen();
+
+    /*
+     * Get the morphogen threshold for collagen production activations
+     */
+    double GetMorphogenThreshold();
+
+    /*
+     * Set the morphogen threshold
+     */
+    void SetMorphogenThreshold(double morphogenThreshold);
 };
 
 // Declare identifier for the serializer

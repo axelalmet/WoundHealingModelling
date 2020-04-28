@@ -37,6 +37,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "StemCellProliferativeType.hpp"
 #include "DifferentiatedCellProliferativeType.hpp"
 #include "FibroblastCellProliferativeType.hpp"
+#include "PlateletCellProliferativeType.hpp"
 
 template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
 GeneralisedLinearSpringForceWithVariableCellCellStiffness<ELEMENT_DIM,SPACE_DIM>::GeneralisedLinearSpringForceWithVariableCellCellStiffness()
@@ -49,7 +50,11 @@ GeneralisedLinearSpringForceWithVariableCellCellStiffness<ELEMENT_DIM,SPACE_DIM>
      mStemFibroblastMultiplicationFactor(1.0),
      mDifferentiatedDifferentiatedMultiplicationFactor(1.0),
      mDifferentiatedFibroblastMultiplicationFactor(1.0),
-     mFibroblastFibroblastMultiplicationFactor(1.0)
+     mFibroblastFibroblastMultiplicationFactor(1.0),
+     mStemPlateletMultiplicationFactor(1.0),
+     mDifferentiatedPlateletMultiplicationFactor(1.0),
+     mFibroblastPlateletMultiplicationFactor(1.0),
+     mPlateletPlateletMultiplicationFactor(1.0)
 
 {
     if (SPACE_DIM == 1)
@@ -131,6 +136,54 @@ double GeneralisedLinearSpringForceWithVariableCellCellStiffness<ELEMENT_DIM,SPA
 }
 
 template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
+void GeneralisedLinearSpringForceWithVariableCellCellStiffness<ELEMENT_DIM,SPACE_DIM>::SetStemPlateletMultiplicationFactor(double stemPlateletMultiplicationFactor)
+{
+    mStemPlateletMultiplicationFactor = stemPlateletMultiplicationFactor;
+}
+
+template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
+double GeneralisedLinearSpringForceWithVariableCellCellStiffness<ELEMENT_DIM,SPACE_DIM>::GetStemPlateletMultiplicationFactor()
+{
+    return mStemPlateletMultiplicationFactor;
+}
+
+template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
+void GeneralisedLinearSpringForceWithVariableCellCellStiffness<ELEMENT_DIM,SPACE_DIM>::SetDifferentiatedPlateletMultiplicationFactor(double differentiatedPlateletMultiplicationFactor)
+{
+    mDifferentiatedPlateletMultiplicationFactor = differentiatedPlateletMultiplicationFactor;
+}
+
+template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
+double GeneralisedLinearSpringForceWithVariableCellCellStiffness<ELEMENT_DIM,SPACE_DIM>::GetDifferentiatedPlateletMultiplicationFactor()
+{
+    return mDifferentiatedPlateletMultiplicationFactor;
+}
+
+template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
+void GeneralisedLinearSpringForceWithVariableCellCellStiffness<ELEMENT_DIM,SPACE_DIM>::SetFibroblastPlateletMultiplicationFactor(double fibroblastPlateletMultiplicationFactor)
+{
+    mFibroblastPlateletMultiplicationFactor = fibroblastPlateletMultiplicationFactor;
+}
+
+template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
+double GeneralisedLinearSpringForceWithVariableCellCellStiffness<ELEMENT_DIM,SPACE_DIM>::GetFibroblastPlateletMultiplicationFactor()
+{
+    return mFibroblastPlateletMultiplicationFactor;
+}
+
+template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
+void GeneralisedLinearSpringForceWithVariableCellCellStiffness<ELEMENT_DIM,SPACE_DIM>::SetPlateletPlateletMultiplicationFactor(double plateletPlateletMultiplicationFactor)
+{
+    mPlateletPlateletMultiplicationFactor = plateletPlateletMultiplicationFactor;
+}
+
+template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
+double GeneralisedLinearSpringForceWithVariableCellCellStiffness<ELEMENT_DIM,SPACE_DIM>::GetPlateletPlateletMultiplicationFactor()
+{
+    return mPlateletPlateletMultiplicationFactor;
+}
+
+template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
 double GeneralisedLinearSpringForceWithVariableCellCellStiffness<ELEMENT_DIM,SPACE_DIM>::VariableSpringConstantMultiplicationFactor(unsigned nodeAGlobalIndex,
                                                                                      unsigned nodeBGlobalIndex,
                                                                                      AbstractCellPopulation<ELEMENT_DIM,SPACE_DIM>& rCellPopulation,
@@ -169,6 +222,29 @@ double GeneralisedLinearSpringForceWithVariableCellCellStiffness<ELEMENT_DIM,SPA
     else if ( (p_cell_A->GetCellProliferativeType()->IsType<FibroblastCellProliferativeType>())&&(p_cell_A->GetCellProliferativeType()->IsType<FibroblastCellProliferativeType>()) ) // Fibroblast-fibroblast
     {
         multiplication_factor =  mFibroblastFibroblastMultiplicationFactor;
+    }
+    else if ( ( (p_cell_A->GetCellProliferativeType()->IsType<StemCellProliferativeType>())&&(p_cell_B->GetCellProliferativeType()->IsType<PlateletCellProliferativeType>()) )
+            ||  ( (p_cell_A->GetCellProliferativeType()->IsType<PlateletCellProliferativeType>())&&(p_cell_B->GetCellProliferativeType()->IsType<StemCellProliferativeType>()) ) )// Stem-platelet connection
+    {
+        multiplication_factor = mStemPlateletMultiplicationFactor;
+    }
+    else if ( ( (p_cell_A->GetCellProliferativeType()->IsType<DifferentiatedCellProliferativeType>())&&(p_cell_B->GetCellProliferativeType()->IsType<PlateletCellProliferativeType>()) )
+            ||  ( (p_cell_A->GetCellProliferativeType()->IsType<PlateletCellProliferativeType>())&&(p_cell_B->GetCellProliferativeType()->IsType<DifferentiatedCellProliferativeType>()) ) )// Differentiated-platelet connection
+    {
+        multiplication_factor = mDifferentiatedPlateletMultiplicationFactor;
+    }
+    else if ( ( (p_cell_A->GetCellProliferativeType()->IsType<FibroblastCellProliferativeType>())&&(p_cell_B->GetCellProliferativeType()->IsType<PlateletCellProliferativeType>()) )
+            ||  ( (p_cell_A->GetCellProliferativeType()->IsType<PlateletCellProliferativeType>())&&(p_cell_B->GetCellProliferativeType()->IsType<FibroblastCellProliferativeType>()) ) )// Fibroblast-platelet connection
+    {
+        multiplication_factor =  mFibroblastPlateletMultiplicationFactor;
+    }
+    else if ( (p_cell_A->GetCellProliferativeType()->IsType<PlateletCellProliferativeType>())&&(p_cell_A->GetCellProliferativeType()->IsType<PlateletCellProliferativeType>()) ) // Platelet-platelet
+    {
+        multiplication_factor =  mPlateletPlateletMultiplicationFactor;
+    }
+    else
+    {
+        multiplication_factor = 1.0;
     } 
     
     return multiplication_factor;
@@ -398,6 +474,11 @@ void GeneralisedLinearSpringForceWithVariableCellCellStiffness<ELEMENT_DIM,SPACE
     *rParamsFile << "\t\t\t<DifferentiatedFibroblastMultiplicationFactor>" << mDifferentiatedFibroblastMultiplicationFactor << "</DifferentiatedFibroblastMultiplicationFactor>\n";
     *rParamsFile << "\t\t\t<DifferentiatedDifferentiatedMultiplicationFactor>" << mDifferentiatedDifferentiatedMultiplicationFactor << "</DifferentiatedDifferentiatedMultiplicationFactor>\n";
     *rParamsFile << "\t\t\t<FibroblastFibroblastMultiplicationFactor>" << mFibroblastFibroblastMultiplicationFactor << "</FibroblastFibroblastMultiplicationFactor>\n";
+    *rParamsFile << "\t\t\t<StemPlateletMultiplicationFactor>" << mStemPlateletMultiplicationFactor << "</StemPlateletMultiplicationFactor>\n";
+    *rParamsFile << "\t\t\t<DifferentiatedPlateletMultiplicationFactor>" << mDifferentiatedPlateletMultiplicationFactor << "</DifferentiatedPlateletMultiplicationFactor>\n";
+    *rParamsFile << "\t\t\t<FibroblastPlateletMultiplicationFactor>" << mFibroblastPlateletMultiplicationFactor << "</FibroblastPlateletMultiplicationFactor>\n";
+    *rParamsFile << "\t\t\t<PlateletPlateletMultiplicationFactor>" << mPlateletPlateletMultiplicationFactor << "</PlateletPlateletMultiplicationFactor>\n";
+
 
     // Call method on direct parent class
     AbstractTwoBodyInteractionForce<ELEMENT_DIM,SPACE_DIM>::OutputForceParameters(rParamsFile);

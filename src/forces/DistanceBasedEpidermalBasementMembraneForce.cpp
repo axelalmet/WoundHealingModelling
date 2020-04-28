@@ -221,6 +221,11 @@ c_vector<double, 2> DistanceBasedEpidermalBasementMembraneForce::CalculateForceD
 		
 	}
 
+	if (closest_fibroblast_indices.size() > 2) // If there are too many neighbours, it's too far into the dermis
+	{
+		force_due_to_basement_membrane *= -1.0;
+	}
+
 	// c_vector<double, 2> force_due_to_basement_membrane = zero_vector<double>(2);
 	return force_due_to_basement_membrane;
 }

@@ -100,17 +100,17 @@ void BasementMembraneAttachmentTrackingModifier<DIM>::UpdateCellData(AbstractCel
         // Only consider stem cells
         boost::shared_ptr<AbstractCellProperty> p_cell_type = cell_iter->GetCellProliferativeType();
 
+        // Get the node index
+        unsigned node_index = p_cell_population->GetLocationIndexUsingCell(*cell_iter);
+
+        // Get the set of neighbouring location indices within a neighbourhood radius
+        std::set<unsigned> neighbour_indices = p_cell_population->GetNodesWithinNeighbourhoodRadius(node_index, neighbourhood_radius);
+        
         if (!p_cell_type->template IsType<FibroblastCellProliferativeType>())
-        {
-            // Get the node index
-            unsigned node_index = p_cell_population->GetLocationIndexUsingCell(*cell_iter);
-                
+        {          
             // Initialise number of fibroblast neighbours
             unsigned num_fibroblast_neighbours = 0;
-
-            // Get the set of neighbouring location indices within a neighbourhood radius
-            std::set<unsigned> neighbour_indices = p_cell_population->GetNodesWithinNeighbourhoodRadius(node_index, neighbourhood_radius);
-
+            
             // Count the number of fibroblast neighbours
             if (!neighbour_indices.empty())
             {
@@ -200,9 +200,39 @@ void BasementMembraneAttachmentTrackingModifier<DIM>::UpdateCellData(AbstractCel
             }
 
         }
-        else
+        else // We need to track fibroblasts attached to stem cells for the sake of proliferation
         {
-            cell_iter->GetCellData()->SetItem("attachment", -1.0);
+
+            unsigned num_stem_neighbours = 0;
+
+            for (std::set<unsigned>::iterator iter = neighbour_indices.begin();
+                    iter != neighbour_indices.end();
+                    ++iter)
+            {
+                    CellPtr p_cell = rCellPopulation.GetCellUsingLocationIndex(*iter);
+                    boost::shared_ptr<AbstractCellProperty> p_neighbour_cell_type = p_cell->GetCellProliferativeType();
+
+                    // If there are ANY stem neighbours, we immediately know that it's attached to the BM and can stop the iterations.
+                    if (p_neighbour_cell_type->template IsType<StemCellProliferativeType>())
+                    {
+                        num_stem_neighbours += 1;
+                        break;
+                    }
+
+            }
+                
+            // Else the cell has been detached from the basement membrane.
+            if (num_stem_neighbours == 0)
+            {
+                // If this cell has no fibroblast neighbours, store 0.0 for the cell data
+                cell_iter->GetCellData()->SetItem("attachment", -1.0);
+            }
+            else
+            {
+                // If this cell has no fibroblast neighbours, store 0.0 for the cell data
+                cell_iter->GetCellData()->SetItem("attachment", 1.0);
+            }
+            
         }
         
 

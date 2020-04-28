@@ -150,6 +150,26 @@ protected:
      */
     double mFibroblastFibroblastMultiplicationFactor;
 
+    /*
+     * Stem-platelet cell stiffness
+     */
+    double mStemPlateletMultiplicationFactor;
+
+    /*
+     * Differentiated-platelet cell stiffness
+     */
+    double mDifferentiatedPlateletMultiplicationFactor;
+
+    /*
+     * Fibroblast-fibroblast cell stiffness
+     */
+    double mFibroblastPlateletMultiplicationFactor;
+
+    /*
+     * Fibroblast-fibroblast cell stiffness
+     */
+    double mPlateletPlateletMultiplicationFactor;
+
 public:
 
     /**
@@ -183,6 +203,18 @@ public:
 
     void SetFibroblastFibroblastMultiplicationFactor(double fibroblastFibroblastMultiplicationFactor);
     double GetFibroblastFibroblastMultiplicationFactor();
+
+    void SetStemPlateletMultiplicationFactor(double stemPlateletMultiplicationFactor);
+    double GetStemPlateletMultiplicationFactor();
+
+    void SetDifferentiatedPlateletMultiplicationFactor(double differentiatedPlateletMultiplicationFactor);
+    double GetDifferentiatedPlateletMultiplicationFactor();
+
+    void SetFibroblastPlateletMultiplicationFactor(double fibroblastPlateletMultiplicationFactor);
+    double GetFibroblastPlateletMultiplicationFactor();
+
+    void SetPlateletPlateletMultiplicationFactor(double plateletPlateletMultiplicationFactor);
+    double GetPlateletPlateletMultiplicationFactor();
 
     /**
      * Return a multiplication factor for the spring constant, which
