@@ -48,8 +48,8 @@
 
 static const std::string M_OUTPUT_DIRECTORY = "WoundHealingModel/CrossSection";
 static const double M_DT = 0.005;
-static const double M_END_TIME = 100.0;
-static const double M_SAMPLING_TIMESTEP = 0.1*M_END_TIME/M_DT;
+static const double M_END_TIME = 168.0;
+static const double M_SAMPLING_TIMESTEP = 12.0/M_DT;
 
 /*
 * A test model to study the various components that we think should be incorporated
