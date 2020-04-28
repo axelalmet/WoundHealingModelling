@@ -33,7 +33,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 #include "BasementMembraneDistanceBasedCellKiller.hpp"
-#include "NodeBasedCellPOpulation.hpp"
+#include "NodeBasedCellPopulation.hpp"
 #include "DifferentiatedCellProliferativeType.hpp"
 #include "FibroblastCellProliferativeType.hpp"
 #include "PlateletCellProliferativeType.hpp"
