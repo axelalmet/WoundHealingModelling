@@ -383,7 +383,7 @@ public:
 
         // Define the box domain for the PDE
         ChastePoint<2> lower(-1.0, -1.0);
-        ChastePoint<2> upper(21.0, 15.0);
+        ChastePoint<2> upper(1.0*(cells_across + 1), 0.5*sqrt(3)*(cells_up + 2));
         MAKE_PTR_ARGS(ChasteCuboid<2>, p_box_domain, (lower, upper));
 
         // Create a PDE Modifier object using this pde and bcs object
