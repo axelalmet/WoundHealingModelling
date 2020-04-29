@@ -3,24 +3,14 @@
 		<VersionString>2019.1.c4f5695</VersionString> <!-- build specific -->
 		<IsWorkingCopyModified>1</IsWorkingCopyModified>
 		<BuildInformation>Debug</BuildInformation>
-		<BuildTime>Mon, 02 Mar 2020 07:58:05 +0000</BuildTime>
-		<CurrentTime>Tue, 28 Apr 2020 20:46:16 +0000</CurrentTime>
+		<BuildTime>Mon, 27 Jan 2020 16:41:52 +0000</BuildTime>
+		<CurrentTime>Tue, 28 Apr 2020 21:02:23 +0000</CurrentTime>
 		<BuilderUnameInfo>Linux</BuilderUnameInfo>
 		<Projects>
 			<Project>
-				<Name>AxelA</Name>
-				<Version>58358c550748fedf6088863782fdd77870262cc6</Version>
-				<Modified>True</Modified>
-			</Project>
-			<Project>
-				<Name>MorphoCellBasedComparison</Name>
-				<Version>16de33a9744c65327e83bc3f0c912a1b99f2ee7d</Version>
-				<Modified>True</Modified>
-			</Project>
-			<Project>
 				<Name>WoundHealingModelling</Name>
-				<Version>0e40c8c947a2033508a726e5889bc662633f881d</Version>
-				<Modified>True</Modified>
+				<Version>8b46952879f10efa52d82ce40169d59ec32ce2dd</Version>
+				<Modified>False</Modified>
 			</Project>
 		</Projects>
 	</ProvenanceInfo>

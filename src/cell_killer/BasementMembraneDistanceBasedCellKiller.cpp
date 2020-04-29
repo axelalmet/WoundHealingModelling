@@ -107,7 +107,7 @@ void BasementMembraneDistanceBasedCellKiller::CheckAndLabelCellsForApoptosisOrDe
                 }
             }
         }
-        else if (p_cell_type->IsType<PlateletCellProliferativeType>()) // Slough off platelet cells if they're too high up
+        else // Slough off cells if they're too high up
         {
             // Get the node index
             unsigned node_index = this->mpCellPopulation->GetLocationIndexUsingCell(*cell_iter);

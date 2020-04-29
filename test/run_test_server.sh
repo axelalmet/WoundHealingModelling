@@ -1,16 +1,18 @@
 #!/bin/bash
 
+# Select which GPU to use
+CUDA_VISIBLE_DEVICES=$1
 # Move to the correct directory
 cd ~/BuildChaste/
 
 # Make the test
-CUDA_VISIBLE_DEVICES=$1 make $2
+make -j$2 $3
 
 # Run the test
-CUDA_VISIBLE_DEVICES=$1 ctest -R $2
+ctest -j$2 -R $3
 
 # Move the output to a non-temporary directory
-cp -r /tmp/axela/testoutput/WoundHealingModel/CrossSection $3
+cp -r /tmp/axela/testoutput/WoundHealingModel/CrossSection $4
 
 # Move LastTestLog to a non-temporary directory (this is useful for debugging)
-cp -r ~/BuildChaste/Testing/Temporary/LastTest.log $3
+cp -r ~/BuildChaste/Testing/Temporary/LastTest.log $4
