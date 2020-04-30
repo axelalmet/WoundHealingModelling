@@ -48,7 +48,7 @@
 
 static const std::string M_OUTPUT_DIRECTORY = "WoundHealingModel/CrossSection";
 static const double M_DT = 0.005;
-static const double M_END_TIME = 168.0; // 7 days
+static const double M_END_TIME = 120.0; // 5 days
 static const double M_SAMPLING_TIMESTEP = 12.0/M_DT; // Sample every half-day
 
 /*
@@ -110,12 +110,12 @@ public:
             p_cycle_model->SetEquilibriumVolume(0.25*M_PI);
             p_cycle_model->SetQuiescentVolumeFraction(0.9);
             p_cycle_model->SetGrowthFactorThreshold(morphogen_threshold);
-            p_cycle_model->SetStemCellG1Duration(14.0);
+            p_cycle_model->SetStemCellG1Duration(10.0);
             p_cycle_model->SetDimension(2);
 
             // Set collagen-based SRN model
             FibroblastStateDependentCollagenSrnModel* p_srn_model = new FibroblastStateDependentCollagenSrnModel(); //Fibroblast-state-dependent collagen SRN model
-            p_srn_model->SetMorphogenThreshold(morphogen_threshold);
+            p_srn_model->SetOdeParameters(morphogen_threshold, 1.0, 1.0);
 
             // Randomly fill the fibroblast population with EPF and ENF fibroblasts, according to proportions
             // from the Rinkevich et al. (2018) paper (0.75 EPF, 0.25 ENF)
@@ -262,7 +262,7 @@ public:
                 BasementMembraneBasedContactInhibitionCellCycleModel* p_cycle_model = new BasementMembraneBasedContactInhibitionCellCycleModel(); //Contact-inhibition-based cycle model yet.
                 p_cycle_model->SetEquilibriumVolume(0.25*M_PI);
                 p_cycle_model->SetQuiescentVolumeFraction(0.9);
-                p_cycle_model->SetStemCellG1Duration(14.0);
+                p_cycle_model->SetStemCellG1Duration(10.0);
                 p_cycle_model->SetDimension(2);
 
                 cell_iter->SetCellCycleModel(p_cycle_model);
@@ -335,16 +335,6 @@ public:
         MAKE_PTR(GeneralisedLinearSpringForce<2>, p_spring_force);
         p_spring_force->SetMeinekeSpringStiffness(spring_stiffness);
         p_spring_force->SetCutOffLength(radius_of_interaction);
-        // p_spring_force->SetFibroblastFibroblastMultiplicationFactor(1.0);
-        // p_spring_force->SetStemFibroblastMultiplicationFactor(2.0);
-        // p_spring_force->SetStemStemMultiplicationFactor(2.0);
-        // p_spring_force->SetStemDifferentiatedMultiplicationFactor(4.0);
-        // p_spring_force->SetDifferentiatedDifferentiatedMultiplicationFactor(4.0);
-        // p_spring_force->SetDifferentiatedFibroblastMultiplicationFactor(4.0);
-        // p_spring_force->SetPlateletPlateletMultiplicationFactor(1.0);
-        // p_spring_force->SetStemPlateletMultiplicationFactor(2.0);
-        // p_spring_force->SetDifferentiatedPlateletMultiplicationFactor(4.0);
-        // p_spring_force->SetFibroblastPlateletMultiplicationFactor(1.0);
         simulator.AddForce(p_spring_force);
 
 
@@ -356,7 +346,7 @@ public:
         // Add the chemotactic force
         MAKE_PTR(WoundBasedChemotacticForce<2>, p_chemotactic_force);
         p_chemotactic_force->SetNeighbourhoodRadius(radius_of_interaction);
-        p_chemotactic_force->SetChemotacticStrength(2.5*M_DT);
+        p_chemotactic_force->SetChemotacticStrength(3.0*M_DT);
         simulator.AddForce(p_chemotactic_force);
 
         // // Add fibre-alignment-based migration force

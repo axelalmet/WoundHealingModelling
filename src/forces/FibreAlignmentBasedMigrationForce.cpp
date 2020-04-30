@@ -97,7 +97,7 @@ bool FibreAlignmentBasedMigrationForce<DIM>::DoesCollagenFibreIntersectWithFibro
     double s = (fibre_location[1] - fibroblast_location[1] - (fibre_location[0] - fibroblast_location[0]))/(cos(fibre_orientation) - sin(fibre_orientation));
     double t = (cos(fibre_orientation)*(fibre_location[1] - fibroblast_location[1]) - sin(fibre_orientation)*(fibre_location[0] - fibroblast_location[0]))/(cos(fibroblast_direction)*(cos(fibre_orientation) - sin(fibre_orientation)));
 
-    if ( (s > 0.0)&&(t > 0.0) ) // If s and t are both positive, then the fibres intersect.
+    if ( (s > 1e-4)&&(t > 1e-4) ) // If s and t are both positive, then the fibres intersect.
     {
         does_fibre_intersect_with_fibroblast = true;
     }
@@ -163,7 +163,7 @@ void FibreAlignmentBasedMigrationForce<DIM>::AddForceContribution(AbstractCellPo
                         // Get the neighbouring concentration
                         double collagen = neighbour_cell_iter->GetCellData()->GetItem("collagen");
 
-                        if (collagen > 0.0)
+                        if (collagen > 1e-4)
                         {
                             // Now determine if the fibre intersects with the fibroblast direction
                             bool does_fibre_intersect_with_fibroblast = DoesCollagenFibreIntersectWithFibroblast(rCellPopulation, current_index, *elem_iter);

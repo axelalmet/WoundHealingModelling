@@ -38,7 +38,10 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 FibroblastStateDependentCollagenSrnModel::FibroblastStateDependentCollagenSrnModel(boost::shared_ptr<AbstractCellCycleModelOdeSolver> pOdeSolver)
     : AbstractOdeSrnModel(1, pOdeSolver),
-    mMorphogenThreshold(DOUBLE_UNSET)
+    mMorphogenThreshold(DOUBLE_UNSET),
+    mProductionRate(DOUBLE_UNSET),
+    mDegradationRate(DOUBLE_UNSET)
+
 {
     if (mpOdeSolver == boost::shared_ptr<AbstractCellCycleModelOdeSolver>())
     {
@@ -101,6 +104,10 @@ void FibroblastStateDependentCollagenSrnModel::Initialise()
 
     AbstractOdeSrnModel::SetInitialConditions(initial_condition);
     AbstractOdeSrnModel::Initialise(new FibroblastStateDependentCollagenOdeSystem);
+
+    mpOdeSystem->SetParameter("p_c", mProductionRate);
+    mpOdeSystem->SetParameter("d_c", mDegradationRate);
+
 }
 
 void FibroblastStateDependentCollagenSrnModel::UpdateEpfStatus()
@@ -167,9 +174,21 @@ double FibroblastStateDependentCollagenSrnModel::GetMorphogenThreshold()
     return mMorphogenThreshold;
 }
 
-void FibroblastStateDependentCollagenSrnModel::SetMorphogenThreshold(double morphogenThreshold)
+double FibroblastStateDependentCollagenSrnModel::GetProductionRate()
+{
+    return mProductionRate;
+}
+
+double FibroblastStateDependentCollagenSrnModel::GetDegradationRate()
+{
+    return mDegradationRate;
+}
+
+void FibroblastStateDependentCollagenSrnModel::SetOdeParameters(double morphogenThreshold, double productionRate, double degradationRate)
 {
     mMorphogenThreshold = morphogenThreshold;
+    mProductionRate = productionRate;
+    mDegradationRate = degradationRate;
 }
 
 // Declare identifier for the serializer

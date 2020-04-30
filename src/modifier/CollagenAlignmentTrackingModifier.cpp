@@ -163,7 +163,7 @@ void CollagenAlignmentTrackingModifier<DIM>::UpdateCellData(AbstractCellPopulati
             // Get the collagen amount
             double collagen = cell_iter->GetCellData()->GetItem("collagen");
 
-            if (collagen > 0.0)
+            if (collagen > 1e-4) // Realise how bad it is to use 0 as a point of comparison
             {
                 // Get the node index
                 unsigned node_index = p_cell_population->GetLocationIndexUsingCell(*cell_iter);

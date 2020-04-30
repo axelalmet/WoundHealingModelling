@@ -57,6 +57,16 @@ private:
      */
     double mMorphogenThreshold;
 
+    /**
+     * @double Production rate of collagen
+     */
+    double mProductionRate;
+
+    /*
+     * @double Degradation rate of collagen
+     */
+    double mDegradationRate;
+
     /** Needed for serialization. */
     friend class boost::serialization::access;
     /**
@@ -70,6 +80,8 @@ private:
     {
         archive & boost::serialization::base_object<AbstractOdeSrnModel>(*this);
         archive & mMorphogenThreshold;
+        archive & mProductionRate;
+        archive & mDegradationRate;
     }
 
 protected:
@@ -147,9 +159,19 @@ public:
     double GetMorphogenThreshold();
 
     /*
+     * Get the rate for collagen production 
+     */
+    double GetProductionRate();
+
+    /*
+     * Get the rate for collagen degradation
+     */ 
+    double GetDegradationRate();
+
+    /*
      * Set the morphogen threshold
      */
-    void SetMorphogenThreshold(double morphogenThreshold);
+    void SetOdeParameters(double morphogenThreshold, double productionRate, double degradationRate);
 };
 
 // Declare identifier for the serializer
