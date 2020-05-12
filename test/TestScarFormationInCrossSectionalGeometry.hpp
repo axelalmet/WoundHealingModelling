@@ -49,7 +49,7 @@
 static const std::string M_OUTPUT_DIRECTORY = "WoundHealingModel/CrossSection";
 static const double M_DT = 0.005;
 static const double M_END_TIME = 200.0;
-static const double M_SAMPLING_TIMESTEP = 0.25*M_END_TIME/M_DT;
+static const double M_SAMPLING_TIMESTEP = 10.0/M_DT;
 
 /*
 * A test model to study the various components that we think should be incorporated
@@ -80,10 +80,10 @@ public:
 		RandomNumberGenerator::Instance()->Reseed(100);
 
         // Set the probability of being an EPF fibroblast.
-        double epf_fibroblast_probability = 0.25;
+        double epf_fibroblast_probability = 0.7;
 
         // Morphogen threshold for fibroblast proliferation and collagen activation
-        double morphogen_threshold = 2.5;
+        double morphogen_threshold = 1.5;
 
         HoneycombMeshGenerator generator(cells_across, cells_up, 0); //Create mesh
         MutableMesh<2, 2>* p_generating_mesh = generator.GetMesh(); //Generate mesh
@@ -110,12 +110,12 @@ public:
             p_cycle_model->SetEquilibriumVolume(0.25*M_PI);
             p_cycle_model->SetQuiescentVolumeFraction(0.9);
             p_cycle_model->SetGrowthFactorThreshold(morphogen_threshold);
-            p_cycle_model->SetStemCellG1Duration(14.0);
+            p_cycle_model->SetStemCellG1Duration(8.0);
             p_cycle_model->SetDimension(2);
 
             // Set collagen-based SRN model
             FibroblastStateDependentCollagenSrnModel* p_srn_model = new FibroblastStateDependentCollagenSrnModel(); //Fibroblast-state-dependent collagen SRN model
-            p_srn_model->SetMorphogenThreshold(morphogen_threshold);
+            p_srn_model->SetOdeParameters(morphogen_threshold, 1.0, 1.0);
 
             // Randomly fill the fibroblast population with EPF and ENF fibroblasts, according to proportions
             // from the Rinkevich et al. (2018) paper (0.75 EPF, 0.25 ENF)
@@ -138,7 +138,7 @@ public:
                 // p_cell->InitialiseSrnModel();
 
                 // Set a random birth time for each cell so that you don't get synchronised division.
-                double birth_time = - 10.0* RandomNumberGenerator::Instance()->ranf() * 1.0;
+                double birth_time = - 10.0 * RandomNumberGenerator::Instance()->ranf();
                 p_cell->SetBirthTime(birth_time);
 
                 // Initialise all the scalar cell data
@@ -174,7 +174,7 @@ public:
                 p_cell->SetCellProliferativeType(p_fibroblast_type); //Make cell differentiated
                 // p_cell->InitialiseCellCycleModel();
                 // Set a random birth time for each cell so that you don't get synchronised division.
-                double birth_time = - 10.0 * RandomNumberGenerator::Instance()->ranf() * 1.0;
+                double birth_time = - 10.0 * RandomNumberGenerator::Instance()->ranf();
                 p_cell->SetBirthTime(birth_time);
 
                 // For completeness in the stupid contact inhibition model.
@@ -262,7 +262,7 @@ public:
                 BasementMembraneBasedContactInhibitionCellCycleModel* p_cycle_model = new BasementMembraneBasedContactInhibitionCellCycleModel(); //Contact-inhibition-based cycle model yet.
                 p_cycle_model->SetEquilibriumVolume(0.25*M_PI);
                 p_cycle_model->SetQuiescentVolumeFraction(0.9);
-                p_cycle_model->SetStemCellG1Duration(14.0);
+                p_cycle_model->SetStemCellG1Duration(8.0);
                 p_cycle_model->SetDimension(2);
 
                 cell_iter->SetCellCycleModel(p_cycle_model);
@@ -296,6 +296,9 @@ public:
 
         boost::shared_ptr<AbstractCellProperty> p_platelet_type(CellPropertyRegistry::Instance()->Get<PlateletCellProliferativeType>());
         boost::shared_ptr<AbstractCellProperty> p_platelet_state(CellPropertyRegistry::Instance()->Get<PlateletCellMutationState>());
+        
+        // Set the death rate as well
+        double death_rate = 1.0/24.0;
 
         //Obtain the proliferative cells
         for (AbstractCellPopulation<2>::Iterator cell_iter = cell_population.Begin();
@@ -306,6 +309,9 @@ public:
             double x = cell_population.GetLocationOfCellCentre(*cell_iter)[0];
             double y = cell_population.GetLocationOfCellCentre(*cell_iter)[1];
 
+            // Generate the time of death for platelet cells
+            double time_of_death = RandomNumberGenerator::Instance()->ExponentialRandomDeviate(death_rate);
+
             //If the cell is within the 'wound area', we kill it.
             if ( (x > (wound_centre - 0.5*wound_width))&&(x < (wound_centre + 0.5*wound_width))&&(y > wound_base_height) )
             // if ( ( pow(x - wound_centre, 2.0) + pow(y - min_height, 2.0) < pow(wound_width, 2.0) ))
@@ -314,7 +320,12 @@ public:
                 cell_iter->SetCellProliferativeType(p_platelet_type);
                 cell_iter->GetCellData()->SetItem("collagen", 0.0);
                 cell_iter->GetCellData()->SetItem("epf", 0.0);
+                cell_iter->GetCellData()->SetItem("death", time_of_death);
                 
+            }
+            else
+            {
+                cell_iter->GetCellData()->SetItem("death", 2.0*M_END_TIME);
             }
         
         }
@@ -356,7 +367,7 @@ public:
         // Add the chemotactic force
         MAKE_PTR(WoundBasedChemotacticForce<2>, p_chemotactic_force);
         p_chemotactic_force->SetNeighbourhoodRadius(radius_of_interaction);
-        p_chemotactic_force->SetChemotacticStrength(2.5*M_DT);
+        p_chemotactic_force->SetChemotacticStrength(5.0*M_DT);
         simulator.AddForce(p_chemotactic_force);
 
         // // Add fibre-alignment-based migration force
@@ -415,7 +426,7 @@ public:
         MAKE_PTR_ARGS(PlateletCellKiller, p_platelet_cell_killer, (&cell_population));
         p_platelet_cell_killer->SetCutOffRadius(radius_of_interaction);
         p_platelet_cell_killer->SetGrowthFactorThreshold(morphogen_threshold);
-        p_platelet_cell_killer->SetVolumeThreshold(0.95*0.25*M_PI); // Platelet cells can be compressed to half their size before dying
+        p_platelet_cell_killer->SetVolumeThreshold(0.9*0.25*M_PI); // Platelet cells can be compressed to half their size before dying
         simulator.AddCellKiller(p_platelet_cell_killer);
 
         simulator.Solve(); // Run the simulation.

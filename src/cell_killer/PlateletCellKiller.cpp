@@ -14,7 +14,7 @@
 #include "NodeBasedCellPopulation.hpp"
 #include "PlateletCellProliferativeType.hpp"
 #include "FibroblastCellProliferativeType.hpp"
-#include "Debug.hpp"
+#include "SimulationTime.hpp"
 
 PlateletCellKiller::PlateletCellKiller(AbstractCellPopulation<2>* pCellPopulation)
     : AbstractCellKiller<2>(pCellPopulation),
@@ -99,14 +99,16 @@ bool PlateletCellKiller::ShouldCellBeRemoved(unsigned nodeIndex)
     double growth_factor_threshold = GetGrowthFactorThreshold(); // Get the growth factor threshold
 	
 	double volume_threshold = GetVolumeThreshold();
-	double current_volume = this->mpCellPopulation->GetCellUsingLocationIndex(nodeIndex)->GetCellData()->GetItem("volume"); // Get the cell's volume.
+
+	CellPtr p_cell = this->mpCellPopulation->GetCellUsingLocationIndex(nodeIndex);
+	double current_volume = p_cell->GetCellData()->GetItem("volume"); // Get the cell's volume.
 
 	// if (dynamic_cast<NodeBasedCellPopulation<2>*>(this->mpCellPopulation))
 	// {
 	// NodeBasedCellPopulation<2>* p_tissue = static_cast<NodeBasedCellPopulation<2>*> (this->mpCellPopulation);
 
 	// Only consider platelet cells
-	if (this->mpCellPopulation->GetCellUsingLocationIndex(nodeIndex)->GetCellProliferativeType()->IsType<PlateletCellProliferativeType>() )
+	if (p_cell->GetCellProliferativeType()->IsType<PlateletCellProliferativeType>() )
 	{
 		std::set<unsigned> neighbours = GetNeighbouringNodeIndices(nodeIndex);
 
@@ -121,7 +123,6 @@ bool PlateletCellKiller::ShouldCellBeRemoved(unsigned nodeIndex)
 				// We kill if the fibroblast is sufficiently activated during the wounding, i.e. it has been exposed to a sufficient 
 				// amount of growth factor.
 				double growth_factor_level = this->mpCellPopulation->GetCellUsingLocationIndex(*neighbour_iter)->GetCellData()->GetItem("morphogen");
-
 				
 				if ( (growth_factor_level > growth_factor_threshold)&&(current_volume < volume_threshold) )
 				{
@@ -129,6 +130,14 @@ bool PlateletCellKiller::ShouldCellBeRemoved(unsigned nodeIndex)
 					break;
 				}
 			}
+		}
+
+		// Also check if the platelet should be killed via natural cell death, so to speak
+		double time_of_death = p_cell->GetCellData()->GetItem("death");
+		double current_time = SimulationTime::Instance()->GetTime();
+		if (current_time > time_of_death)
+		{
+			should_cell_be_removed = true;
 		}
 
 	}

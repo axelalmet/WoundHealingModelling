@@ -75,37 +75,29 @@ void BasementMembraneDistanceBasedCellKiller::CheckAndLabelCellsForApoptosisOrDe
             // Get the node index
             unsigned node_index = this->mpCellPopulation->GetLocationIndexUsingCell(*cell_iter);
 
-            double y = this->mpCellPopulation->GetNode(node_index)->rGetLocation()[1];
-            if (y > mMaxHeight)
+            unsigned num_fibroblast_neighbours = 0;
+            // Now get the neighbours within mRadius
+            std::set<unsigned> neighbour_indices = p_tissue->GetNodesWithinNeighbourhoodRadius(node_index, mRadius);
+            
+            for (std::set<unsigned>::iterator iter = neighbour_indices.begin();
+                iter != neighbour_indices.end();
+                ++iter)
+            {
+                CellPtr p_cell = this->mpCellPopulation->GetCellUsingLocationIndex(*iter);
+                boost::shared_ptr<AbstractCellProperty> p_neighbour_cell_type = p_cell->GetCellProliferativeType();
+
+                // If there are ANY fibroblast neighbours, we immediately know that it's attached to the BM and can stop the iterations.
+                if (p_neighbour_cell_type->IsType<FibroblastCellProliferativeType>())
+                {
+                    num_fibroblast_neighbours += 1;
+                    break;
+                }
+            }
+
+            if (num_fibroblast_neighbours == 0)
             {
                 cell_iter->Kill();
-            }
-            else
-            {
-                unsigned num_fibroblast_neighbours = 0;
-                // Now get the neighbours within mRadius
-                std::set<unsigned> neighbour_indices = p_tissue->GetNodesWithinNeighbourhoodRadius(node_index, mRadius);
-                
-                for (std::set<unsigned>::iterator iter = neighbour_indices.begin();
-                    iter != neighbour_indices.end();
-                    ++iter)
-                {
-                    CellPtr p_cell = this->mpCellPopulation->GetCellUsingLocationIndex(*iter);
-                    boost::shared_ptr<AbstractCellProperty> p_neighbour_cell_type = p_cell->GetCellProliferativeType();
-
-                    // If there are ANY fibroblast neighbours, we immediately know that it's attached to the BM and can stop the iterations.
-                    if (p_neighbour_cell_type->IsType<FibroblastCellProliferativeType>())
-                    {
-                        num_fibroblast_neighbours += 1;
-                        break;
-                    }
                 }
-
-                if (num_fibroblast_neighbours == 0)
-                {
-                    cell_iter->Kill();
-                }
-            }
         }
         else // Slough off cells if they're too high up
         {

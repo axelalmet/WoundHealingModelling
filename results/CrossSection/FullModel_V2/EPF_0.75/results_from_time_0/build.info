@@ -1,0 +1,37 @@
+<ChasteBuildInfo>
+	<ProvenanceInfo>
+		<VersionString>2019.1.c4f5695</VersionString> <!-- build specific -->
+		<IsWorkingCopyModified>1</IsWorkingCopyModified>
+		<BuildInformation>Debug</BuildInformation>
+		<BuildTime>Mon, 27 Jan 2020 16:41:52 +0000</BuildTime>
+		<CurrentTime>Thu, 30 Apr 2020 06:51:03 +0000</CurrentTime>
+		<BuilderUnameInfo>Linux</BuilderUnameInfo>
+		<Projects>
+			<Project>
+				<Name>WoundHealingModelling</Name>
+				<Version>35c974ba663067393cd819c5a318ab8fc789a9c6</Version>
+				<Modified>True</Modified>
+			</Project>
+		</Projects>
+	</ProvenanceInfo>
+	<Compiler>
+		<NameAndVersion>/usr/bin/c++, version 7.4.0</NameAndVersion>
+		<Flags>-std=c++14 -Wall -Werror -Wnon-virtual-dtor -Woverloaded-virtual -Wextra -Wno-unused-parameter -Wvla -Wimplicit-fallthrough=2 -pthread -g</Flags>
+	</Compiler>
+	<Libraries>
+		<CompiledIn>
+			<PETSc>3.7.7</PETSc>
+			<Boost>1.65.1</Boost>
+			<HDF5>1.10.0</HDF5>
+			<Parmetis>4.0.3</Parmetis>
+		</CompiledIn>
+		<Binaries>
+			<XSD>4.0.0</XSD>
+		</Binaries>
+		<Optional>
+			<SUNDIALS>"2.7.0"</SUNDIALS><!-- includes Cvode of a different version number -->
+			<VTK>7.1</VTK>
+			<Xerces>3.2.0</Xerces>
+		</Optional>
+	</Libraries>
+</ChasteBuildInfo>

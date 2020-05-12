@@ -48,8 +48,8 @@
 
 static const std::string M_OUTPUT_DIRECTORY = "WoundHealingModel/CrossSection";
 static const double M_DT = 0.005;
-static const double M_END_TIME = 120.0; // 5 days
-static const double M_SAMPLING_TIMESTEP = 12.0/M_DT; // Sample every half-day
+static const double M_END_TIME = 200.0; // 5 days
+static const double M_SAMPLING_TIMESTEP = 5.0/M_DT; // Sample every 5 hours
 
 /*
 * A test model to study the various components that we think should be incorporated
@@ -83,7 +83,7 @@ public:
         double epf_fibroblast_probability = 0.25;
 
         // Morphogen threshold for fibroblast proliferation and collagen activation
-        double morphogen_threshold = 2.5;
+        double morphogen_threshold = 1.5;
 
         HoneycombMeshGenerator generator(cells_across, cells_up, 0); //Create mesh
         MutableMesh<2, 2>* p_generating_mesh = generator.GetMesh(); //Generate mesh
@@ -110,7 +110,7 @@ public:
             p_cycle_model->SetEquilibriumVolume(0.25*M_PI);
             p_cycle_model->SetQuiescentVolumeFraction(0.9);
             p_cycle_model->SetGrowthFactorThreshold(morphogen_threshold);
-            p_cycle_model->SetStemCellG1Duration(10.0);
+            p_cycle_model->SetStemCellG1Duration(8.0);
             p_cycle_model->SetDimension(2);
 
             // Set collagen-based SRN model
@@ -257,12 +257,12 @@ public:
             {
                 cell_iter->AddCellProperty(p_cell_label);
             }
-            if (y > max_height - 1.5*sqrt(3.0) - 0.1)
+            if (y > max_height - sqrt(3.0) - 0.1)
             {
                 BasementMembraneBasedContactInhibitionCellCycleModel* p_cycle_model = new BasementMembraneBasedContactInhibitionCellCycleModel(); //Contact-inhibition-based cycle model yet.
                 p_cycle_model->SetEquilibriumVolume(0.25*M_PI);
                 p_cycle_model->SetQuiescentVolumeFraction(0.9);
-                p_cycle_model->SetStemCellG1Duration(10.0);
+                p_cycle_model->SetStemCellG1Duration(8.0);
                 p_cycle_model->SetDimension(2);
 
                 cell_iter->SetCellCycleModel(p_cycle_model);
@@ -291,11 +291,14 @@ public:
 
         // Wound the model. 
         double wound_centre = 0.5*max_width;
-        double wound_width = 0.5*max_width;
-        double wound_base_height = 0.3*max_height;
+        double wound_width = 0.6*max_width;
+        double wound_base_height = 0.4*max_height;
 
         boost::shared_ptr<AbstractCellProperty> p_platelet_type(CellPropertyRegistry::Instance()->Get<PlateletCellProliferativeType>());
         boost::shared_ptr<AbstractCellProperty> p_platelet_state(CellPropertyRegistry::Instance()->Get<PlateletCellMutationState>());
+
+        // Set the death rate as well
+        double death_rate = 1.0/24.0;
 
         //Obtain the proliferative cells
         for (AbstractCellPopulation<2>::Iterator cell_iter = cell_population.Begin();
@@ -306,6 +309,9 @@ public:
             double x = cell_population.GetLocationOfCellCentre(*cell_iter)[0];
             double y = cell_population.GetLocationOfCellCentre(*cell_iter)[1];
 
+            // Generate the time of death for platelet cells
+            double time_of_death = RandomNumberGenerator::Instance()->ExponentialRandomDeviate(death_rate);
+
             //If the cell is within the 'wound area', we kill it.
             if ( (x > (wound_centre - 0.5*wound_width))&&(x < (wound_centre + 0.5*wound_width))&&(y > wound_base_height) )
             // if ( ( pow(x - wound_centre, 2.0) + pow(y - min_height, 2.0) < pow(wound_width, 2.0) ))
@@ -314,7 +320,11 @@ public:
                 cell_iter->SetCellProliferativeType(p_platelet_type);
                 cell_iter->GetCellData()->SetItem("collagen", 0.0);
                 cell_iter->GetCellData()->SetItem("epf", 0.0);
-                
+                cell_iter->GetCellData()->SetItem("death", time_of_death);
+            }
+            else
+            {
+                cell_iter->GetCellData()->SetItem("death", 2.0*M_END_TIME);
             }
         
         }
@@ -373,7 +383,7 @@ public:
 
         // Define the box domain for the PDE
         ChastePoint<2> lower(-1.0, -1.0);
-        ChastePoint<2> upper(26.0, 14.0);
+        ChastePoint<2> upper(26.0, 15.0);
         MAKE_PTR_ARGS(ChasteCuboid<2>, p_box_domain, (lower, upper));
 
         // Create a PDE Modifier object using this pde and bcs object
@@ -405,7 +415,7 @@ public:
         MAKE_PTR_ARGS(PlateletCellKiller, p_platelet_cell_killer, (&cell_population));
         p_platelet_cell_killer->SetCutOffRadius(radius_of_interaction);
         p_platelet_cell_killer->SetGrowthFactorThreshold(morphogen_threshold);
-        p_platelet_cell_killer->SetVolumeThreshold(0.95*0.25*M_PI); // Platelet cells can be compressed to half their size before dying
+        p_platelet_cell_killer->SetVolumeThreshold(0.9*0.25*M_PI); // Platelet cells can be compressed to half their size before dying
         simulator.AddCellKiller(p_platelet_cell_killer);
 
         simulator.Solve(); // Run the simulation.

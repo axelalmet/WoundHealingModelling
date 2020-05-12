@@ -180,7 +180,7 @@ void WoundBasedChemotacticForce<DIM>::AddForceContribution(AbstractCellPopulatio
                 c_vector<double, DIM> gradient_direction = rCellPopulation.rGetMesh().GetVectorFromAtoB(current_location, chosen_neighbour_location);
 
                 // Only add the chemotactic force when the change is positive
-                if (morphogen_max_grad > 0.0)
+                if (morphogen_max_grad > 1e-4)
                 {
                     // Get the chemotactic strength parameter 
                     double chemotactic_strength = GetChemotacticStrength();
