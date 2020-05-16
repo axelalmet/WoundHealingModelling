@@ -1,33 +1,29 @@
-Start testing: May 11 19:59 PDT
+Start testing: May 13 12:43 PDT
 ----------------------------------------------------------
-493/498 Testing: TestHairFollicleModel
-493/498 Test: TestHairFollicleModel
-Command: "/home/axel/BuildChaste/projects/WoundHealingModelling/test/TestHairFollicleModel"
+490/498 Testing: TestScarFormationInCrossSectionalGeometry
+490/498 Test: TestScarFormationInCrossSectionalGeometry
+Command: "/home/axel/BuildChaste/projects/WoundHealingModelling/test/TestScarFormationInCrossSectionalGeometry"
 Directory: /media/sf_SimulationPackages/Chaste/
-"TestHairFollicleModel" start time: May 11 19:59 PDT
+"TestScarFormationInCrossSectionalGeometry" start time: May 13 12:43 PDT
 Output:
 ----------------------------------------------------------
 Running 1 test
 
- ***** TestHairFollicleModel.hpp *****
+ ***** TestCrossSectionalScarFormation.hpp *****
 
 
-Entering TestHairFollicle
+Entering TestScarFormation
 Passed
 OK!
-Chaste warning: in file /media/sf_SimulationPackages/Chaste/mesh/src/common/TetrahedralMesh.cpp at line 897: Triangle has produced a zero area (collinear) element
-Chaste warning: in file /media/sf_SimulationPackages/Chaste/mesh/src/common/TetrahedralMesh.cpp at line 897: Triangle has produced a zero area (collinear) element
-Chaste warning: in file /media/sf_SimulationPackages/Chaste/mesh/src/common/TetrahedralMesh.cpp at line 897: Triangle has produced a zero area (collinear) element
-Chaste warning: in file /media/sf_SimulationPackages/Chaste/mesh/src/common/TetrahedralMesh.cpp at line 897: Triangle has produced a zero area (collinear) element
 <end of output>
-Test time =  81.80 sec
+Test time =  51.77 sec
 ----------------------------------------------------------
 Test Passed.
-"TestHairFollicleModel" end time: May 11 20:00 PDT
-"TestHairFollicleModel" time elapsed: 00:01:21
+"TestScarFormationInCrossSectionalGeometry" end time: May 13 12:44 PDT
+"TestScarFormationInCrossSectionalGeometry" time elapsed: 00:00:51
 ----------------------------------------------------------
 
-End testing: May 11 20:00 PDT
+End testing: May 13 12:44 PDT
 
-Continuous_project_WoundHealingModelling =  81.80 sec*proc
+Continuous_project_WoundHealingModelling =  51.77 sec*proc
 

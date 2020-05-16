@@ -2,4 +2,3 @@ TestClotFormationInCrossSectionalGeometry.hpp
 TestScarFormationInCrossSectionalGeometry.hpp
 TestEpidermisInCrossSectionalGeometry.hpp
 TestWoundHealingInCrossSectionalGeometry.hpp
-TestHairFollicleModel.hpp

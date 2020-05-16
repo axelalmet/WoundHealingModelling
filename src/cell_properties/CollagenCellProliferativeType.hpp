@@ -33,87 +33,42 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#ifndef HAIRFOLLICLEMIGRATIONFORCE_HPP_
-#define HAIRFOLLICLEMIGRATIONFORCE_HPP_
+#ifndef COLLAGENCELLPROLIFERATIVETYPE_HPP_
+#define COLLAGENCELLPROLIFERATIVETYPE_HPP_
 
+#include "AbstractCellProliferativeType.hpp"
 #include "ChasteSerialization.hpp"
 #include <boost/serialization/base_object.hpp>
 
-#include "AbstractForce.hpp"
-
 /**
- * A HairFollicleMigration force class.
+ * Subclass of AbstractCellProliferativeType defining a Collagen cell.
  */
-template<unsigned DIM>
-class HairFollicleMigrationForce  : public AbstractForce<DIM>
+class CollagenCellProliferativeType : public AbstractCellProliferativeType
 {
-friend class TestForces;
-
 private:
-
-    /*
-     * Migration force strength
-     */
-    double mMigrationForceStrength;
-
+    /** Needed for serialization. */
     friend class boost::serialization::access;
     /**
-     * Boost Serialization method for archiving/checkpointing.
-     * Archives the object and its member variables.
+     * Archive the cell proliferative type.
      *
-     * @param archive  The boost archive.
-     * @param version  The current version of this class.
+     * @param archive the archive
+     * @param version the current version of this class
      */
     template<class Archive>
     void serialize(Archive & archive, const unsigned int version)
     {
-        archive & boost::serialization::base_object<AbstractForce<DIM> >(*this);
-        archive & mMigrationForceStrength;
+        archive & boost::serialization::base_object<AbstractCellProliferativeType>(*this);
     }
 
 public:
-
     /**
      * Constructor.
      */
-    HairFollicleMigrationForce();
-
-    /**
-     * Destructor.
-     */
-    ~HairFollicleMigrationForce();
-
-    /*
-     * Get migration force strength
-     * 
-     * @return mMigrationForceStrength
-     */
-    double GetMigrationForceStrength();
-
-    /*
-     * Set the fibre reorientation strength
-     * 
-     * @param migrationForceStrength
-     */
-    void SetMigrationForceStrength(double migrationForceStrength);
-
-    /**
-     * Overridden AddForceContribution() method.
-     *
-     * @param rCellPopulation reference to the cell population
-     *
-     */
-    void AddForceContribution(AbstractCellPopulation<DIM>& rCellPopulation);
-
-    /**
-     * Overridden OutputForceParameters() method.
-     *
-     * @param rParamsFile the file stream to which the parameters are output
-     */
-    void OutputForceParameters(out_stream& rParamsFile);
+    CollagenCellProliferativeType();
 };
 
 #include "SerializationExportWrapper.hpp"
-EXPORT_TEMPLATE_CLASS_SAME_DIMS(HairFollicleMigrationForce)
+// Declare identifier for the serializer
+CHASTE_CLASS_EXPORT(CollagenCellProliferativeType)
 
-#endif /*HAIRFOLLICLEMIGRATIONFORCE_HHP_*/
+#endif /* CollagenCELLPROLIFERATIVETYPE_HPP_*/
