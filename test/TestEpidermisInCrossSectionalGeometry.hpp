@@ -8,42 +8,28 @@
 #include "CellBasedSimulationArchiver.hpp"
 
 #include "CheckpointArchiveTypes.hpp" // Needed if we use GetIdentifier() method (which we do)
-#include "HoneycombMeshGenerator.hpp" //Generates mesh
+#include "CylindricalHoneycombMeshGenerator.hpp" //Generates mesh
 #include "GeneralisedLinearSpringForce.hpp" // Standard spring force that implements logarithmic repulsion and exponential attraction for OS models
 #include "EpidermalBasementMembraneForce.hpp" // Force to anchor basal stem cells to dermis (based off Du et al. (2018) model)
 #include "DistanceBasedEpidermalBasementMembraneForce.hpp" // Force to anchor basal stem cells to dermis (based off Dunn et al. (2012) model)
 #include "WoundBasedChemotacticForce.hpp" // Individual-based chemotactic force to induce migration.
 #include "FibreAlignmentBasedMigrationForce.hpp" // Fibre-alignment-based migration force
 #include "FixedRegionPlaneBoundaryCondition.hpp" // Fixed-position boundary condition
-#include "PlaneBoundaryCondition.hpp" // Plane-based boundary condition
-#include "HoneycombMeshGenerator.hpp" // Generates mesh
 #include "NoCellCycleModel.hpp" // Useful for running tests where cell proliferation isn't needed.
 #include "BasementMembraneBasedContactInhibitionCellCycleModel.hpp" // Cell cycle for epidermal cell, where proliferative capacity is determined by attachment to the basement membrane
-#include "GrowthFactorBasedContactInhibitionCellCycleModel.hpp" // Cell cycle for fibroblasts that is dependent on exposure to wound-derived growth factors
-#include "FibroblastStateDependentCollagenSrnModel.hpp"
 #include "NodeBasedCellPopulation.hpp" // Overlapping spheres centre-based population
-#include "RandomSymmetricDivisionBasedDivisionRule.hpp" // Symmetric and asymmetric division rule
 #include "Cylindrical2dNodesOnlyMesh.hpp" // Mesh with periodic vertical boundaries
-#include "CellDataItemWriter.hpp" // Allows us to track different cell data items
 #include "CellMigrationDirectionWriter.hpp" // Allows us to track migration direction
-#include "ParabolicGrowingDomainWithCellDeathPdeModifier.hpp" // Modifier to track PDE solutions
-#include "PlateletDerivedGrowthFactorCellwiseSourceParabolicPde.hpp" // Cellwise-source-based PDE to simulate PDGF due to wound healing
 #include "OffLatticeSimulation.hpp" //Simulates the evolution of the population
 #include "SmartPointers.hpp" //Enables macros to save typing
 #include "CellLabel.hpp" // What we use to mark cells along the bottom boundary
 #include "StemCellProliferativeType.hpp" // Epidermal basal stem cell type
 #include "FibroblastCellProliferativeType.hpp" // Dermal cell type
 #include "DifferentiatedCellProliferativeType.hpp" // Differentiated cell type
-#include "PlateletCellProliferativeType.hpp" // Blood platelet cell type
-#include "EnfFibroblastCellMutationState.hpp" // ENF fibroblast mutation state
-#include "EpfFibroblastCellMutationState.hpp" // EPF fibroblast mutation state
 #include "WildTypeCellMutationState.hpp" // Epidermal mutation state
-#include "PlateletCellMutationState.hpp" //Platelet cell mutation state
 #include "BasementMembraneAttachmentTrackingModifier.hpp" // Modifier to track stem cell attachment to the basement membrane
 #include "CollagenAlignmentTrackingModifier.hpp" // Modifier to align fibroblasts with local collagen fibre orientation
 #include "VolumeTrackingModifier.hpp" // Modifier to track cell volume
-#include "PlateletCellKiller.hpp" // Cell killer to remove platelets upon wound healing
-#include "BasementMembraneDistanceBasedCellKiller.hpp" // Cell killer based on distance to the basement membrane
 #include "FakePetscSetup.hpp" //Forbids tests running in parallel
 #include "PetscSetupAndFinalize.hpp"
 
