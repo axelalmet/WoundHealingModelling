@@ -35,6 +35,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "CellMigrationDirectionWriter.hpp"
 #include "NodeBasedCellPopulation.hpp"
+#include "CollagenCellProliferativeType.hpp"
 #include "PlateletCellProliferativeType.hpp"
 #include "UblasVectorInclude.hpp"
 
@@ -54,16 +55,20 @@ c_vector<double, SPACE_DIM> CellMigrationDirectionWriter<ELEMENT_DIM, SPACE_DIM>
     // Define the migration direction unit vector
     c_vector<double, SPACE_DIM> migration_direction = zero_vector<double>(SPACE_DIM);
 
-    // Only non-platelet cells have a migration direction
+    // Only non-platelet and non-collagen cells have a migration direction
     boost::shared_ptr<AbstractCellProperty> p_cell_type = pCell->GetCellProliferativeType(); // Get the cell type
     
-    if (!p_cell_type->IsType<PlateletCellProliferativeType>())
+    if (dynamic_cast<NodeBasedCellPopulation<SPACE_DIM>*>(pCellPopulation))
     {
-        // Get the migration direction
-        double direction = pCell->GetCellData()->GetItem("direction");
-        
-        migration_direction[0] = cos(direction);
-        migration_direction[1] = sin(direction);
+        if ( (!p_cell_type->IsType<PlateletCellProliferativeType>())
+            &&(!p_cell_type->IsType<CollagenCellProliferativeType>()) )
+        {
+            // Get the migration direction
+            double direction = pCell->GetCellData()->GetItem("direction");
+            
+            migration_direction[0] = cos(direction);
+            migration_direction[1] = sin(direction);
+        }
     }
 
     return migration_direction;

@@ -36,6 +36,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "WoundBasedChemotacticForce.hpp"
 #include "NodeBasedCellPopulation.hpp"
 #include "PlateletCellProliferativeType.hpp"
+#include "CollagenCellProliferativeType.hpp"
 #include "RandomNumberGenerator.hpp"
 
 template<unsigned DIM>
@@ -95,13 +96,11 @@ void WoundBasedChemotacticForce<DIM>::AddForceContribution(AbstractCellPopulatio
          ++cell_iter)
     {
 
-        // Should only look at non-platelet cells
-
-
-        // Only apply this migration force to fibroblasts
+        // Should only look at non-platelet cells and non-collagen cells
         boost::shared_ptr<AbstractCellProperty> p_cell_type = cell_iter->GetCellProliferativeType(); // Get the cell type
 
-        if (!p_cell_type->IsType<PlateletCellProliferativeType>())
+        if ( (!p_cell_type->IsType<PlateletCellProliferativeType>())
+            &&(!p_cell_type->IsType<CollagenCellProliferativeType>()) )
         {
             // Get the node index
             unsigned current_index = rCellPopulation.GetLocationIndexUsingCell(*cell_iter);
@@ -140,7 +139,7 @@ void WoundBasedChemotacticForce<DIM>::AddForceContribution(AbstractCellPopulatio
                 if (grad > morphogen_max_grad)
                 {
                     morphogen_max_grad = grad;
-            }
+                }
             }
 
             // Iterate again, now determining which neighbours have a grad equal to max grad.

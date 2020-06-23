@@ -35,6 +35,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "CollagenAlignmentTrackingModifier.hpp"
 #include "FibroblastCellProliferativeType.hpp"
+#include "CollagenCellProliferativeType.hpp"
 #include "NodeBasedCellPopulation.hpp"
 #include "Debug.hpp"
 
@@ -157,7 +158,7 @@ void CollagenAlignmentTrackingModifier<DIM>::UpdateCellData(AbstractCellPopulati
         // Only consider fibroblasts
         boost::shared_ptr<AbstractCellProperty> p_cell_type = cell_iter->GetCellProliferativeType();
 
-        if (p_cell_type->template IsType<FibroblastCellProliferativeType>())
+        if (p_cell_type->template IsType<CollagenCellProliferativeType>())
         {
 
             // Get the collagen amount

@@ -33,8 +33,8 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#ifndef BASEMENTMEMBRANEATTACHMENTTRACKINGMODIFIER_HPP_
-#define BASEMENTMEMBRANEATTACHMENTTRACKINGMODIFIER_HPP_
+#ifndef POLARITYTRACKINGMODIFIER_HPP_
+#define POLARITYTRACKINGMODIFIER_HPP_
 
 #include "ChasteSerialization.hpp"
 #include <boost/serialization/base_object.hpp>
@@ -42,12 +42,12 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AbstractCellBasedSimulationModifier.hpp"
 
 /**
- * A modifier class in which we determine whether or not epidermal stem cells
- * (or differentiated cells) are attached to the basement membrane, which
- * then in turn determines differentiation and proliferative capacity. 
+ * A modifier class in which the polarity of non-ECM-type cells
+ * are updated. Polarity is assumed to align to cell velocity,
+ * which is influenced by various mechanical forces.
  */
 template<unsigned DIM>
-class BasementMembraneAttachmentTrackingModifier : public AbstractCellBasedSimulationModifier<DIM,DIM>
+class PolarityTrackingModifier : public AbstractCellBasedSimulationModifier<DIM,DIM>
 {
     /** Needed for serialization. */
     friend class boost::serialization::access;
@@ -62,38 +62,39 @@ class BasementMembraneAttachmentTrackingModifier : public AbstractCellBasedSimul
     void serialize(Archive & archive, const unsigned int version)
     {
         archive & boost::serialization::base_object<AbstractCellBasedSimulationModifier<DIM,DIM> >(*this);
-        archive & mNeighbourhoodRadius;
+        archive & mReorientationStrength;
     }
 protected:
 
     /*
-     * Reighbourhood radius.
+     *  The remodelling rate of the polarity to the cell velocity.
      */
-    double mNeighbourhoodRadius;
+    double mReorientationStrength;
 
 public:
 
     /**
      * Default constructor.
      */
-    BasementMembraneAttachmentTrackingModifier();
+    PolarityTrackingModifier();
 
     /**
      * Destructor.
      */
-    virtual ~BasementMembraneAttachmentTrackingModifier();
-
-    /**
-     * Get the neighbourhood interaction radius, which we need to determine the number of fibroblast neighbours
-     */
-    double GetNeighbourhoodRadius();
+    virtual ~PolarityTrackingModifier();
 
     /*
-     * Set the neighbourhood interaction radius.
-     * 
-     * @param neighbourhoodRadius the new set neighbourhood radius
+     * Get the rorientation strength parameters
      */
-    void SetNeighbourhoodRadius(double neighbourhoodRadius);
+    double GetReorientationStrength();
+
+
+    /*
+     * Get the rorientation strength parameters
+     * 
+     * @param reorientationStrength the new strength of reorientation
+     */
+    void SetReorientationStrength(double reorientationStrength);
 
     /**
      * Overridden UpdateAtEndOfTimeStep() method.
@@ -135,6 +136,6 @@ public:
 };
 
 #include "SerializationExportWrapper.hpp"
-EXPORT_TEMPLATE_CLASS_SAME_DIMS(BasementMembraneAttachmentTrackingModifier)
+EXPORT_TEMPLATE_CLASS_SAME_DIMS(PolarityTrackingModifier)
 
-#endif /*BASEMENTMEMBRANEATTACHMENTRACKINGMODIFIER_HPP_*/
+#endif /*PolarityTrackingMODIFIER_HPP_*/

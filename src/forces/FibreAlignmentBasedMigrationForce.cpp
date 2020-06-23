@@ -37,6 +37,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "NodeBasedCellPopulation.hpp"
 #include "RandomNumberGenerator.hpp"
 #include "FibroblastCellProliferativeType.hpp"
+#include "CollagenCellProliferativeType.hpp"
 
 template<unsigned DIM>
 FibreAlignmentBasedMigrationForce<DIM>::FibreAlignmentBasedMigrationForce()
@@ -156,9 +157,9 @@ void FibreAlignmentBasedMigrationForce<DIM>::AddForceContribution(AbstractCellPo
                     // Only consider fibroblast neighbours
                     boost::shared_ptr<AbstractCellProperty> p_neighbour_cell_type = neighbour_cell_iter->GetCellProliferativeType(); // Get the cell type
 
-                    // Fibres are defined as spanning from fibroblast neighbours that express 
+                    // Fibres are defined as spanning from collagen neighbours that express 
                     // a positive amount of collagen
-                    if (p_neighbour_cell_type->IsType<FibroblastCellProliferativeType>())
+                    if (p_neighbour_cell_type->IsType<CollagenCellProliferativeType>())
                     {
                         // Get the neighbouring concentration
                         double collagen = neighbour_cell_iter->GetCellData()->GetItem("collagen");

@@ -33,8 +33,8 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#ifndef BASEMENTMEMBRANEATTACHMENTTRACKINGMODIFIER_HPP_
-#define BASEMENTMEMBRANEATTACHMENTTRACKINGMODIFIER_HPP_
+#ifndef COLLAGENFIBRETRACKINGMODIFIER_HPP_
+#define COLLAGENFIBRETRACKINGMODIFIER_HPP_
 
 #include "ChasteSerialization.hpp"
 #include <boost/serialization/base_object.hpp>
@@ -42,12 +42,12 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AbstractCellBasedSimulationModifier.hpp"
 
 /**
- * A modifier class in which we determine whether or not epidermal stem cells
- * (or differentiated cells) are attached to the basement membrane, which
- * then in turn determines differentiation and proliferative capacity. 
+ * A modifier class in which the mean levels of Delta in neighbouring cells
+ * are computed and stored in CellData. To be used in conjunction with Delta
+ * Notch cell cycle models.
  */
 template<unsigned DIM>
-class BasementMembraneAttachmentTrackingModifier : public AbstractCellBasedSimulationModifier<DIM,DIM>
+class CollagenFibreTrackingModifier : public AbstractCellBasedSimulationModifier<DIM,DIM>
 {
     /** Needed for serialization. */
     friend class boost::serialization::access;
@@ -62,38 +62,27 @@ class BasementMembraneAttachmentTrackingModifier : public AbstractCellBasedSimul
     void serialize(Archive & archive, const unsigned int version)
     {
         archive & boost::serialization::base_object<AbstractCellBasedSimulationModifier<DIM,DIM> >(*this);
-        archive & mNeighbourhoodRadius;
     }
+
+    //Output file for data
+    out_stream mpMarkedSpringsFile;
+
 protected:
 
-    /*
-     * Reighbourhood radius.
-     */
-    double mNeighbourhoodRadius;
+    /** An output stream for writing data. */
+    out_stream mpOutStream;
 
 public:
 
     /**
      * Default constructor.
      */
-    BasementMembraneAttachmentTrackingModifier();
+    CollagenFibreTrackingModifier();
 
     /**
      * Destructor.
      */
-    virtual ~BasementMembraneAttachmentTrackingModifier();
-
-    /**
-     * Get the neighbourhood interaction radius, which we need to determine the number of fibroblast neighbours
-     */
-    double GetNeighbourhoodRadius();
-
-    /*
-     * Set the neighbourhood interaction radius.
-     * 
-     * @param neighbourhoodRadius the new set neighbourhood radius
-     */
-    void SetNeighbourhoodRadius(double neighbourhoodRadius);
+    virtual ~CollagenFibreTrackingModifier();
 
     /**
      * Overridden UpdateAtEndOfTimeStep() method.
@@ -103,6 +92,16 @@ public:
      * @param rCellPopulation reference to the cell population
      */
     virtual void UpdateAtEndOfTimeStep(AbstractCellPopulation<DIM,DIM>& rCellPopulation);
+
+
+    /**
+     * Overridden UpdateAtEndOfOutputTimeStep() method.
+     *
+     * Specifies what to do in the simulation at the end of each time step.
+     *
+     * @param rCellPopulation reference to the cell population
+     */
+    virtual void UpdateAtEndOfOutputTimeStep(AbstractCellPopulation<DIM,DIM>& rCellPopulation);
 
     /**
      * Overridden SetupSolve() method.
@@ -135,6 +134,6 @@ public:
 };
 
 #include "SerializationExportWrapper.hpp"
-EXPORT_TEMPLATE_CLASS_SAME_DIMS(BasementMembraneAttachmentTrackingModifier)
+EXPORT_TEMPLATE_CLASS_SAME_DIMS(CollagenFibreTrackingModifier)
 
-#endif /*BASEMENTMEMBRANEATTACHMENTRACKINGMODIFIER_HPP_*/
+#endif /*COLLAGENFibreTRACKINGMODIFIER_HPP_*/

@@ -34,6 +34,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "CellCollagenFibreOrientationWriter.hpp"
+#include "CollagenCellProliferativeType.hpp"
 #include "NodeBasedCellPopulation.hpp"
 #include "UblasVectorInclude.hpp"
 
@@ -50,13 +51,13 @@ template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
 c_vector<double, SPACE_DIM> CellCollagenFibreOrientationWriter<ELEMENT_DIM, SPACE_DIM>::GetVectorCellDataForVtkOutput(CellPtr pCell, AbstractCellPopulation<ELEMENT_DIM, SPACE_DIM>* pCellPopulation)
 {
 
-    // Only define non-zero-length vectors from cells with non-zero amounts of collagen
+    // Only define non-zero-length vectors from collagen cell types
     double collagen = pCell->GetCellData()->GetItem("collagen");
     c_vector<double, SPACE_DIM> collagen_fibre_orientation = zero_vector<double>(SPACE_DIM);
 
     if (dynamic_cast<NodeBasedCellPopulation<SPACE_DIM>*>(pCellPopulation))
     {
-        if (collagen > 0.0) // If there is a non-zero amount of collagen
+        if ( (pCell->GetCellProliferativeType()->IsType<CollagenCellProliferativeType>())&&(collagen > 1e-4) )
         {
             double orientation = pCell->GetCellData()->GetItem("orientation");
             collagen_fibre_orientation[0] = cos(orientation);

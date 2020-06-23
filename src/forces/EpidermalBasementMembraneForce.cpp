@@ -1,7 +1,8 @@
-	#include "EpidermalBasementMembraneForce.hpp"
+#include "EpidermalBasementMembraneForce.hpp"
 #include "NodeBasedCellPopulation.hpp"
 #include "StemCellProliferativeType.hpp"
-#include "FibroblastCellProliferativeType.hpp"
+#include "CollagenCellProliferativeType.hpp"
+#include "CollagenCellProliferativeType.hpp"
 #include "AbstractCellProperty.hpp"
 #include "Debug.hpp"
 #include "Exception.hpp"
@@ -78,7 +79,7 @@ c_vector<double,2> EpidermalBasementMembraneForce::GetEpidermisHeightExtremes(Ab
 	// We will need the width extremes, actually
 	double max_width = epidermalWidthExtremes[0];
 
-	// To account for injury, we will consider the dermal fibroblast positions
+	// To account for injury, we will consider the dermal Collagen positions
 	// instead. The maximum height is found by 
 	for (AbstractCellPopulation<2>::Iterator cell_iter = rCellPopulation.Begin();
 			cell_iter != rCellPopulation.End();
@@ -86,7 +87,7 @@ c_vector<double,2> EpidermalBasementMembraneForce::GetEpidermisHeightExtremes(Ab
 	{
 
 		// Need these to not be labelled cells
-		if ( (cell_iter->GetCellProliferativeType()->IsType<FibroblastCellProliferativeType>()) )
+		if ( (cell_iter->GetCellProliferativeType()->IsType<CollagenCellProliferativeType>()) )
 		{
 			Node<2>* p_node = p_tissue->GetNodeCorrespondingToCell(*cell_iter);
 
@@ -303,16 +304,16 @@ unsigned EpidermalBasementMembraneForce::GetNearestNeighbourAlongCosineApproxima
  * Return the nearest neighbour based on vector projections from the tangent vector
  * at a point along the cosine approximation of the epithelium.
  */
-c_vector<unsigned, 2> EpidermalBasementMembraneForce::GetTwoNearestFibroblastNeighbours(AbstractCellPopulation<2>& rCellPopulation, unsigned epidermalIndex)
+c_vector<unsigned, 2> EpidermalBasementMembraneForce::GetTwoNearestCollagenNeighbours(AbstractCellPopulation<2>& rCellPopulation, unsigned epidermalIndex)
 {
 	// Initialise the vector
-	c_vector<unsigned, 2> closest_fibroblast_indices;
+	c_vector<unsigned, 2> closest_Collagen_indices;
 
 	// Initialise the values of the minimum distances and the corresponding indices (these will be replaced anyway)
-	double min_fibroblast_distance = DBL_MAX;
-	double second_min_fibroblast_distance = min_fibroblast_distance;
-	unsigned closest_fibroblast_index = 0;
-	unsigned second_closest_fibroblast_index = 0;
+	double min_Collagen_distance = DBL_MAX;
+	double second_min_Collagen_distance = min_Collagen_distance;
+	unsigned closest_Collagen_index = 0;
+	unsigned second_closest_Collagen_index = 0;
 
 	// Get the location of the considered Epidermal node
 	c_vector<double, 2> epidermal_location = rCellPopulation.GetNode(epidermalIndex)->rGetLocation();
@@ -339,42 +340,42 @@ c_vector<unsigned, 2> EpidermalBasementMembraneForce::GetTwoNearestFibroblastNei
 			//Get the cell type
 			boost::shared_ptr<AbstractCellProperty> p_type = cell_iter->GetCellProliferativeType();
 
-			// Only consider fibroblasts
-			if(p_type->IsType<FibroblastCellProliferativeType>())
+			// Only consider Collagens
+			if(p_type->IsType<CollagenCellProliferativeType>())
 			{
-				// Get the fibroblast index and location
-				unsigned fibroblast_index = rCellPopulation.GetNode(*elem_iter)->GetIndex(); // Roundabout way of storing the index, as I don't know how to convert the iterator to an unsigned
-				c_vector<double, 2> fibroblast_location = rCellPopulation.GetNode(fibroblast_index)->rGetLocation();
+				// Get the Collagen index and location
+				unsigned Collagen_index = rCellPopulation.GetNode(*elem_iter)->GetIndex(); // Roundabout way of storing the index, as I don't know how to convert the iterator to an unsigned
+				c_vector<double, 2> Collagen_location = rCellPopulation.GetNode(Collagen_index)->rGetLocation();
 
-				c_vector<double, 2> fibroblast_to_node = rCellPopulation.rGetMesh().GetVectorFromAtoB(fibroblast_location, epidermal_location);
+				c_vector<double, 2> Collagen_to_node = rCellPopulation.rGetMesh().GetVectorFromAtoB(Collagen_location, epidermal_location);
 
-				// By the end of this loop, we should end up with the closest fibroblast neighbour
-				if (norm_2(fibroblast_to_node) < min_fibroblast_distance)
+				// By the end of this loop, we should end up with the closest Collagen neighbour
+				if (norm_2(Collagen_to_node) < min_Collagen_distance)
 				{
 					// Update second closest index
-					second_min_fibroblast_distance = min_fibroblast_distance;
-					second_closest_fibroblast_index = closest_fibroblast_index;
+					second_min_Collagen_distance = min_Collagen_distance;
+					second_closest_Collagen_index = closest_Collagen_index;
 
 					// Update closest index
-					min_fibroblast_distance = norm_2(fibroblast_to_node);
-					closest_fibroblast_index = fibroblast_index;
+					min_Collagen_distance = norm_2(Collagen_to_node);
+					closest_Collagen_index = Collagen_index;
 				}
 				// Else if the distance is closer than the second and distinct from the first, update the second index
-				else if ( (fibroblast_index != closest_fibroblast_index)&&(norm_2(fibroblast_to_node) < second_min_fibroblast_distance) )
+				else if ( (Collagen_index != closest_Collagen_index)&&(norm_2(Collagen_to_node) < second_min_Collagen_distance) )
 				{
 					// Update second closest index
-					second_min_fibroblast_distance = norm_2(fibroblast_to_node);
-					second_closest_fibroblast_index = fibroblast_index;
+					second_min_Collagen_distance = norm_2(Collagen_to_node);
+					second_closest_Collagen_index = Collagen_index;
 				}
 			}
 
 		}
 	}
 
-	closest_fibroblast_indices[0] = closest_fibroblast_index;
-	closest_fibroblast_indices[1] = second_closest_fibroblast_index;
+	closest_Collagen_indices[0] = closest_Collagen_index;
+	closest_Collagen_indices[1] = second_closest_Collagen_index;
 
-	return closest_fibroblast_indices;
+	return closest_Collagen_indices;
 }
 
 
@@ -563,39 +564,39 @@ c_vector<double, 2> EpidermalBasementMembraneForce::CalculateForceDueToBasementM
 
 		// Obtain the right neighbour by rotating the vector from the centre node to the left node.
 		// We define the angle via the inner product between the centre-to-left vector and the vector from
-		// the closest fibroblast neighbour to the centre node.
+		// the closest Collagen neighbour to the centre node.
 
 		// Get the centre-to-left vector
 		c_vector<double, 2> centre_to_left = rCellPopulation.rGetMesh().GetVectorFromAtoB(centre_point, left_point);
 		double centre_to_left_norm = norm_2(centre_to_left);
 		centre_to_left /= centre_to_left_norm; // Normalise the vector length
 		
-		// Get the fibroblast-to-centre vector
-		c_vector<unsigned, 2> closest_fibroblast_indices = GetTwoNearestFibroblastNeighbours(rCellPopulation, nodeIndex);
+		// Get the Collagen-to-centre vector
+		c_vector<unsigned, 2> closest_Collagen_indices = GetTwoNearestCollagenNeighbours(rCellPopulation, nodeIndex);
 
-		unsigned closest_fibroblast_index = closest_fibroblast_indices[0];
-		unsigned second_closest_fibroblast_index = closest_fibroblast_indices[1];
+		unsigned closest_Collagen_index = closest_Collagen_indices[0];
+		unsigned second_closest_Collagen_index = closest_Collagen_indices[1];
 
-		c_vector<double, 2> left_fibroblast_point = rCellPopulation.GetNode(closest_fibroblast_index)->rGetLocation();
-		c_vector<double, 2> right_fibroblast_point = rCellPopulation.GetNode(second_closest_fibroblast_index)->rGetLocation();
+		c_vector<double, 2> left_Collagen_point = rCellPopulation.GetNode(closest_Collagen_index)->rGetLocation();
+		c_vector<double, 2> right_Collagen_point = rCellPopulation.GetNode(second_closest_Collagen_index)->rGetLocation();
 
-		c_vector<double, 2> average_fibroblast_point = left_fibroblast_point + 0.5*rCellPopulation.rGetMesh().GetVectorFromAtoB(left_fibroblast_point, right_fibroblast_point);
+		c_vector<double, 2> average_Collagen_point = left_Collagen_point + 0.5*rCellPopulation.rGetMesh().GetVectorFromAtoB(left_Collagen_point, right_Collagen_point);
 
-		c_vector<double, 2> fibroblast_to_centre = rCellPopulation.rGetMesh().GetVectorFromAtoB(average_fibroblast_point, centre_point);
-		fibroblast_to_centre /= norm_2(fibroblast_to_centre); // Normalise the vector length
+		c_vector<double, 2> Collagen_to_centre = rCellPopulation.rGetMesh().GetVectorFromAtoB(average_Collagen_point, centre_point);
+		Collagen_to_centre /= norm_2(Collagen_to_centre); // Normalise the vector length
 
-		// Reflect the fibroblast-to-centre vector so they're pointing in the same quadrant
-		if (inner_prod(fibroblast_to_centre, centre_to_left) < 0.0)
+		// Reflect the Collagen-to-centre vector so they're pointing in the same quadrant
+		if (inner_prod(Collagen_to_centre, centre_to_left) < 0.0)
 		{
-			fibroblast_to_centre *= -1.0;
+			Collagen_to_centre *= -1.0;
 		}
 
 		// We can now define the right point via a clockwise rotation
-		double theta = acos(inner_prod(fibroblast_to_centre, centre_to_left));
+		double theta = acos(inner_prod(Collagen_to_centre, centre_to_left));
 
 		// Rotate the centre point
-		right_point[0] = centre_to_left_norm*(fibroblast_to_centre[0]*cos(theta) + fibroblast_to_centre[1]*sin(theta));
-		right_point[1] = centre_to_left_norm*(fibroblast_to_centre[1]*cos(theta) - fibroblast_to_centre[0]*sin(theta));
+		right_point[0] = centre_to_left_norm*(Collagen_to_centre[0]*cos(theta) + Collagen_to_centre[1]*sin(theta));
+		right_point[1] = centre_to_left_norm*(Collagen_to_centre[1]*cos(theta) - Collagen_to_centre[0]*sin(theta));
 
 		// // Define the right neighbour by reflecting the vector from the considered node to the right neighbour
 		// right_point = centre_point + rCellPopulation.rGetMesh().GetVectorFromAtoB(left_point, centre_point);
@@ -614,39 +615,39 @@ c_vector<double, 2> EpidermalBasementMembraneForce::CalculateForceDueToBasementM
 
 		// Obtain the left neighbour by rotating the vector from the centre node to the left node.
 		// We define the angle via the inner product between the centre-to-right vector and the vector from
-		// the closest fibroblast neighbour to the centre node.
+		// the closest Collagen neighbour to the centre node.
 
 		// Get the centre-to-right vector
 		c_vector<double, 2> centre_to_right = rCellPopulation.rGetMesh().GetVectorFromAtoB(centre_point, right_point);
 		double centre_to_right_norm = norm_2(centre_to_right);
 		centre_to_right /= centre_to_right_norm; // Normalise the vector length
 
-		// Get the fibroblast-to-centre vector
-		c_vector<unsigned, 2> closest_fibroblast_indices = GetTwoNearestFibroblastNeighbours(rCellPopulation, nodeIndex);
+		// Get the Collagen-to-centre vector
+		c_vector<unsigned, 2> closest_Collagen_indices = GetTwoNearestCollagenNeighbours(rCellPopulation, nodeIndex);
 
-		unsigned closest_fibroblast_index = closest_fibroblast_indices[0];
-		unsigned second_closest_fibroblast_index = closest_fibroblast_indices[1];
+		unsigned closest_Collagen_index = closest_Collagen_indices[0];
+		unsigned second_closest_Collagen_index = closest_Collagen_indices[1];
 
-		c_vector<double, 2> left_fibroblast_point = rCellPopulation.GetNode(closest_fibroblast_index)->rGetLocation();
-		c_vector<double, 2> right_fibroblast_point = rCellPopulation.GetNode(second_closest_fibroblast_index)->rGetLocation();
+		c_vector<double, 2> left_Collagen_point = rCellPopulation.GetNode(closest_Collagen_index)->rGetLocation();
+		c_vector<double, 2> right_Collagen_point = rCellPopulation.GetNode(second_closest_Collagen_index)->rGetLocation();
 
-		c_vector<double, 2> average_fibroblast_point = right_fibroblast_point + 0.5*rCellPopulation.rGetMesh().GetVectorFromAtoB(right_fibroblast_point, left_fibroblast_point);
+		c_vector<double, 2> average_Collagen_point = right_Collagen_point + 0.5*rCellPopulation.rGetMesh().GetVectorFromAtoB(right_Collagen_point, left_Collagen_point);
 
-		c_vector<double, 2> fibroblast_to_centre = rCellPopulation.rGetMesh().GetVectorFromAtoB(average_fibroblast_point, centre_point);
-		fibroblast_to_centre /= norm_2(fibroblast_to_centre); // Normalise the vector length
+		c_vector<double, 2> Collagen_to_centre = rCellPopulation.rGetMesh().GetVectorFromAtoB(average_Collagen_point, centre_point);
+		Collagen_to_centre /= norm_2(Collagen_to_centre); // Normalise the vector length
 
-		// Reflect the fibroblast-to-centre vector so they're pointing in the same quadrant
-		if (inner_prod(fibroblast_to_centre, centre_to_right) < 0.0)
+		// Reflect the Collagen-to-centre vector so they're pointing in the same quadrant
+		if (inner_prod(Collagen_to_centre, centre_to_right) < 0.0)
 		{
-			fibroblast_to_centre *= -1.0;
+			Collagen_to_centre *= -1.0;
 		}
 
 		// We can now define the right point via a clockwise rotation
-		double theta = acos(inner_prod(fibroblast_to_centre, centre_to_right));
+		double theta = acos(inner_prod(Collagen_to_centre, centre_to_right));
 
 		// Rotate the centre point
-		left_point[0] = centre_to_right_norm*(fibroblast_to_centre[0]*cos(theta) - fibroblast_to_centre[1]*sin(theta));
-		left_point[1] = centre_to_right_norm*(fibroblast_to_centre[1]*cos(theta) + fibroblast_to_centre[0]*sin(theta));
+		left_point[0] = centre_to_right_norm*(Collagen_to_centre[0]*cos(theta) - Collagen_to_centre[1]*sin(theta));
+		left_point[1] = centre_to_right_norm*(Collagen_to_centre[1]*cos(theta) + Collagen_to_centre[0]*sin(theta));
 
 		// // Define the right neighbour by reflecting the vector from the considered node to the right neighbour
 		// left_point = centre_point + rCellPopulation.rGetMesh().GetVectorFromAtoB(right_point, centre_point);
@@ -655,27 +656,27 @@ c_vector<double, 2> EpidermalBasementMembraneForce::CalculateForceDueToBasementM
 	else // Cell has no neighbours
 	{
 		// Essentially there should be no basement membrane force, which we will obtain by defining left and 
-		// right neighbours by rotating the vector from the cello's closest fibroblast neighbour to the 
+		// right neighbours by rotating the vector from the cello's closest Collagen neighbour to the 
 		// considered cell 90 degrees CCW and CW respectively.
 
-		// Get the fibroblast-to-centre vector
-		c_vector<unsigned, 2> closest_fibroblast_indices = GetTwoNearestFibroblastNeighbours(rCellPopulation, nodeIndex);
+		// Get the Collagen-to-centre vector
+		c_vector<unsigned, 2> closest_Collagen_indices = GetTwoNearestCollagenNeighbours(rCellPopulation, nodeIndex);
 
-		unsigned closest_fibroblast_index = closest_fibroblast_indices[0];
-		unsigned second_closest_fibroblast_index = closest_fibroblast_indices[1];
+		unsigned closest_Collagen_index = closest_Collagen_indices[0];
+		unsigned second_closest_Collagen_index = closest_Collagen_indices[1];
 
-		c_vector<double, 2> left_fibroblast_point = rCellPopulation.GetNode(closest_fibroblast_index)->rGetLocation();
-		c_vector<double, 2> right_fibroblast_point = rCellPopulation.GetNode(second_closest_fibroblast_index)->rGetLocation();
+		c_vector<double, 2> left_Collagen_point = rCellPopulation.GetNode(closest_Collagen_index)->rGetLocation();
+		c_vector<double, 2> right_Collagen_point = rCellPopulation.GetNode(second_closest_Collagen_index)->rGetLocation();
 
-		c_vector<double, 2> average_fibroblast_point = left_fibroblast_point + 0.5*rCellPopulation.rGetMesh().GetVectorFromAtoB(left_fibroblast_point, right_fibroblast_point);
+		c_vector<double, 2> average_Collagen_point = left_Collagen_point + 0.5*rCellPopulation.rGetMesh().GetVectorFromAtoB(left_Collagen_point, right_Collagen_point);
 
-		c_vector<double, 2> fibroblast_to_centre = rCellPopulation.rGetMesh().GetVectorFromAtoB(average_fibroblast_point, centre_point);
-		fibroblast_to_centre /= norm_2(fibroblast_to_centre); // Normalise the vector length
+		c_vector<double, 2> Collagen_to_centre = rCellPopulation.rGetMesh().GetVectorFromAtoB(average_Collagen_point, centre_point);
+		Collagen_to_centre /= norm_2(Collagen_to_centre); // Normalise the vector length
 
 		// Rotate the vector 90 degrees
 		c_vector<double, 2> centre_to_left;
-		centre_to_left[0] = -fibroblast_to_centre[1];
-		centre_to_left[1] = fibroblast_to_centre[0];
+		centre_to_left[0] = -Collagen_to_centre[1];
+		centre_to_left[1] = Collagen_to_centre[0];
 
 		left_point = centre_point + centre_to_left;
 		right_point = centre_point - centre_to_left;

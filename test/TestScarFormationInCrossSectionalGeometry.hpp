@@ -86,7 +86,7 @@ public:
 
         // Construct a periodic mesh
         Cylindrical2dNodesOnlyMesh* p_mesh = new Cylindrical2dNodesOnlyMesh(1.0*cells_across);
-		p_mesh->ConstructNodesWithoutMesh(*p_generating_mesh, 20.0); //Construct mesh
+		p_mesh->ConstructNodesWithoutMesh(*p_generating_mesh, 2.0); //Construct mesh
 
         //Create shared pointers for cell and mutation states
         boost::shared_ptr<AbstractCellProperty> p_diff_type(CellPropertyRegistry::Instance()->Get<DifferentiatedCellProliferativeType>());
@@ -140,9 +140,6 @@ public:
             // Initialise fibroblast direction
             p_cell->GetCellData()->SetItem("direction", fibroblast_direction);
 
-            // Initialise collagen orientation
-            p_cell->GetCellData()->SetItem("orientation", collagen_orientation);
-
             // Set collagen amount
             p_cell->GetCellData()->SetItem("collagen", collagen_amount);
 
@@ -155,7 +152,6 @@ public:
 
         // Add cell writers
         cell_population.AddCellWriter<CellMigrationDirectionWriter>();
-        cell_population.AddCellWriter<CellCollagenFibreOrientationWriter>();
 
         //Get the maximum width so we know where to apply the right BC.
         double min_width = 0.0;

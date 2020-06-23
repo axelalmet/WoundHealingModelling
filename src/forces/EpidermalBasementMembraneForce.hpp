@@ -123,12 +123,12 @@ public :
                                                         double leftOrRight);
 
     /*
-     * Return closest fibroblast index to the considered epidermal index
+     * Return closest Collagen index to the considered epidermal index
      * 
      * @param rCellPopulation the cell population
      * @param epidermalIndex the considered epidermal node index
      */
-    c_vector<unsigned,2> GetTwoNearestFibroblastNeighbours(AbstractCellPopulation<2>& rCellPopulation, unsigned epidermalIndex);
+    c_vector<unsigned,2> GetTwoNearestCollagenNeighbours(AbstractCellPopulation<2>& rCellPopulation, unsigned epidermalIndex);
 
     /* Get method for cut off radius */
     double GetCutOffRadius();

@@ -35,7 +35,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BasementMembraneAttachmentTrackingModifier.hpp"
 #include "DifferentiatedCellProliferativeType.hpp"
-#include "FibroblastCellProliferativeType.hpp"
+#include "CollagenCellProliferativeType.hpp"
 #include "StemCellProliferativeType.hpp"
 #include "NodeBasedCellPopulation.hpp"
 
@@ -106,10 +106,10 @@ void BasementMembraneAttachmentTrackingModifier<DIM>::UpdateCellData(AbstractCel
         // Get the set of neighbouring location indices within a neighbourhood radius
         std::set<unsigned> neighbour_indices = p_cell_population->GetNodesWithinNeighbourhoodRadius(node_index, neighbourhood_radius);
         
-        if (!p_cell_type->template IsType<FibroblastCellProliferativeType>())
+        if (!p_cell_type->template IsType<CollagenCellProliferativeType>())
         {          
             // Initialise number of fibroblast neighbours
-            unsigned num_fibroblast_neighbours = 0;
+            unsigned num_collagen_neighbours = 0;
             
             // Count the number of fibroblast neighbours
             if (!neighbour_indices.empty())
@@ -134,9 +134,9 @@ void BasementMembraneAttachmentTrackingModifier<DIM>::UpdateCellData(AbstractCel
                     boost::shared_ptr<AbstractCellProperty> p_neighbour_cell_type = p_cell->GetCellProliferativeType();
 
                     // If there are ANY fibroblast neighbours, we immediately know that it's attached to the BM and can stop the iterations.
-                    if (p_neighbour_cell_type->template IsType<FibroblastCellProliferativeType>())
+                    if (p_neighbour_cell_type->template IsType<CollagenCellProliferativeType>())
                     {
-                        num_fibroblast_neighbours += 1;
+                        num_collagen_neighbours += 1;
 
                         c_vector<double, 2> fibroblast_location = rCellPopulation.GetNode(*iter)->rGetLocation();
                         double fibroblast_radius = rCellPopulation.GetNode(*iter)->GetRadius();
@@ -159,7 +159,7 @@ void BasementMembraneAttachmentTrackingModifier<DIM>::UpdateCellData(AbstractCel
 
                 }
                 
-                if (num_fibroblast_neighbours > 0)
+                if (num_collagen_neighbours > 0)
                 {
                     // Say that the cell is attached for now, but now check to see if it intersects with another stem cell
                     cell_iter->GetCellData()->SetItem("attachment", 1.0);
@@ -193,7 +193,7 @@ void BasementMembraneAttachmentTrackingModifier<DIM>::UpdateCellData(AbstractCel
             }
 
             // Else the cell has been detached from the basement membrane.
-            if (num_fibroblast_neighbours == 0)
+            if (num_collagen_neighbours == 0)
             {
                 // If this cell has no fibroblast neighbours, store 0.0 for the cell data
                 cell_iter->GetCellData()->SetItem("attachment", 0.0);
