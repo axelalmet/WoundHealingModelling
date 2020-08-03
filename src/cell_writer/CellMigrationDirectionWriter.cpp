@@ -35,8 +35,6 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "CellMigrationDirectionWriter.hpp"
 #include "NodeBasedCellPopulation.hpp"
-#include "CollagenCellProliferativeType.hpp"
-#include "PlateletCellProliferativeType.hpp"
 #include "UblasVectorInclude.hpp"
 
 template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
@@ -55,21 +53,11 @@ c_vector<double, SPACE_DIM> CellMigrationDirectionWriter<ELEMENT_DIM, SPACE_DIM>
     // Define the migration direction unit vector
     c_vector<double, SPACE_DIM> migration_direction = zero_vector<double>(SPACE_DIM);
 
-    // Only non-platelet and non-collagen cells have a migration direction
-    boost::shared_ptr<AbstractCellProperty> p_cell_type = pCell->GetCellProliferativeType(); // Get the cell type
+    // Get the migration direction
+    double direction = pCell->GetCellData()->GetItem("direction");
     
-    if (dynamic_cast<NodeBasedCellPopulation<SPACE_DIM>*>(pCellPopulation))
-    {
-        if ( (!p_cell_type->IsType<PlateletCellProliferativeType>())
-            &&(!p_cell_type->IsType<CollagenCellProliferativeType>()) )
-        {
-            // Get the migration direction
-            double direction = pCell->GetCellData()->GetItem("direction");
-            
-            migration_direction[0] = cos(direction);
-            migration_direction[1] = sin(direction);
-        }
-    }
+    migration_direction[0] = cos(direction);
+    migration_direction[1] = sin(direction);
 
     return migration_direction;
 }
@@ -80,17 +68,24 @@ void CellMigrationDirectionWriter<ELEMENT_DIM, SPACE_DIM>::VisitCell(CellPtr pCe
     unsigned location_index = pCellPopulation->GetLocationIndexUsingCell(pCell);
     unsigned cell_id = pCell->GetCellId();
     c_vector<double, SPACE_DIM> cell_location = pCellPopulation->GetLocationOfCellCentre(pCell);
+    double direction = pCell->GetCellData()->GetItem("direction");
     c_vector<double, SPACE_DIM> migration_direction = GetVectorCellDataForVtkOutput(pCell, pCellPopulation);
+    double ecm_density = pCell->GetCellData()->GetItem("density");
 
     *this->mpOutStream << location_index << " " << cell_id << " ";
     for (unsigned i=0; i<SPACE_DIM; i++)
     {
         *this->mpOutStream << cell_location[i] << " ";
     }
+
+    *this->mpOutStream << direction << " ";
+    
     for (unsigned i=0; i<SPACE_DIM; i++)
     {
         *this->mpOutStream << migration_direction[i] << " ";
     }
+
+    *this->mpOutStream << ecm_density << " ";
 }
 
 // Explicit instantiation

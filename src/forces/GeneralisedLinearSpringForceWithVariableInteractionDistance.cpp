@@ -34,43 +34,40 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "GeneralisedLinearSpringForceWithVariableInteractionDistance.hpp"
-#include "CollagenCellProliferativeType.hpp"
+#include "ExtracellularMatrixCellProliferativeType.hpp"
 #include "FibroblastCellProliferativeType.hpp"
 #include "Debug.hpp"
 
 template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
 GeneralisedLinearSpringForceWithVariableInteractionDistance<ELEMENT_DIM,SPACE_DIM>::GeneralisedLinearSpringForceWithVariableInteractionDistance()
-   : AbstractTwoBodyInteractionForce<ELEMENT_DIM,SPACE_DIM>(),
-     mCellCellSpringStiffness(15.0),        // denoted by mu in Meineke et al, 2001 (doi:10.1046/j.0960-7722.2001.00216.x)
+   : GeneralisedLinearSpringForce<ELEMENT_DIM,SPACE_DIM>(),
+     mSpringStiffness(15.0),        // denoted by mu in Meineke et al, 2001 (doi:10.1046/j.0960-7722.2001.00216.x)
      mMeinekeDivisionRestingSpringLength(0.5),
      mMeinekeSpringGrowthDuration(1.0),
-     mCellEcmStiffnessMultiplicationFactor(1.0)
+     mApplyCellToEcmForce(false),
+     mApplyForceOnMarkedSprings(false)
 {
     if (SPACE_DIM == 1)
     {
-        mCellCellSpringStiffness = 30.0;
+        mSpringStiffness = 30.0;
     }
 }
 
 template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
-double GeneralisedLinearSpringForceWithVariableInteractionDistance<ELEMENT_DIM,SPACE_DIM>::VariableSpringConstantMultiplicationFactor(unsigned nodeAGlobalIndex,
-                                                                                     unsigned nodeBGlobalIndex,
-                                                                                     AbstractCellPopulation<ELEMENT_DIM,SPACE_DIM>& rCellPopulation,
-                                                                                     bool isCloserThanRestLength)
+double GeneralisedLinearSpringForceWithVariableInteractionDistance<ELEMENT_DIM,SPACE_DIM>::GetSpringConstantMultiplicationFactor(unsigned nodeAColour,
+                                                                                     unsigned nodeBColour)
 {
-    double stiffness_multiplier = 1.0;
+    /* 
+     * As a first step, we just take the average of the two stiffness factors,
+     * because it will reduce to the correct stiffness when the cell types are the same. 
+     */
+    double stiffness_factor_A = mStiffnessMultiplicationFactors[nodeAColour]; 
+    double stiffness_factor_B = mStiffnessMultiplicationFactors[nodeBColour];
 
-    // Get the celll types
-    boost::shared_ptr<AbstractCellProperty> p_cell_type_A = rCellPopulation.GetCellUsingLocationIndex(nodeAGlobalIndex)->GetCellProliferativeType();
-    boost::shared_ptr<AbstractCellProperty> p_cell_type_B = rCellPopulation.GetCellUsingLocationIndex(nodeBGlobalIndex)->GetCellProliferativeType();
+    double stiffness_mulltiplier = 0.5 * (stiffness_factor_A + stiffness_factor_B);
 
-    if ( ( (!p_cell_type_A->IsType<CollagenCellProliferativeType>())&&(p_cell_type_B->IsType<CollagenCellProliferativeType>()) )
-        || ( (p_cell_type_A->IsType<CollagenCellProliferativeType>())&&(!p_cell_type_B->IsType<CollagenCellProliferativeType>()) ) )
-    {
-        stiffness_multiplier = mCellEcmStiffnessMultiplicationFactor;
-    }
-    
-    return stiffness_multiplier;
+    return stiffness_mulltiplier; 
+
 }
 
 template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
@@ -83,194 +80,7 @@ c_vector<double, SPACE_DIM> GeneralisedLinearSpringForceWithVariableInteractionD
                                                                                     unsigned nodeBGlobalIndex,
                                                                                     AbstractCellPopulation<ELEMENT_DIM,SPACE_DIM>& rCellPopulation)
 {
-    // We should only ever calculate the force between two distinct nodes
-    assert(nodeAGlobalIndex != nodeBGlobalIndex);
-
-    // Initialise force vector
-    c_vector<double, SPACE_DIM> temp = zero_vector<double>(SPACE_DIM);
-
-    // Get the cell types
-    CellPtr p_cell_A = rCellPopulation.GetCellUsingLocationIndex(nodeAGlobalIndex);
-    CellPtr p_cell_B = rCellPopulation.GetCellUsingLocationIndex(nodeBGlobalIndex);
-
-    // Get the cell types
-    boost::shared_ptr<AbstractCellProperty> p_cell_type_A = p_cell_A->GetCellProliferativeType();
-    boost::shared_ptr<AbstractCellProperty> p_cell_type_B = p_cell_B->GetCellProliferativeType();
-
-        // For non-collagen-collagen connections, we cna apply the standard law.
-        // Collagen-collagen connections may actually overlap each other. 
-    if ( (!p_cell_type_A->IsType<CollagenCellProliferativeType>())||(!p_cell_type_B->IsType<CollagenCellProliferativeType>()) )
-    {
-        Node<SPACE_DIM>* p_node_a = rCellPopulation.GetNode(nodeAGlobalIndex);
-        Node<SPACE_DIM>* p_node_b = rCellPopulation.GetNode(nodeBGlobalIndex);
-
-        // Get the node locations
-        const c_vector<double, SPACE_DIM>& r_node_a_location = p_node_a->rGetLocation();
-        const c_vector<double, SPACE_DIM>& r_node_b_location = p_node_b->rGetLocation();
-
-        // Get the unit vector parallel to the line joining the two nodes
-        c_vector<double, SPACE_DIM> unit_difference;
-        /*
-        * We use the mesh method GetVectorFromAtoB() to compute the direction of the
-        * unit vector along the line joining the two nodes, rather than simply subtract
-        * their positions, because this method can be overloaded (e.g. to enforce a
-        * periodic boundary in Cylindrical2dMesh).
-        */
-        unit_difference = rCellPopulation.rGetMesh().GetVectorFromAtoB(r_node_a_location, r_node_b_location);
-
-        // Calculate the distance between the two nodes
-        double distance_between_nodes = norm_2(unit_difference);
-        assert(distance_between_nodes > 0);
-        assert(!std::isnan(distance_between_nodes));
-
-        unit_difference /= distance_between_nodes;
-
-        /*
-        * Calculate the rest length of the spring connecting the two nodes using the new method
-        * that accounts for the differences in shapes between epidermal and fibroblats
-        */
-        double rest_length_final = CalculateRestLength(nodeAGlobalIndex, nodeBGlobalIndex, unit_difference, rCellPopulation);
-
-        /*
-        * If mUseCutOffLength has been set, then there is zero force between
-        * two nodes located a distance apart greater than mMechanicsCutOffLength in AbstractTwoBodyInteractionForce.
-        */
-        if (this->mUseCutOffLength)
-        {
-            // We alter the cut-off length like this as l_ij could potentially be very smal, so we could 
-            // end up with cases where attraction occurs when it shouldn't.
-            if (distance_between_nodes >= rest_length_final*(this->GetCutOffLength())) 
-            {
-                temp = zero_vector<double>(SPACE_DIM); // c_vector<double,SPACE_DIM>() is not guaranteed to be fresh memory
-            }
-            else
-            {
-                double rest_length = rest_length_final;
-
-                double ageA = p_cell_A->GetAge();
-                double ageB = p_cell_B->GetAge();
-
-                assert(!std::isnan(ageA));
-                assert(!std::isnan(ageB));
-
-                // Static-cast for later uses
-                AbstractCentreBasedCellPopulation<ELEMENT_DIM,SPACE_DIM>* p_static_cast_cell_population = static_cast<AbstractCentreBasedCellPopulation<ELEMENT_DIM,SPACE_DIM>*>(&rCellPopulation);
-                std::pair<CellPtr,CellPtr> cell_pair = p_static_cast_cell_population->CreateCellPair(p_cell_A, p_cell_B);
-
-                /*
-                * If the cells are both newly divided, then the rest length of the spring
-                * connecting them grows linearly with time, until 1 hour after division.
-                */
-                if (ageA < mMeinekeSpringGrowthDuration && ageB < mMeinekeSpringGrowthDuration)
-                {
-
-                    // if (p_static_cast_cell_population->IsMarkedSpring(cell_pair))
-                    // {
-                    // Spring rest length increases from a small value to the normal rest length over 1 hour
-                    double lambda = mMeinekeDivisionRestingSpringLength;
-                    rest_length = lambda + (rest_length_final - lambda) * ageA/mMeinekeSpringGrowthDuration;
-                    // }
-                    if (ageA + SimulationTime::Instance()->GetTimeStep() >= mMeinekeSpringGrowthDuration)
-                    {
-                        // This spring is about to go out of scope
-                        // p_static_cast_cell_population->UnmarkSpring(cell_pair);
-                    }
-                }
-
-                /*
-                * For apoptosis, progressively reduce the radius of the cell
-                */
-                double a_rest_length = rest_length*0.5;
-                double b_rest_length = a_rest_length;
-
-                /*
-                * If either of the cells has begun apoptosis, then the length of the spring
-                * connecting them decreases linearly with time.
-                */
-                if (p_cell_A->HasApoptosisBegun())
-                {
-                    double time_until_death_a = p_cell_A->GetTimeUntilDeath();
-                    a_rest_length = a_rest_length * time_until_death_a / p_cell_A->GetApoptosisTime();
-                }
-                if (p_cell_B->HasApoptosisBegun())
-                {
-                    double time_until_death_b = p_cell_B->GetTimeUntilDeath();
-                    b_rest_length = b_rest_length * time_until_death_b / p_cell_B->GetApoptosisTime();
-                }
-
-                rest_length = a_rest_length + b_rest_length;
-
-                        //assert(rest_length <= 1.0+1e-12); ///\todo #1884 Magic number: would "<= 1.0" do?
-
-                // Although in this class the 'spring constant' is a constant parameter, in
-                // subclasses it can depend on properties of each of the cells
-                double overlap = distance_between_nodes - rest_length;
-                bool is_closer_than_rest_length = (overlap <= 0);
-                double multiplication_factor = VariableSpringConstantMultiplicationFactor(nodeAGlobalIndex, nodeBGlobalIndex, rCellPopulation, is_closer_than_rest_length);
-                double spring_stiffness = mCellCellSpringStiffness;
-
-                // If it's a cell-collagen connection, we only apply a force to the cell. 
-                if ( (p_cell_type_A->IsType<CollagenCellProliferativeType>())||(p_cell_type_B->IsType<CollagenCellProliferativeType>()) )
-                {
-                    c_vector<double, SPACE_DIM> force_on_cell;
-                    // A reasonably stable simple force law
-                    if (bool(dynamic_cast<MeshBasedCellPopulation<ELEMENT_DIM,SPACE_DIM>*>(&rCellPopulation)))
-                    {
-                        force_on_cell = multiplication_factor * spring_stiffness * unit_difference * overlap;
-                    }
-                    else
-                    {
-                        if (is_closer_than_rest_length) //overlap is negative
-                        {
-                            //log(x+1) is undefined for x<=-1
-                            assert(overlap > -rest_length_final);
-                            force_on_cell = multiplication_factor*spring_stiffness * unit_difference * rest_length_final* log(1.0 + overlap/rest_length_final);
-                        }
-                        else
-                        {
-                            double alpha = 5.0;
-                            force_on_cell = multiplication_factor*spring_stiffness * unit_difference * overlap * exp(-alpha * overlap/rest_length_final);
-                        }
-                    }
-
-                    // Apply the force to the cell
-                    if (!p_cell_type_A->IsType<CollagenCellProliferativeType>()) // Apply the force to node A only
-                    {
-                        p_node_a->AddAppliedForceContribution(force_on_cell);
-                    }
-                    else if (!p_cell_type_B->IsType<CollagenCellProliferativeType>()) // Apply the force to node B only.
-                    {
-                        p_node_b->AddAppliedForceContribution(force_on_cell); 
-                    }
-                }
-                else
-                {
-                    if (bool(dynamic_cast<MeshBasedCellPopulation<ELEMENT_DIM,SPACE_DIM>*>(&rCellPopulation)))
-                    {
-                        return multiplication_factor * spring_stiffness * unit_difference * overlap;
-                    }
-                    else
-                    {
-                        // A reasonably stable simple force law
-                        if (is_closer_than_rest_length) //overlap is negative
-                        {
-                            //log(x+1) is undefined for x<=-1
-                            assert(overlap > -rest_length_final);
-                            temp = multiplication_factor*spring_stiffness * unit_difference * rest_length_final* log(1.0 + overlap/rest_length_final);
-                        }
-                        else
-                        {
-                            double alpha = 5.0;
-                            temp = multiplication_factor*spring_stiffness * unit_difference * overlap * exp(-alpha * overlap/rest_length_final);
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
-    return temp;
-
+    return zero_vector<double>(SPACE_DIM); // Just return zero here.
 }
 
 template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
@@ -318,13 +128,9 @@ double GeneralisedLinearSpringForceWithVariableInteractionDistance<ELEMENT_DIM,S
     direction_B[0] = cos(phi_B);
     direction_B[1] = sin(phi_B);
 
-    // Calculate the shape anisotropy factor, chi
-    double chi = ( (sigma_A_pa*sigma_A_pa - sigma_A_pe*sigma_A_pe)*(sigma_B_pa*sigma_B_pa - sigma_B_pe*sigma_B_pe) )
-                /( (sigma_A_pa*sigma_A_pa + sigma_B_pe*sigma_B_pe) * (sigma_A_pe*sigma_A_pe + sigma_B_pa*sigma_B_pa) );
-
     // Calculate the numerator and denominator separately
     double sigma_numerator = (sigma_A_pa*sigma_A_pa + sigma_B_pe*sigma_B_pe) * (sigma_A_pe*sigma_A_pe + sigma_B_pa*sigma_B_pa)
-                                * (1.0 - chi * inner_prod(direction_A, direction_B) * inner_prod(direction_A, direction_B) );
+                                - (sigma_A_pa*sigma_A_pa - sigma_A_pe*sigma_A_pe) * (sigma_B_pa*sigma_B_pa - sigma_B_pe*sigma_B_pe) * inner_prod(direction_A, direction_B) * inner_prod(direction_A, direction_B);
     double sigma_denominator = sigma_A_pa*sigma_A_pa + sigma_B_pa*sigma_B_pa
                                 - (sigma_A_pa*sigma_A_pa - sigma_A_pe*sigma_A_pe)*inner_prod(unitDifference, direction_A)*inner_prod(unitDifference, direction_A)
                                 - (sigma_B_pa*sigma_B_pa - sigma_B_pe*sigma_B_pe)*inner_prod(unitDifference, direction_B)*inner_prod(unitDifference, direction_B);
@@ -336,9 +142,29 @@ double GeneralisedLinearSpringForceWithVariableInteractionDistance<ELEMENT_DIM,S
 }
 
 template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
-double GeneralisedLinearSpringForceWithVariableInteractionDistance<ELEMENT_DIM,SPACE_DIM>::GetCellCellSpringStiffness()
+bool GeneralisedLinearSpringForceWithVariableInteractionDistance<ELEMENT_DIM,SPACE_DIM>::DoesCellIntersectWithFibre(CellPtr pCell, c_vector<double, SPACE_DIM> cellLocation,
+                                    CellPtr pMatrixCell, c_vector<double, SPACE_DIM> matrixCellLocation)
 {
-    return mCellCellSpringStiffness;
+    double cell_direction = pCell->GetCellData()->GetItem("direction"); // Get the cell direction
+    double fibre_direction = pMatrixCell->GetCellData()->GetItem("direction"); // Get the fibre directions
+
+    // If the angles are the same, then they'll only intersect if they span from the same point
+    if (cell_direction == fibre_direction)
+    {
+        return ( (cellLocation[0] == matrixCellLocation[0])&&(cellLocation[1] == matrixCellLocation[1]) );
+    }
+    else
+    {
+        return (fabs(((cellLocation[1] - matrixCellLocation[1])*cos(fibre_direction) 
+                - (cellLocation[0] - matrixCellLocation[0])*sin(fibre_direction))
+                    /sin(fibre_direction - cell_direction)) <= this->GetCutOffLength());
+    }
+}
+
+template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
+double GeneralisedLinearSpringForceWithVariableInteractionDistance<ELEMENT_DIM,SPACE_DIM>::GetSpringStiffness()
+{
+    return mSpringStiffness;
 }
 
 template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
@@ -354,16 +180,10 @@ double GeneralisedLinearSpringForceWithVariableInteractionDistance<ELEMENT_DIM,S
 }
 
 template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
-double GeneralisedLinearSpringForceWithVariableInteractionDistance<ELEMENT_DIM,SPACE_DIM>::GetCellEcmStiffnessMultiplicationFactor()
-{
-    return mCellEcmStiffnessMultiplicationFactor;
-}
-
-template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
-void GeneralisedLinearSpringForceWithVariableInteractionDistance<ELEMENT_DIM,SPACE_DIM>::SetCellCellSpringStiffness(double springStiffness)
+void GeneralisedLinearSpringForceWithVariableInteractionDistance<ELEMENT_DIM,SPACE_DIM>::SetSpringStiffness(double springStiffness)
 {
     assert(springStiffness > 0.0);
-    mCellCellSpringStiffness = springStiffness;
+    mSpringStiffness = springStiffness;
 }
 
 template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
@@ -384,21 +204,256 @@ void GeneralisedLinearSpringForceWithVariableInteractionDistance<ELEMENT_DIM,SPA
 }
 
 template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
-void GeneralisedLinearSpringForceWithVariableInteractionDistance<ELEMENT_DIM,SPACE_DIM>::SetCellEcmStiffnessMultiplicationFactor(double cellEcmStiffnessMultiplicationFactor)
+void GeneralisedLinearSpringForceWithVariableInteractionDistance<ELEMENT_DIM,SPACE_DIM>::SetStiffnessMultiplicationFactors(std::map<unsigned, double> stiffnessMultiplicationFactors)
 {
-    mCellEcmStiffnessMultiplicationFactor = cellEcmStiffnessMultiplicationFactor;
+    mStiffnessMultiplicationFactors = stiffnessMultiplicationFactors;
 }
 
 template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
-void GeneralisedLinearSpringForceWithVariableInteractionDistance<ELEMENT_DIM,SPACE_DIM>::OutputForceParameters(out_stream& rParamsFile)
+void GeneralisedLinearSpringForceWithVariableInteractionDistance<ELEMENT_DIM,SPACE_DIM>::ApplyCellToEcmForce(bool applyCellToEcmForce)
 {
-    *rParamsFile << "\t\t\t<CellCellSpringStiffness>" << mCellCellSpringStiffness << "</CellCellSpringStiffness>\n";
-    *rParamsFile << "\t\t\t<CellEcmStiffnessMultiplicationFactor>" << mCellEcmStiffnessMultiplicationFactor << "</CellEcmStiffnessMultiplicationFactor>\n";
-    *rParamsFile << "\t\t\t<MeinekeDivisionRestingSpringLength>" << mMeinekeDivisionRestingSpringLength << "</MeinekeDivisionRestingSpringLength>\n";
-    *rParamsFile << "\t\t\t<MeinekeSpringGrowthDuration>" << mMeinekeSpringGrowthDuration << "</MeinekeSpringGrowthDuration>\n";
+    mApplyCellToEcmForce = applyCellToEcmForce;
+}
 
-    // Call method on direct parent class
-    AbstractTwoBodyInteractionForce<ELEMENT_DIM,SPACE_DIM>::OutputForceParameters(rParamsFile);
+template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
+void GeneralisedLinearSpringForceWithVariableInteractionDistance<ELEMENT_DIM,SPACE_DIM>::ApplyForceOnMarkedSprings(bool applyForceOnMarkedSprings)
+{
+    mApplyForceOnMarkedSprings = applyForceOnMarkedSprings;
+}
+
+template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
+void GeneralisedLinearSpringForceWithVariableInteractionDistance<ELEMENT_DIM,SPACE_DIM>::AddForceContribution(AbstractCellPopulation<ELEMENT_DIM,SPACE_DIM>& rCellPopulation)
+{
+
+    AbstractCentreBasedCellPopulation<ELEMENT_DIM,SPACE_DIM>* p_static_cast_cell_population = static_cast<AbstractCentreBasedCellPopulation<ELEMENT_DIM,SPACE_DIM>*>(&rCellPopulation);
+
+    std::vector< std::pair<Node<SPACE_DIM>*, Node<SPACE_DIM>* > >& r_node_pairs = p_static_cast_cell_population->rGetNodePairs();
+
+    // We iterate over the node pairs because it's easier to control which cell pairs undergo both adhesion or repulsion 
+    // or only one of adhesion/repulsion
+    for (typename std::vector< std::pair<Node<SPACE_DIM>*, Node<SPACE_DIM>* > >::iterator iter = r_node_pairs.begin();
+        iter != r_node_pairs.end();
+        iter++)
+    {
+        // Get the node pair and their indices
+        std::pair<Node<SPACE_DIM>*, Node<SPACE_DIM>* > pair = *iter;
+
+        unsigned node_a_index = pair.first->GetIndex();
+        unsigned node_b_index = pair.second->GetIndex();
+        
+        // Get the cell types
+        CellPtr p_cell_A = rCellPopulation.GetCellUsingLocationIndex(node_a_index);
+        CellPtr p_cell_B = rCellPopulation.GetCellUsingLocationIndex(node_b_index);
+
+        // Get the cell types
+        boost::shared_ptr<AbstractCellProliferativeType> p_cell_type_A = p_cell_A->GetCellProliferativeType();
+        boost::shared_ptr<AbstractCellProliferativeType> p_cell_type_B = p_cell_B->GetCellProliferativeType();
+
+        // Get the colours associated with cell types
+        unsigned node_a_colour = p_cell_type_A->GetColour();
+        unsigned node_b_colour = p_cell_type_B->GetColour();
+
+        // Get the node locations
+        const c_vector<double, SPACE_DIM>& r_node_a_location = pair.first->rGetLocation();
+        const c_vector<double, SPACE_DIM>& r_node_b_location = pair.second->rGetLocation();
+
+        // Get the unit vector parallel to the line joining the two nodes
+        c_vector<double, SPACE_DIM> unit_difference;
+
+        c_vector<double, SPACE_DIM> force; // Initialise the force vector
+
+        /*
+        * We use the mesh method GetVectorFromAtoB() to compute the direction of the
+        * unit vector along the line joining the two nodes, rather than simply subtract
+        * their positions, because this method can be overloaded (e.g. to enforce a
+        * periodic boundary in Cylindrical2dMesh).
+        */
+        unit_difference = rCellPopulation.rGetMesh().GetVectorFromAtoB(r_node_a_location, r_node_b_location);
+
+        // Calculate the distance between the two nodes
+        double distance_between_nodes = norm_2(unit_difference);
+
+        // Really only do anything if we're at non-zero and non-NAN distance
+        if ( (distance_between_nodes > 0)&&(!std::isnan(distance_between_nodes)) )
+        {
+            unit_difference /= distance_between_nodes; // Normalilse the unit difference
+
+            /*
+            * Calculate the rest length of the spring connecting the two nodes using the new method
+            * that accounts for the differences in shapes between epidermal and fibroblats
+            */
+            double rest_length_final = CalculateRestLength(node_a_index, node_b_index, unit_difference, rCellPopulation);
+
+            /*
+            * If mUseCutOffLength has been set, then there is zero force between
+            * two nodes located a distance apart greater than mMechanicsCutOffLength in AbstractTwoBodyInteractionForce.
+            */
+            if (this->mUseCutOffLength)
+            {
+                if (distance_between_nodes <= (rest_length_final) * (this->GetCutOffLength()) )
+                {
+                    double rest_length = rest_length_final;
+
+                    double ageA = p_cell_A->GetAge();
+                    double ageB = p_cell_B->GetAge();
+
+                    assert(!std::isnan(ageA));
+                    assert(!std::isnan(ageB));
+
+                    /*
+                    * If the cells are both newly divided, then the rest length of the spring
+                    * connecting them grows linearly with time, until 1 hour after division.
+                    */
+                    if (ageA < mMeinekeSpringGrowthDuration && ageB < mMeinekeSpringGrowthDuration)
+                    {
+
+                        // if (p_static_cast_cell_population->IsMarkedSpring(cell_pair))
+                        // {
+                        // Spring rest length increases from a small value to the normal rest length over 1 hour
+                        double lambda = mMeinekeDivisionRestingSpringLength;
+                        rest_length = lambda + (rest_length_final - lambda) * ageA/mMeinekeSpringGrowthDuration;
+                        // }
+                        if (ageA + SimulationTime::Instance()->GetTimeStep() >= mMeinekeSpringGrowthDuration)
+                        {
+                            // This spring is about to go out of scope
+                            // p_static_cast_cell_population->UnmarkSpring(cell_pair);
+                        }
+                    }
+
+                    /*
+                    * For apoptosis, progressively reduce the radius of the cell
+                    */
+                    double a_rest_length = rest_length*0.5;
+                    double b_rest_length = a_rest_length;
+
+                    /*
+                    * If either of the cells has begun apoptosis, then the length of the spring
+                    * connecting them decreases linearly with time.
+                    */
+                    if (p_cell_A->HasApoptosisBegun())
+                    {
+                        double time_until_death_a = p_cell_A->GetTimeUntilDeath();
+                        a_rest_length = a_rest_length * time_until_death_a / p_cell_A->GetApoptosisTime();
+                    }
+                    if (p_cell_B->HasApoptosisBegun())
+                    {
+                        double time_until_death_b = p_cell_B->GetTimeUntilDeath();
+                        b_rest_length = b_rest_length * time_until_death_b / p_cell_B->GetApoptosisTime();
+                    }
+
+                    rest_length = a_rest_length + b_rest_length;
+
+                            //assert(rest_length <= 1.0+1e-12); ///\todo #1884 Magic number: would "<= 1.0" do?
+
+                    // Although in this class the 'spring constant' is a constant parameter, in
+                    // subclasses it can depend on properties of each of the cells
+                    double overlap = distance_between_nodes - rest_length;
+                    bool is_closer_than_rest_length = (overlap <= 0);
+                    double multiplication_factor = GetSpringConstantMultiplicationFactor(node_a_colour, node_b_colour);
+                    double spring_stiffness = mSpringStiffness;
+
+                    if (bool(dynamic_cast<MeshBasedCellPopulation<ELEMENT_DIM,SPACE_DIM>*>(&rCellPopulation)))
+                    {
+                        force = multiplication_factor * spring_stiffness * unit_difference * overlap;
+                    }
+                    else
+                    {
+                        // A reasonably stable simple force law
+                        if (is_closer_than_rest_length) //overlap is negative
+                        {
+                            //log(x+1) is undefined for x<=-1
+                            assert(overlap > -rest_length_final);
+                            force = multiplication_factor*spring_stiffness * unit_difference * rest_length_final* log(1.0 + overlap/rest_length_final);
+                        }
+                        else
+                        {
+                            double alpha = 5.0;
+                            force = multiplication_factor*spring_stiffness * unit_difference * overlap * exp(-alpha * overlap/rest_length_final);
+                        }
+                    }
+
+                    // We now check for the cell types, because there's a bunch of conditions that we want to implement
+                    if ( (p_cell_type_A->template IsType<FibroblastCellProliferativeType>()) 
+                        &&(p_cell_type_B->template IsType<FibroblastCellProliferativeType>()) )
+                    {
+                        if (is_closer_than_rest_length) // Only apply a repulsive force
+                        {
+                            // Add the force contribution to each node
+                            pair.first->AddAppliedForceContribution(force);
+                            pair.second->AddAppliedForceContribution(-1.0*force);
+                        }
+                    }
+                    else if ( (p_cell_type_A->template IsType<ExtracellularMatrixCellProliferativeType>()) // Fibrin fibres should only be under tension, if there's a force.
+                        &&(p_cell_type_B->template IsType<ExtracellularMatrixCellProliferativeType>()) )
+                    {
+                        if (!is_closer_than_rest_length) // Only apply if the spring is under tension
+                        {                   // If we only apply on marked springs, we should check
+                            if (mApplyForceOnMarkedSprings)
+                            {
+                                std::pair<CellPtr, CellPtr> cell_pair = p_static_cast_cell_population->CreateCellPair(p_cell_A, p_cell_B);
+
+                                if (p_static_cast_cell_population->IsMarkedSpring(cell_pair))
+                                {
+                                    pair.first->AddAppliedForceContribution(force);
+                                    pair.second->AddAppliedForceContribution(-1.0*force);
+                                }
+                            }
+                            else
+                            {
+                                pair.first->AddAppliedForceContribution(force);
+                                pair.second->AddAppliedForceContribution(-1.0*force);
+                            }
+                        }
+                    }
+                    else if ( (p_cell_type_A->template IsType<ExtracellularMatrixCellProliferativeType>()) // Cell-ecm (fibrin) forces need to be considered
+                        &&(!p_cell_type_B->template IsType<ExtracellularMatrixCellProliferativeType>()) )
+                    {
+                        // Only consider cells under tension and intersecting fibres/cells
+                        if ((!is_closer_than_rest_length)
+                                &&(DoesCellIntersectWithFibre(p_cell_B, r_node_b_location, p_cell_A, r_node_a_location)) )
+                        {
+                            if (mApplyCellToEcmForce)
+                            {
+                                    pair.first->AddAppliedForceContribution(force);
+                                    pair.second->AddAppliedForceContribution(-1.0*force);
+                            }
+                            else // Else only apply the force on the cell
+                            {
+                                // Cell B is the non-fibrin cell
+                                pair.second->AddAppliedForceContribution(-1.0*force);
+                            }
+                        }
+                    }
+                    else if ( (!p_cell_type_A->template IsType<ExtracellularMatrixCellProliferativeType>()) 
+                        &&(p_cell_type_B->template IsType<ExtracellularMatrixCellProliferativeType>()) )
+                    {
+                        // Only consider cells under tension and intersecting fibres/cells
+                        if ((!is_closer_than_rest_length)
+                            &&(DoesCellIntersectWithFibre(p_cell_A, r_node_a_location, p_cell_B, r_node_b_location)) )
+                        {
+                            if (mApplyCellToEcmForce)
+                            {
+                                    pair.first->AddAppliedForceContribution(force);
+                                    pair.second->AddAppliedForceContribution(-1.0*force);
+                            }
+                            else // Else only apply the force on the cell
+                            {
+                                // Cell A is the non-fibrin cell
+                                pair.first->AddAppliedForceContribution(force); 
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Add the force contribution to each node
+                        pair.first->AddAppliedForceContribution(force);
+                        pair.second->AddAppliedForceContribution(-1.0*force);
+                    }
+
+                }
+            }
+        }
+    }
 }
 
 // Explicit instantiation

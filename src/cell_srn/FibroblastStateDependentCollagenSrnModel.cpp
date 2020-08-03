@@ -34,11 +34,9 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "FibroblastStateDependentCollagenSrnModel.hpp"
-#include "EpfFibroblastCellMutationState.hpp"
 
 FibroblastStateDependentCollagenSrnModel::FibroblastStateDependentCollagenSrnModel(boost::shared_ptr<AbstractCellCycleModelOdeSolver> pOdeSolver)
     : AbstractOdeSrnModel(1, pOdeSolver),
-    mMorphogenThreshold(DOUBLE_UNSET),
     mProductionRate(DOUBLE_UNSET),
     mDegradationRate(DOUBLE_UNSET)
 
@@ -84,20 +82,20 @@ void FibroblastStateDependentCollagenSrnModel::SimulateToCurrentTime()
 {
     // Custom behaviour: run the ODE simulation as needed
     // Custom behaviour
-    UpdateEpfStatus();
+    UpdateActivatedStatus();
 
     AbstractOdeSrnModel::SimulateToCurrentTime();
 
     // Set the collagen cell data.
     double collagen = GetCollagen();
 
-    mpCell->GetCellData()->SetItem("collagen", collagen);
+    mpCell->GetCellData()->SetItem("density", collagen);
 }
 
 void FibroblastStateDependentCollagenSrnModel::Initialise()
 {
     // Set the collagen level to the initiated collagen level
-    double collagen = mpCell->GetCellData()->GetItem("collagen");
+    double collagen = mpCell->GetCellData()->GetItem("density");
 
     std::vector<double> initial_condition;
     initial_condition.push_back(collagen);
@@ -110,32 +108,15 @@ void FibroblastStateDependentCollagenSrnModel::Initialise()
 
 }
 
-void FibroblastStateDependentCollagenSrnModel::UpdateEpfStatus()
+void FibroblastStateDependentCollagenSrnModel::UpdateActivatedStatus()
 {
     assert(mpOdeSystem != nullptr);
     assert(mpCell != nullptr);
 
-    double is_epf = 0.0;
-
-    // If the cell is an EPF fibroblast, we set the "epf" parameter to 1.0
-    boost::shared_ptr<AbstractCellProperty> p_mutation_state = mpCell->GetMutationState();
-
-    if(p_mutation_state->IsType<EpfFibroblastCellMutationState>())
-    {
-        is_epf = 1.0;
-    }
-
-    mpOdeSystem->SetParameter("epf", is_epf);
-
-    // We only activate collagen production if the fibroblasts have been exposed to a morphogen
-    double morphogen = mpCell->GetCellData()->GetItem("morphogen");
-
-    double is_activated = 0.0; // Initialise activation status
-
-    if (morphogen > mMorphogenThreshold)
-    {
-        is_activated = 1.0;
-    }
+    // Activation is determined in PolarityTrackingModifier.
+    // Essentially, if the ECM cell has interacted with an activated
+    // fibroblast, we activate ECM production.
+    double is_activated = mpCell->GetCellData()->GetItem("activated");
 
     mpOdeSystem->SetParameter("activated", is_activated);
 
@@ -160,18 +141,13 @@ void FibroblastStateDependentCollagenSrnModel::SetCollagen()
 {
     assert(mpOdeSystem != nullptr);
 
-    double collagen = mpCell->GetCellData()->GetItem("collagen");
+    double collagen = mpCell->GetCellData()->GetItem("density");
     
     std::vector<double> state_variables;
     state_variables.push_back(collagen);
 
     mpOdeSystem->SetStateVariables(state_variables);
 
-}
-
-double FibroblastStateDependentCollagenSrnModel::GetMorphogenThreshold()
-{
-    return mMorphogenThreshold;
 }
 
 double FibroblastStateDependentCollagenSrnModel::GetProductionRate()
@@ -184,9 +160,8 @@ double FibroblastStateDependentCollagenSrnModel::GetDegradationRate()
     return mDegradationRate;
 }
 
-void FibroblastStateDependentCollagenSrnModel::SetOdeParameters(double morphogenThreshold, double productionRate, double degradationRate)
+void FibroblastStateDependentCollagenSrnModel::SetOdeParameters(double productionRate, double degradationRate)
 {
-    mMorphogenThreshold = morphogenThreshold;
     mProductionRate = productionRate;
     mDegradationRate = degradationRate;
 }

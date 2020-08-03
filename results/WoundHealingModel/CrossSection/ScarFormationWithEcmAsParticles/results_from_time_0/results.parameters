@@ -1,0 +1,67 @@
+<Chaste>
+
+	<OffLatticeSimulation-2-2>
+		<Dt>0.005</Dt>
+		<EndTime>1</EndTime>
+		<SamplingTimestepMultiple>200</SamplingTimestepMultiple>
+		<OutputDivisionLocations>0</OutputDivisionLocations>
+		<OutputCellVelocities>0</OutputCellVelocities>
+	</OffLatticeSimulation-2-2>
+
+	<NodeBasedCellPopulationWithParticles-2>
+		<MechanicsCutOffLength>2</MechanicsCutOffLength>
+		<UseVariableRadii>0</UseVariableRadii>
+		<MeinekeDivisionSeparation>0.1</MeinekeDivisionSeparation>
+		<CentreBasedDivisionRule>
+			<RandomDirectionCentreBasedDivisionRule-2-2>
+			</RandomDirectionCentreBasedDivisionRule-2-2>
+		</CentreBasedDivisionRule>
+		<DampingConstantNormal>1</DampingConstantNormal>
+		<DampingConstantMutant>1</DampingConstantMutant>
+		<OutputResultsForChasteVisualizer>1</OutputResultsForChasteVisualizer>
+	</NodeBasedCellPopulationWithParticles-2>
+
+	<CellCycleModels>
+		<NoCellCycleModel>
+		</NoCellCycleModel>
+	</CellCycleModels>
+
+	<SrnModels>
+		<FibroblastStateDependentCollagenSrnModel>
+		</FibroblastStateDependentCollagenSrnModel>
+	</SrnModels>
+
+	<CellKillers>
+	</CellKillers>
+
+	<SimulationModifiers>
+		<ModifiedVolumeTrackingModifier-2>
+		</ModifiedVolumeTrackingModifier-2>
+		<ModifiedParabolicBoxDomainPdeModifier-2>
+		</ModifiedParabolicBoxDomainPdeModifier-2>
+	</SimulationModifiers>
+
+	<Forces>
+		<WoundBasedChemotacticForce-2>
+			<ChemotacticStrength>2</ChemotacticStrength> 
+			<NeighbourhoodRadius>1.5</NeighbourhoodRadius> 
+		</WoundBasedChemotacticForce-2>
+	</Forces>
+
+	<CellPopulationBoundaryConditions>
+		<FixedRegionPlaneBoundaryCondition-2>
+			<PointOnPlane>0,0.25</PointOnPlane>
+			<NormalToPlane>0,-1</NormalToPlane>
+			<UseJiggledNodesOnPlane>0</UseJiggledNodesOnPlane>
+		</FixedRegionPlaneBoundaryCondition-2>
+	</CellPopulationBoundaryConditions>
+
+	<NumericalMethod>
+		<ForwardEulerNumericalMethod-2-2>
+			<UseAdaptiveTimestep>0</UseAdaptiveTimestep> 
+			<UseUpdateNodeLocation>0</UseUpdateNodeLocation> 
+			<GhostNodeForcesEnabled>0</GhostNodeForcesEnabled> 
+		</ForwardEulerNumericalMethod-2-2>
+	</NumericalMethod>
+
+</Chaste>

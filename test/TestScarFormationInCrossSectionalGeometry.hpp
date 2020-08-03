@@ -143,6 +143,9 @@ public:
             // Set collagen amount
             p_cell->GetCellData()->SetItem("collagen", collagen_amount);
 
+            // Set collagen amount
+            p_cell->GetCellData()->SetItem("orientation", collagen_orientation);
+
             cells.push_back(p_cell);
         }
 
@@ -339,36 +342,36 @@ public:
         MAKE_PTR_ARGS(FixedRegionPlaneBoundaryCondition<2>, p_bc_bottom, (&cell_population, point, normal));
         simulator.AddCellPopulationBoundaryCondition(p_bc_bottom);
 
-        // // Define the reaction-diffusion PDE, using the value's from YangYang's paper.
-        // MAKE_PTR_ARGS(PlateletDerivedGrowthFactorAveragedSourceParabolicPde<2>, p_pde, (cell_population, 1.0, 0.36, 1.0, 0.1));
-        // // MAKE_PTR_ARGS(AveragedSourceParabolicPde<2>, p_pde, (cell_population, 1.0, 0.36, 0.0));
-        // MAKE_PTR_ARGS(ConstBoundaryCondition<2>, p_bc, (0.0));
+        // Define the reaction-diffusion PDE, using the value's from YangYang's paper.
+        MAKE_PTR_ARGS(PlateletDerivedGrowthFactorAveragedSourceParabolicPde<2>, p_pde, (cell_population, 1.0, 0.36, 1.0, 0.1));
+        // MAKE_PTR_ARGS(AveragedSourceParabolicPde<2>, p_pde, (cell_population, 1.0, 0.36, 0.0));
+        MAKE_PTR_ARGS(ConstBoundaryCondition<2>, p_bc, (0.0));
 
-        // // Define the box domain for the PDE
-        // ChastePoint<2> lower(-1.0, -1.0);
-        // ChastePoint<2> upper(21.0, 15.0);
-        // MAKE_PTR_ARGS(ChasteCuboid<2>, p_box_domain, (lower, upper));
+        // Define the box domain for the PDE
+        ChastePoint<2> lower(-1.0, -1.0);
+        ChastePoint<2> upper(21.0, 15.0);
+        MAKE_PTR_ARGS(ChasteCuboid<2>, p_box_domain, (lower, upper));
 
-        // // Create a PDE Modifier object using this pde and bcs object
-        // // MAKE_PTR_ARGS(ParabolicGrowingDomainWithCellDeathPdeModifier<2>, p_pde_modifier, (p_pde, p_bc, true));
-        // MAKE_PTR_ARGS(ModifiedParabolicBoxDomainPdeModifier<2>, p_pde_modifier, (p_pde, p_bc, true, p_box_domain));
-        // p_pde_modifier->SetDependentVariableName("morphogen");
-        // simulator.AddSimulationModifier(p_pde_modifier);
+        // Create a PDE Modifier object using this pde and bcs object
+        // MAKE_PTR_ARGS(ParabolicGrowingDomainWithCellDeathPdeModifier<2>, p_pde_modifier, (p_pde, p_bc, true));
+        MAKE_PTR_ARGS(ModifiedParabolicBoxDomainPdeModifier<2>, p_pde_modifier, (p_pde, p_bc, true, p_box_domain));
+        p_pde_modifier->SetDependentVariableName("morphogen");
+        simulator.AddSimulationModifier(p_pde_modifier);
+
+        // // // Create a modifier to track which cells are attached to the basement membrane.
+        // MAKE_PTR(VolumeTrackingModifier<2>, p_volume_tracking_modifier);
+		// simulator.AddSimulationModifier(p_volume_tracking_modifier);
+
+        // // Create a modifier to realign cell orientations with collagen.
+        // MAKE_PTR(CollagenAlignmentTrackingModifier<2>, p_collagen_alignment_modifier);
+        // p_collagen_alignment_modifier->SetNeighbourhoodRadius(radius_of_interaction);
+        // p_collagen_alignment_modifier->SetReorientationStrength(1.0*M_DT);
+		// simulator.AddSimulationModifier(p_collagen_alignment_modifier);
 
         // // Create a modifier to track which cells are attached to the basement membrane.
-        MAKE_PTR(VolumeTrackingModifier<2>, p_volume_tracking_modifier);
-		simulator.AddSimulationModifier(p_volume_tracking_modifier);
-
-        // Create a modifier to realign cell orientations with collagen.
-        MAKE_PTR(CollagenAlignmentTrackingModifier<2>, p_collagen_alignment_modifier);
-        p_collagen_alignment_modifier->SetNeighbourhoodRadius(radius_of_interaction);
-        p_collagen_alignment_modifier->SetReorientationStrength(1.0*M_DT);
-		simulator.AddSimulationModifier(p_collagen_alignment_modifier);
-
-        // Create a modifier to track which cells are attached to the basement membrane.
-        MAKE_PTR(BasementMembraneAttachmentTrackingModifier<2>, p_bm_attachment_tracking_modifier);
-        p_bm_attachment_tracking_modifier->SetNeighbourhoodRadius(radius_of_interaction);
-        simulator.AddSimulationModifier(p_bm_attachment_tracking_modifier);
+        // MAKE_PTR(BasementMembraneAttachmentTrackingModifier<2>, p_bm_attachment_tracking_modifier);
+        // p_bm_attachment_tracking_modifier->SetNeighbourhoodRadius(radius_of_interaction);
+        // simulator.AddSimulationModifier(p_bm_attachment_tracking_modifier);
 
         // // Add a cell killer to remove differentiated cells that are too far from the basement membrane.
         // MAKE_PTR_ARGS(BasementMembraneDistanceBasedCellKiller, p_cell_killer, (&cell_population, max_height - max_fibroblast_height + 0.1, max_height));

@@ -437,27 +437,27 @@ bool FixedRegionPlaneBoundaryCondition<DIM>::VerifyBoundaryCondition()
 {
 	bool condition_satisfied = true;
 
-	if (DIM == 1)
-	{
-		EXCEPTION("PlaneBoundaryCondition is not implemented in 1D");
-	}
-	else
-	{
-		for (typename AbstractCellPopulation<DIM>::Iterator cell_iter = this->mpCellPopulation->Begin();
-				cell_iter != this->mpCellPopulation->End();
-				++cell_iter)
-		{
-			c_vector<double, DIM> cell_location = this->mpCellPopulation->GetLocationOfCellCentre(*cell_iter);
+	// if (DIM == 1)
+	// {
+	// 	EXCEPTION("PlaneBoundaryCondition is not implemented in 1D");
+	// }
+	// else
+	// {
+	// 	for (typename AbstractCellPopulation<DIM>::Iterator cell_iter = this->mpCellPopulation->Begin();
+	// 			cell_iter != this->mpCellPopulation->End();
+	// 			++cell_iter)
+	// 	{
+	// 		c_vector<double, DIM> cell_location = this->mpCellPopulation->GetLocationOfCellCentre(*cell_iter);
 
-			c_vector<double, DIM> plane_to_cell_location = this->mpCellPopulation->rGetMesh().GetVectorFromAtoB(mPointOnPlane, cell_location);
+	// 		c_vector<double, DIM> plane_to_cell_location = this->mpCellPopulation->rGetMesh().GetVectorFromAtoB(mPointOnPlane, cell_location);
 
-            if ( (inner_prod(plane_to_cell_location, mNormalToPlane) > 0.0)&&(!cell_iter->template HasCellProperty<CellLabel>()) )
-            {
-                condition_satisfied = false;
-                break;
-            }
-		}
-	}
+    //         if ( (inner_prod(plane_to_cell_location, mNormalToPlane) > 0.0)&&(!cell_iter->template HasCellProperty<CellLabel>()) )
+    //         {
+    //             condition_satisfied = false;
+    //             break;
+    //         }
+	// 	}
+	// }
 
 	return condition_satisfied;
 }

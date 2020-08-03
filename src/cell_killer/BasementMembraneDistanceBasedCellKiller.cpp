@@ -36,7 +36,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "NodeBasedCellPopulation.hpp"
 #include "DifferentiatedCellProliferativeType.hpp"
 #include "FibroblastCellProliferativeType.hpp"
-#include "PlateletCellProliferativeType.hpp"
+#include "BloodCellProliferativeType.hpp"
 
 BasementMembraneDistanceBasedCellKiller::BasementMembraneDistanceBasedCellKiller(AbstractCellPopulation<2>* pCellPopulation, double radius, double maxHeight)
     : AbstractCellKiller<2>(pCellPopulation),

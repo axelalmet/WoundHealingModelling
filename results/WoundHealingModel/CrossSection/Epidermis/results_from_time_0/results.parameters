@@ -2,14 +2,14 @@
 
 	<OffLatticeSimulation-2-2>
 		<Dt>0.005</Dt>
-		<EndTime>1</EndTime>
-		<SamplingTimestepMultiple>20</SamplingTimestepMultiple>
+		<EndTime>20</EndTime>
+		<SamplingTimestepMultiple>200</SamplingTimestepMultiple>
 		<OutputDivisionLocations>0</OutputDivisionLocations>
 		<OutputCellVelocities>0</OutputCellVelocities>
 	</OffLatticeSimulation-2-2>
 
 	<NodeBasedCellPopulation-2>
-		<MechanicsCutOffLength>5</MechanicsCutOffLength>
+		<MechanicsCutOffLength>2</MechanicsCutOffLength>
 		<UseVariableRadii>0</UseVariableRadii>
 		<MeinekeDivisionSeparation>0.1</MeinekeDivisionSeparation>
 		<CentreBasedDivisionRule>
@@ -22,6 +22,15 @@
 	</NodeBasedCellPopulation-2>
 
 	<CellCycleModels>
+		<BasementMembraneBasedContactInhibitionCellCycleModel>
+			<QuiescentVolumeFraction>0.9</QuiescentVolumeFraction>
+			<EquilibriumVolume>0.785398</EquilibriumVolume>
+			<StemCellG1Duration>14</StemCellG1Duration>
+			<TransitCellG1Duration>2</TransitCellG1Duration>
+			<SDuration>5</SDuration>
+			<G2Duration>4</G2Duration>
+			<MDuration>1</MDuration>
+		</BasementMembraneBasedContactInhibitionCellCycleModel>
 		<NoCellCycleModel>
 		</NoCellCycleModel>
 	</CellCycleModels>
@@ -32,22 +41,38 @@
 	</SrnModels>
 
 	<CellKillers>
+		<SloughingCellKiller-2>
+			<SloughLength>10.0263</SloughLength>
+			<SloughSides>0</SloughSides>
+			<SloughWidth>10</SloughWidth>
+		</SloughingCellKiller-2>
 	</CellKillers>
 
 	<SimulationModifiers>
+		<VolumeTrackingModifier-2>
+		</VolumeTrackingModifier-2>
+		<BasementMembraneAttachmentTrackingModifier-2>
+		</BasementMembraneAttachmentTrackingModifier-2>
 		<CollagenFibreTrackingModifier-2>
 		</CollagenFibreTrackingModifier-2>
+		<PolarityTrackingModifier-2>
+		</PolarityTrackingModifier-2>
 	</SimulationModifiers>
 
 	<Forces>
 		<GeneralisedLinearSpringForceWithVariableInteractionDistance-2-2>
-			<CellCellSpringStiffness>30</CellCellSpringStiffness>
-			<CellEcmStiffnessMultiplicationFactor>0</CellEcmStiffnessMultiplicationFactor>
+			<CellCellSpringStiffness>15</CellCellSpringStiffness>
+			<EpidermalEcmStiffnessMultiplicationFactor>1</EpidermalEcmStiffnessMultiplicationFactor>
+			<FibroblastEcmStiffnessMultiplicationFactor>0</FibroblastEcmStiffnessMultiplicationFactor>
 			<MeinekeDivisionRestingSpringLength>0.5</MeinekeDivisionRestingSpringLength>
 			<MeinekeSpringGrowthDuration>1</MeinekeSpringGrowthDuration>
 			<UseCutOffLength>1</UseCutOffLength>
 			<CutOffLength>1.5</CutOffLength>
 		</GeneralisedLinearSpringForceWithVariableInteractionDistance-2-2>
+		<EpidermalBasementMembraneForce>
+			<BasementMembraneParameter>5</BasementMembraneParameter> 
+			<TargetCurvature>0</TargetCurvature> 
+		</EpidermalBasementMembraneForce>
 	</Forces>
 
 	<CellPopulationBoundaryConditions>

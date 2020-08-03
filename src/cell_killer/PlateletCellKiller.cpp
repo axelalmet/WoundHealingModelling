@@ -12,15 +12,16 @@
 #include "AbstractCellKiller.hpp"
 #include "AbstractCellProperty.hpp"
 #include "NodeBasedCellPopulation.hpp"
-#include "PlateletCellProliferativeType.hpp"
+#include "BloodCellProliferativeType.hpp"
 #include "FibroblastCellProliferativeType.hpp"
 #include "SimulationTime.hpp"
+#include "RandomNumberGenerator.hpp"
 
 PlateletCellKiller::PlateletCellKiller(AbstractCellPopulation<2>* pCellPopulation)
     : AbstractCellKiller<2>(pCellPopulation),
     mCellsRemovedByFibroblasts(0),
     mCutOffRadius(1.5),
-    mGrowthFactorThreshold(0.5),
+    mMeanDeathTime(1.0),
 	mVolumeThreshold(0.5*0.25*M_PI)
 {
     // Sets up output file
@@ -29,15 +30,15 @@ PlateletCellKiller::PlateletCellKiller(AbstractCellPopulation<2>* pCellPopulatio
 }
 
 //Method to get mGrowthFactorThreshold
-double PlateletCellKiller::GetGrowthFactorThreshold()
+double PlateletCellKiller::GetMeanDeathTime()
 {
-	return mGrowthFactorThreshold;
+	return mMeanDeathTime;
 }
 
 //Method to set mGrowthFactorThreshold
-void PlateletCellKiller::SetGrowthFactorThreshold(double growthFactorThreshold)
+void PlateletCellKiller::SetMeanDeathTime(double meanDeathTime)
 {
-	mGrowthFactorThreshold = growthFactorThreshold;
+	mMeanDeathTime = meanDeathTime;
 }
 
 //Method to get mVolumeThreshold
@@ -96,19 +97,17 @@ bool PlateletCellKiller::ShouldCellBeRemoved(unsigned nodeIndex)
 {
 	bool should_cell_be_removed = false;	// Initialising
 
-    double growth_factor_threshold = GetGrowthFactorThreshold(); // Get the growth factor threshold
+    double mean_death_time = GetMeanDeathTime(); // Get the growth factor threshold
 	
 	double volume_threshold = GetVolumeThreshold();
 
 	CellPtr p_cell = this->mpCellPopulation->GetCellUsingLocationIndex(nodeIndex);
 	double current_volume = p_cell->GetCellData()->GetItem("volume"); // Get the cell's volume.
-
-	// if (dynamic_cast<NodeBasedCellPopulation<2>*>(this->mpCellPopulation))
-	// {
-	// NodeBasedCellPopulation<2>* p_tissue = static_cast<NodeBasedCellPopulation<2>*> (this->mpCellPopulation);
+	double death_time = p_cell->GetCellData()->GetItem("activation time"); // Get the activation time
+	double current_time =  SimulationTime::Instance()->GetTime(); // Get the current simulation time
 
 	// Only consider platelet cells
-	if (p_cell->GetCellProliferativeType()->IsType<PlateletCellProliferativeType>() )
+	if (p_cell->GetCellProliferativeType()->IsType<BloodCellProliferativeType>() )
 	{
 		std::set<unsigned> neighbours = GetNeighbouringNodeIndices(nodeIndex);
 
@@ -122,20 +121,23 @@ bool PlateletCellKiller::ShouldCellBeRemoved(unsigned nodeIndex)
 			{
 				// We kill if the fibroblast is sufficiently activated during the wounding, i.e. it has been exposed to a sufficient 
 				// amount of growth factor.
-				double growth_factor_level = this->mpCellPopulation->GetCellUsingLocationIndex(*neighbour_iter)->GetCellData()->GetItem("morphogen");
+				double activation_status = this->mpCellPopulation->GetCellUsingLocationIndex(*neighbour_iter)->GetCellData()->GetItem("activated");
 				
-				if ( (growth_factor_level > growth_factor_threshold)&&(current_volume < volume_threshold) )
+				if ( (activation_status == 1.0)&&(current_volume < volume_threshold)&&(death_time == 0.0) )
 				{
-					should_cell_be_removed = true;
+					double random_uniform_number = RandomNumberGenerator::Instance()->ranf();
+					double death_time = current_time - mean_death_time * log(random_uniform_number);
+
+					// Set the death time
+					p_cell->GetCellData()->SetItem("activation time", death_time);
+
 					break;
 				}
 			}
 		}
 
 		// Also check if the platelet should be killed via natural cell death, so to speak
-		double time_of_death = p_cell->GetCellData()->GetItem("death");
-		double current_time = SimulationTime::Instance()->GetTime();
-		if (current_time > time_of_death)
+		if ((death_time > 0.0)&&(current_time > death_time))
 		{
 			should_cell_be_removed = true;
 		}
@@ -170,13 +172,16 @@ std::vector<c_vector<unsigned,2> > PlateletCellKiller::RemoveByFibroblasts()
 
 		// Examine each epithelial node to see if it should be removed by Platelet and then if it
 		// should be removed by compression-driven apoptosis
-		if (cell_iter->GetCellProliferativeType()->IsType<PlateletCellProliferativeType>())
+		if (cell_iter->GetCellProliferativeType()->IsType<BloodCellProliferativeType>())
 		{
 			// Determining whether to remove this cell by fibroblasts
 
-			if(this->ShouldCellBeRemoved(node_index))
+			if (this->mpCellPopulation->IsCellAttachedToLocationIndex(node_index))
 			{
-				individual_node_information[1] = 1;
+				if(this->ShouldCellBeRemoved(node_index))
+				{
+					individual_node_information[1] = 1;
+				}
 			}
 		}
 
@@ -215,10 +220,11 @@ void PlateletCellKiller::CheckAndLabelCellsForApoptosisOrDeath()
 			// Get cell associated to this node
 			CellPtr p_cell = this->mpCellPopulation->GetCellUsingLocationIndex(cells_to_remove[i][0]);
 
-			if (!p_cell->HasApoptosisBegun())
-			{
-				p_cell->StartApoptosis();
-			}
+			// if (!p_cell->HasApoptosisBegun())
+			// {
+				// p_cell->StartApoptosis();
+			p_cell->Kill();
+			// }
 		}
 	}
 
@@ -284,7 +290,7 @@ void PlateletCellKiller::OutputCellKillerParameters(out_stream& rParamsFile)
 {
     *rParamsFile << "\t\t\t<CellsRemovedByFibroblasts>" << mCellsRemovedByFibroblasts << "</CellsRemovedByFibroblasts> \n";
     *rParamsFile << "\t\t\t<CutOffRadius>" << mCutOffRadius << "</CutOffRadius> \n";
-    *rParamsFile << "\t\t\t<GrowthFactorThreshold>" << mGrowthFactorThreshold << "</GrowthFactorThreshold> \n";
+    *rParamsFile << "\t\t\t<MeanDeathTime>" << mMeanDeathTime << "</MeanDeathTime> \n";
 	*rParamsFile << "\t\t\t<VolumeThreshold>" << mVolumeThreshold << "</VolumeThreshold \n";
 
     // Call direct parent class

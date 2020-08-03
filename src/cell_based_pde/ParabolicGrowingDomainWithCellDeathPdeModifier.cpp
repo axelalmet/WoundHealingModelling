@@ -36,7 +36,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParabolicGrowingDomainWithCellDeathPdeModifier.hpp"
 #include "CellBasedParabolicPdeSolver.hpp"
 #include "AveragedSourceParabolicPde.hpp"
-#include "PlateletCellProliferativeType.hpp"
+#include "BloodCellProliferativeType.hpp"
 #include "Debug.hpp"
 
 template<unsigned DIM>

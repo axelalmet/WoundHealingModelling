@@ -35,7 +35,10 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "PlateletDerivedGrowthFactorAveragedSourceParabolicPde.hpp"
 #include "ApoptoticCellProperty.hpp"
-#include "PlateletCellProliferativeType.hpp"
+#include "BloodCellProliferativeType.hpp"
+#include "ExtracellularMatrixCellProliferativeType.hpp"
+#include "PlateletCellMutationState.hpp"
+#include "Debug.hpp"
 
 template<unsigned DIM>
 PlateletDerivedGrowthFactorAveragedSourceParabolicPde<DIM>::PlateletDerivedGrowthFactorAveragedSourceParabolicPde(AbstractCellPopulation<DIM,DIM>& rCellPopulation,
@@ -87,10 +90,13 @@ void PlateletDerivedGrowthFactorAveragedSourceParabolicPde<DIM>::SetupSourceTerm
         // Update element map if cell has moved
         bool cell_is_apoptotic = cell_iter->template HasCellProperty<ApoptoticCellProperty>();
 
+        
         if (!cell_is_apoptotic)
-        {
-            // Only consider platelet cells
-            if (cell_iter->GetCellProliferativeType()->template IsType<PlateletCellProliferativeType>())
+        {            
+            boost::shared_ptr<AbstractCellProliferativeType> p_cell_type = cell_iter->GetCellProliferativeType();
+
+            // Only consider platelet or fibrin cells
+            if (p_cell_type->IsType<BloodCellProliferativeType>())
             {
                 mCellDensityOnCoarseElements[elem_index] += 1.0;
             }
@@ -108,7 +114,7 @@ void PlateletDerivedGrowthFactorAveragedSourceParabolicPde<DIM>::SetupSourceTerm
 }
 
 template<unsigned DIM>
-double PlateletDerivedGrowthFactorAveragedSourceParabolicPde<DIM>::ComputeDuDtCoefficientFunction(const ChastePoint<DIM>& )
+double PlateletDerivedGrowthFactorAveragedSourceParabolicPde<DIM>::ComputeDuDtCoefficientFunction(const ChastePoint<DIM>& rX)
 {
     return mDuDtCoefficient;
 }

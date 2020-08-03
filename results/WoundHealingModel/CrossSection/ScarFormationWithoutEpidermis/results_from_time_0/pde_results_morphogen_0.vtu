@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<VTKFile type="UnstructuredGrid" version="0.1" byte_order="LittleEndian" header_type="UInt32" compressor="vtkZLibDataCompressor">
+  <UnstructuredGrid>
+    <Piece NumberOfPoints="154"                  NumberOfCells="260"                 >
+      <PointData>
+        <DataArray type="Float64" Name="morphogen" format="appended" RangeMin="0.1"                  RangeMax="0.1"                  offset="0"                   />
+      </PointData>
+      <CellData>
+      </CellData>
+      <Points>
+        <DataArray type="Float64" Name="Vertex positions" NumberOfComponents="3" format="appended" RangeMin="0"                    RangeMax="15"                   offset="56"                  />
+      </Points>
+      <Cells>
+        <DataArray type="Int64" Name="connectivity" format="appended" RangeMin=""                     RangeMax=""                     offset="528"                 />
+        <DataArray type="Int64" Name="offsets" format="appended" RangeMin=""                     RangeMax=""                     offset="1588"                />
+        <DataArray type="UInt8" Name="types" format="appended" RangeMin=""                     RangeMax=""                     offset="2208"                />
+      </Cells>
+    </Piece>
+  </UnstructuredGrid>
+  <AppendedData encoding="base64">
+   _AQAAAACAAADQBAAAGAAAAA==eJybNRMEdtrPGqVH6VF6lB7iNACU0b4lAQAAAACAAABwDgAATwEAAA==eJx11jFqBSEUBdBfWlpYWFiIiLiLuPNsKUsIKRyI43nNwOEOAxcd/Xz+5uf78+95zuk/X8ivuwd4hCd4hhd4hTd4hw/4hKtHze7zNevOAR7hCZ7hBV7hDd7hAz7hz/pET6c/6/PMr7sHeIQneIYXeIU3eIcP+IQ/63N97nP48/6ZX3cP8AhP8Awv8Apv8A4f8AnffWpfnr77fOXX3QM8whM8wwu8whu8wwd8wnef+p+dvvt85dfdAzzCEzzDC7zCG7zDB3zCd586B07ffb7y6+4BHuEJnuEFXuEN3uEDPuG7T52fp+8+X/l19wCP8ATP8AKv8Abv8AGf8N2n7h2n7z5f+XX3AI/wBM/wAq/wBu/wAZ/w3afua6fvPl/5dfcAj/AEz/ACr/AG7/ABn/DdZzv8/P6T/0J+3T3AIzzBM7zAK7zBO3zA58t/AeMglqc=AQAAAACAAABgGAAACAMAAA==eJx10lsTDgQYReFKZyUhpISQQ0iSEkIiJMckyTGEpCQJkSTHUCrl37rZ+6Jn5ntv1qxZs+/eYQ/8/54JH8TtD4XDcff2Z8MhuP3hcATu3j4yfAS3PxqOwt3bnwsfw+2Ph6Nx9/Yx4RO4/clwLO7e/nw4FLc/FY7D3dtfCJ/G218M+yfj8fZhA/pL4XDc3j+ZgLu3TwxH4Pb+ySTcvf3lcBRu759Mxt3bp4SjcXv/ZCru3v5KOBa390+m4e7t08NxuL1/NQN3PzPsX70ajsft/ZNZuHv77HACbp8YzsHd218LJ+H2/slc3L399XAybu+fzMPd298Ip+L2/sl83L39zXAabu+fLMDd298KZ+Dtb4f9k4V4+8wB/Z1wFm7vnyzC3dsXh3Nwe/9kCe7e/m44F7f3T5bi7u3Lwnm4vX+yHHdvfy+cj9v7Jytw9/b3wwW4vX+1Ene/KuxffRAuxO39k9W4e/uacBFu75+sxd3bPwyX4Pb+yTrcvf2jcCluXxaux93bN4TLcXv/ZCPu3r4pXIHb+yebcff2LeFKvP3jsH+yFW9fNaB/Eq7G7f2Tbbh7+6fhWtzeP9mOu7d/Fq7D7f2THbh7++fhetzeP9mJu7fvCjfi9v7Jbty9fU+4Gbf3r/bi7veF/asvwq24vX+yH3dvPxBuw+39k4O4e/uX4Xbc3j85hLu3Hw534Pb+yRHcvf2rcCdu758cxd3bvw534/Y94THcvf2bcC/e/m3YPzmOt+8b0L8L9+P2/skJ3L39+/Agbu+fnMTd238ID+H2/skp3L39x/AIbu+fnMbd28+ER3F7/+Qs7t7+U3gMt/evzuHuz4f9q5/D47i9f3IBd2//JTyB2/snF3H39l/Dk7i9f3IJd2//LTyF2/snl3H39ivhadzeP7mKu7dfC8/i9v7Jddy9/UZ4Dm//Peyf3MTbzw/ot8ILuL1/cht3b/8jvIjb+yd/4u7td8JLuL1/8hfu3v53eBm390/+wd3b74ZXcXv/5F/cvf2/8Dpu71/dw93fB3g96Rc=AQAAAACAAAAgCAAAvwEAAA==eJwtxVOAEAYAANDurtquLmzZWrZtu4XlZdu2uezaquVaxlYt27Ztmx/33s8LChMqvIMd4ij+2TEc2/Gc0En8i1M6jdM7k7M6h3M7nwu6iIu7lMu6gn91VVd3Ldd1fTdyU7dwa7dzR3dxd/dyXw/wYA/zSI/xOE/0FE/3LP/peV7gxV7mf7za67zR/3mrt3uX9/qAD/uYT/qMz/uSr/qGb/ueH/qJn/uV3/qDP/ubAwNCD+cfHdGR/ZOjO5bjOoETO5lTOLXTOaOzOLtzOa8LuLCLuaTLuLwruYp/c03XcT03dBM3dyu3dQd3djf3dB/39yAP9QiP9h+e4Mme5pme47n+24u81Cu8ymu9wf96i7d5p/d4vw/5qE/4tM/5oq/4um/5rh/4sZ/5pd/4vT/5qwMCQw/rHxzBkRzV0RzTcRzfiZzUyZ3KaZ3BmZ3NOZ3H+V3IRV3CpV3OFV3Z1VzDtf27G7ixm7ml27i9O7mre7i3+3mgh3i4R3msx3uSp3qGZ/svz/dCL/Fyr/Qar/cmb/b/3uHd3ueDPuLjPuWzvuDLvuabvuP7fuSnfuHXfueP/uIwQXJ4BzvE3wH+lYCtAQAAAACAAAAEAQAACwAAAA==eJxjZR0FAJfUBRU=
+  </AppendedData>
+</VTKFile>
+
+<!-- Created by Chaste version 2019.1.c4f5695 (with uncommitted modifications) on Sat, 01 Aug 2020 19:54:22 +0000.  Chaste was built on Wed, 29 Jul 2020 00:01:38 +0000 by machine (uname) 'Linux' using settings: Debug.  Checked-out project versions: AxelA=58358c550748fedf6088863782fdd77870262cc6; FibroblastAndEcmCellMigrationModel=4ef5b4794b2a799d69d23b89f60dfee60b548de2; HairFollicleModelling=df2e70910d635b61a954d5b922e1ec8f2b4f0193; MorphoCellBasedComparison=23b735d947861d59cb87258b8e8c8309e51be0be; WoundHealingModelling=80a3a2fee5dd271fdd89811c48948668ee7a0da8.
+-->

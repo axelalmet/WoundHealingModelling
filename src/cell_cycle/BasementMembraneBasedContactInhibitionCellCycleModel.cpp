@@ -39,7 +39,8 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "TransitCellProliferativeType.hpp"
 #include "DifferentiatedCellProliferativeType.hpp"
 #include "FibroblastCellProliferativeType.hpp"
-#include "PlateletCellProliferativeType.hpp"
+#include "BloodCellProliferativeType.hpp"
+#include "ExtracellularMatrixCellProliferativeType.hpp"
 
 BasementMembraneBasedContactInhibitionCellCycleModel::BasementMembraneBasedContactInhibitionCellCycleModel()
     : AbstractSimplePhaseBasedCellCycleModel(),
@@ -176,18 +177,14 @@ void BasementMembraneBasedContactInhibitionCellCycleModel::SetG1Duration()
     {
         mG1Duration = GetTransitCellG1Duration();
     }
-    else if (mpCell->GetCellProliferativeType()->IsType<FibroblastCellProliferativeType>())
+    else if ( (mpCell->GetCellProliferativeType()->IsType<FibroblastCellProliferativeType>())
+            || (mpCell->GetCellProliferativeType()->IsType<BloodCellProliferativeType>())
+            || (mpCell->GetCellProliferativeType()->IsType<DifferentiatedCellProliferativeType>())
+            || (mpCell->GetCellProliferativeType()->IsType<ExtracellularMatrixCellProliferativeType>()) )
     {
         mG1Duration = DBL_MAX;
     }
-    else if (mpCell->GetCellProliferativeType()->IsType<PlateletCellProliferativeType>())
-    {
-        mG1Duration = DBL_MAX;
-    }
-    else if (mpCell->GetCellProliferativeType()->IsType<DifferentiatedCellProliferativeType>())
-    {
-        mG1Duration = DBL_MAX;
-    }
+
     else
     {
         NEVER_REACHED;

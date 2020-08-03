@@ -1,8 +1,7 @@
 #include "EpidermalBasementMembraneForce.hpp"
 #include "NodeBasedCellPopulation.hpp"
 #include "StemCellProliferativeType.hpp"
-#include "CollagenCellProliferativeType.hpp"
-#include "CollagenCellProliferativeType.hpp"
+#include "ExtracellularMatrixCellProliferativeType.hpp"
 #include "AbstractCellProperty.hpp"
 #include "Debug.hpp"
 #include "Exception.hpp"
@@ -87,7 +86,7 @@ c_vector<double,2> EpidermalBasementMembraneForce::GetEpidermisHeightExtremes(Ab
 	{
 
 		// Need these to not be labelled cells
-		if ( (cell_iter->GetCellProliferativeType()->IsType<CollagenCellProliferativeType>()) )
+		if ( (cell_iter->GetCellProliferativeType()->IsType<ExtracellularMatrixCellProliferativeType>()) )
 		{
 			Node<2>* p_node = p_tissue->GetNodeCorrespondingToCell(*cell_iter);
 
@@ -341,7 +340,7 @@ c_vector<unsigned, 2> EpidermalBasementMembraneForce::GetTwoNearestCollagenNeigh
 			boost::shared_ptr<AbstractCellProperty> p_type = cell_iter->GetCellProliferativeType();
 
 			// Only consider Collagens
-			if(p_type->IsType<CollagenCellProliferativeType>())
+			if(p_type->IsType<ExtracellularMatrixCellProliferativeType>())
 			{
 				// Get the Collagen index and location
 				unsigned Collagen_index = rCellPopulation.GetNode(*elem_iter)->GetIndex(); // Roundabout way of storing the index, as I don't know how to convert the iterator to an unsigned

@@ -37,7 +37,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "NodeBasedCellPopulation.hpp"
 #include "RandomNumberGenerator.hpp"
 #include "FibroblastCellProliferativeType.hpp"
-#include "CollagenCellProliferativeType.hpp"
+#include "ExtracellularMatrixCellProliferativeType.hpp"
 
 template<unsigned DIM>
 FibreAlignmentBasedMigrationForce<DIM>::FibreAlignmentBasedMigrationForce()
@@ -121,6 +121,9 @@ void FibreAlignmentBasedMigrationForce<DIM>::AddForceContribution(AbstractCellPo
     double reorientation_strength = GetReorientationStrength(); // How strongly fibroblasts align with fibres
     double migration_force_strength = GetMigrationForceStrength(); // Strength of migration force
 
+    // We should only apply the force if the fibroblast can actually travel along a fibre
+    unsigned num_intersecting_fibres = 0;
+
     for (typename AbstractCellPopulation<DIM>::Iterator cell_iter = rCellPopulation.Begin();
          cell_iter != rCellPopulation.End();
          ++cell_iter)
@@ -159,12 +162,14 @@ void FibreAlignmentBasedMigrationForce<DIM>::AddForceContribution(AbstractCellPo
 
                     // Fibres are defined as spanning from collagen neighbours that express 
                     // a positive amount of collagen
-                    if (p_neighbour_cell_type->IsType<CollagenCellProliferativeType>())
+                    if (p_neighbour_cell_type->IsType<ExtracellularMatrixCellProliferativeType>())
                     {
+                        num_intersecting_fibres += 1;
+                        
                         // Get the neighbouring concentration
-                        double collagen = neighbour_cell_iter->GetCellData()->GetItem("collagen");
+                        double ecm_density = neighbour_cell_iter->GetCellData()->GetItem("density");
 
-                        if (collagen > 1e-4)
+                        if (ecm_density > 1e-4)
                         {
                             // Now determine if the fibre intersects with the fibroblast direction
                             bool does_fibre_intersect_with_fibroblast = DoesCollagenFibreIntersectWithFibroblast(rCellPopulation, current_index, *elem_iter);

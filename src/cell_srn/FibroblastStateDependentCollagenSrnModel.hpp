@@ -33,8 +33,8 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#ifndef FibroblastStateDependentCollagenSRNMODEL_HPP_
-#define FibroblastStateDependentCollagenSRNMODEL_HPP_
+#ifndef FIBROBLASTSTATEDEPENDENTCOLLAGENSRNMODEL_HPP_
+#define FIBROBLASTSTATEDEPENDENTCOLLAGENSRNMODEL_HPP_
 
 #include "ChasteSerialization.hpp"
 #include <boost/serialization/base_object.hpp>
@@ -51,11 +51,6 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class FibroblastStateDependentCollagenSrnModel : public AbstractOdeSrnModel
 {
 private:
-
-    /** 
-     * @double Morphogen threshold to activate collagen production/degradation
-     */
-    double mMorphogenThreshold;
 
     /**
      * @double Production rate of collagen
@@ -79,7 +74,6 @@ private:
     void serialize(Archive & archive, const unsigned int version)
     {
         archive & boost::serialization::base_object<AbstractOdeSrnModel>(*this);
-        archive & mMorphogenThreshold;
         archive & mProductionRate;
         archive & mDegradationRate;
     }
@@ -131,10 +125,10 @@ public:
     void SimulateToCurrentTime();
 
     /*
-     * Custom function to check whether or not the cell is an EPF
-     * fibroblast and thus produces collagen.
+     * Custom function to check whether or not the cell has been activated
+     * by the morphogen and thus alters collagen.
      */
-    void UpdateEpfStatus();
+    void UpdateActivatedStatus();
 
     /**
      * Output SRN model parameters to file.
@@ -154,11 +148,6 @@ public:
     void SetCollagen();
 
     /*
-     * Get the morphogen threshold for collagen production activations
-     */
-    double GetMorphogenThreshold();
-
-    /*
      * Get the rate for collagen production 
      */
     double GetProductionRate();
@@ -171,7 +160,7 @@ public:
     /*
      * Set the morphogen threshold
      */
-    void SetOdeParameters(double morphogenThreshold, double productionRate, double degradationRate);
+    void SetOdeParameters(double productionRate, double degradationRate);
 };
 
 // Declare identifier for the serializer

@@ -37,7 +37,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "StemCellProliferativeType.hpp"
 #include "DifferentiatedCellProliferativeType.hpp"
 #include "FibroblastCellProliferativeType.hpp"
-#include "PlateletCellProliferativeType.hpp"
+#include "BloodCellProliferativeType.hpp"
 
 template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
 GeneralisedLinearSpringForceWithVariableCellCellStiffness<ELEMENT_DIM,SPACE_DIM>::GeneralisedLinearSpringForceWithVariableCellCellStiffness()
@@ -223,22 +223,22 @@ double GeneralisedLinearSpringForceWithVariableCellCellStiffness<ELEMENT_DIM,SPA
     {
         multiplication_factor =  mFibroblastFibroblastMultiplicationFactor;
     }
-    else if ( ( (p_cell_A->GetCellProliferativeType()->IsType<StemCellProliferativeType>())&&(p_cell_B->GetCellProliferativeType()->IsType<PlateletCellProliferativeType>()) )
-            ||  ( (p_cell_A->GetCellProliferativeType()->IsType<PlateletCellProliferativeType>())&&(p_cell_B->GetCellProliferativeType()->IsType<StemCellProliferativeType>()) ) )// Stem-platelet connection
+    else if ( ( (p_cell_A->GetCellProliferativeType()->IsType<StemCellProliferativeType>())&&(p_cell_B->GetCellProliferativeType()->IsType<BloodCellProliferativeType>()) )
+            ||  ( (p_cell_A->GetCellProliferativeType()->IsType<BloodCellProliferativeType>())&&(p_cell_B->GetCellProliferativeType()->IsType<StemCellProliferativeType>()) ) )// Stem-platelet connection
     {
         multiplication_factor = mStemPlateletMultiplicationFactor;
     }
-    else if ( ( (p_cell_A->GetCellProliferativeType()->IsType<DifferentiatedCellProliferativeType>())&&(p_cell_B->GetCellProliferativeType()->IsType<PlateletCellProliferativeType>()) )
-            ||  ( (p_cell_A->GetCellProliferativeType()->IsType<PlateletCellProliferativeType>())&&(p_cell_B->GetCellProliferativeType()->IsType<DifferentiatedCellProliferativeType>()) ) )// Differentiated-platelet connection
+    else if ( ( (p_cell_A->GetCellProliferativeType()->IsType<DifferentiatedCellProliferativeType>())&&(p_cell_B->GetCellProliferativeType()->IsType<BloodCellProliferativeType>()) )
+            ||  ( (p_cell_A->GetCellProliferativeType()->IsType<BloodCellProliferativeType>())&&(p_cell_B->GetCellProliferativeType()->IsType<DifferentiatedCellProliferativeType>()) ) )// Differentiated-platelet connection
     {
         multiplication_factor = mDifferentiatedPlateletMultiplicationFactor;
     }
-    else if ( ( (p_cell_A->GetCellProliferativeType()->IsType<FibroblastCellProliferativeType>())&&(p_cell_B->GetCellProliferativeType()->IsType<PlateletCellProliferativeType>()) )
-            ||  ( (p_cell_A->GetCellProliferativeType()->IsType<PlateletCellProliferativeType>())&&(p_cell_B->GetCellProliferativeType()->IsType<FibroblastCellProliferativeType>()) ) )// Fibroblast-platelet connection
+    else if ( ( (p_cell_A->GetCellProliferativeType()->IsType<FibroblastCellProliferativeType>())&&(p_cell_B->GetCellProliferativeType()->IsType<BloodCellProliferativeType>()) )
+            ||  ( (p_cell_A->GetCellProliferativeType()->IsType<BloodCellProliferativeType>())&&(p_cell_B->GetCellProliferativeType()->IsType<FibroblastCellProliferativeType>()) ) )// Fibroblast-platelet connection
     {
         multiplication_factor =  mFibroblastPlateletMultiplicationFactor;
     }
-    else if ( (p_cell_A->GetCellProliferativeType()->IsType<PlateletCellProliferativeType>())&&(p_cell_A->GetCellProliferativeType()->IsType<PlateletCellProliferativeType>()) ) // Platelet-platelet
+    else if ( (p_cell_A->GetCellProliferativeType()->IsType<BloodCellProliferativeType>())&&(p_cell_A->GetCellProliferativeType()->IsType<BloodCellProliferativeType>()) ) // Platelet-platelet
     {
         multiplication_factor =  mPlateletPlateletMultiplicationFactor;
     }

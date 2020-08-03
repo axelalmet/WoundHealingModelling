@@ -84,26 +84,26 @@ public :
 
 
     /*
-     * Return vector of fibroblast indices that are close to the considered Epidermal node,
+     * Return vector of Collagen indices that are close to the considered Epidermal node,
      * based on a specified neighbourhood radius
      * 
      * @param rCellPopulation the cell population
      * @param epidermalIndex the considered epidermal node index
      */
-    std::vector<unsigned> GetNeighbouringFibroblastIndices(AbstractCellPopulation<2>& rCellPopulation, 
+    std::vector<unsigned> GetNeighbouringCollagenIndices(AbstractCellPopulation<2>& rCellPopulation, 
                                                                         unsigned epidermalIndex);
 
     /*
      * Return force direction with respect ot the basement membrane, which accounts for whether
-     * or not the direction from the epidermal index to the average fibroblast position should be 
+     * or not the direction from the epidermal index to the average Collagen position should be 
      * reflected.
      * 
      * @param rCellPopulation the cell population
-     * @param fibroblastIndices the neighbouring fibroblast indices to the epidermal cell
+     * @param CollagenIndices the neighbouring Collagen indices to the epidermal cell
      * @param epidermalIndex the epidermal cell
      */
     // c_vector<double, 2> CalculateForceDirection(AbstractCellPopulation<2>& rCellPopulation, 
-    //                                                                 std::vector<unsigned> fibroblastIndices,
+    //                                                                 std::vector<unsigned> CollagenIndices,
     //                                                                 unsigned epidermalIndex);
 
     /*

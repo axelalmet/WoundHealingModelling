@@ -52,7 +52,6 @@ FibroblastStateDependentCollagenOdeSystem::FibroblastStateDependentCollagenOdeSy
 //    SetDefaultInitialCondition(1, 0.01); // soon overwritten
 //    SetDefaultInitialCondition(2, 0.01); // soon overwritten
 
-    this->mParameters.push_back(0.0); // EPF status
     this->mParameters.push_back(0.0); // fibroblast activation
     this->mParameters.push_back(0.2); // Production rate of collagen
     this->mParameters.push_back(0.1); // Degradation rate of collagen
@@ -73,13 +72,12 @@ void FibroblastStateDependentCollagenOdeSystem::EvaluateYDerivatives(double time
     double C = rY[0]; // collagen
 
     // Get the parameters
-    double is_epf = this->GetParameter("epf"); // Check whether or not cell is an EPF fibroblast
     double is_activated = this->GetParameter("activated"); // Check whether or not cell is an EPF fibroblast
     double p_c = this->GetParameter("p_c"); // Production rate of collagen
     double d_c = this->GetParameter("d_c"); // Degradation rate of collagen
 
     // calculations
-    double reaction_1 = is_epf * p_c;
+    double reaction_1 = p_c;
     // double reaction_1 = is_epf * p_c * C / (1.0 + C);
     double reaction_2 = d_c * C;
 
@@ -92,13 +90,9 @@ void CellwiseOdeSystemInformation<FibroblastStateDependentCollagenOdeSystem>::In
 {
 
     // State variable, which is collagen amount
-    this->mVariableNames.push_back("collagen");
+    this->mVariableNames.push_back("density");
     this->mVariableUnits.push_back("non-dim");
     // this->mInitialConditions.push_back(0.01); // will be filled in later
-
-    // Multiplier to check whether or not cells are EPF fibroblasts
-    this->mParameterNames.push_back("epf");
-    this->mParameterUnits.push_back("non-dim");
 
     // Multiplier to check whether or not cells have been activated by, say, PDGF
     this->mParameterNames.push_back("activated");

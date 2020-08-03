@@ -32,6 +32,7 @@
 #include "BasementMembraneAttachmentTrackingModifier.hpp" // Modifier to track stem cell attachment to the basement membrane
 #include "VolumeTrackingModifier.hpp" // Modifier to track cell volume
 #include "CollagenFibreTrackingModifier.hpp" // Modifier to track collagen fibres, defined by marked springs
+#include "PolarityTrackingModifier.hpp" // Modifier to update cell polarities
 #include "SloughingCellKiller.hpp" // Cell killer that sloughs of cells past a certain height
 #include "FakePetscSetup.hpp" //Forbids tests running in parallel
 #include "PetscSetupAndFinalize.hpp"
@@ -90,10 +91,10 @@ private:
             }
 
             // Create the cell
-            NoCellCycleModel* p_cycle_model = new NoCellCycleModel(); //Contact-inhibition-based cycle model yet.
-            // BasementMembraneBasedContactInhibitionCellCycleModel* p_cycle_model = new BasementMembraneBasedContactInhibitionCellCycleModel(); //Contact-inhibition-based cycle model yet.
-            // p_cycle_model->SetEquilibriumVolume(0.25*M_PI);
-            // p_cycle_model->SetQuiescentVolumeFraction(0.8);
+            // NoCellCycleModel* p_cycle_model = new NoCellCycleModel(); //Contact-inhibition-based cycle model yet.
+            BasementMembraneBasedContactInhibitionCellCycleModel* p_cycle_model = new BasementMembraneBasedContactInhibitionCellCycleModel(); //Contact-inhibition-based cycle model yet.
+            p_cycle_model->SetEquilibriumVolume(0.25*M_PI);
+            p_cycle_model->SetQuiescentVolumeFraction(0.9);
             p_cycle_model->SetDimension(2);
 
             // Initialise CellPtr
@@ -143,7 +144,9 @@ private:
             // Adjust the endpoints if they fall outside of the domain
             if ( (xEnd > mesh_width) ) // Falls outside the vertical boundaries
             {
-                theta = M_PI - theta;
+                double phi = theta;
+                theta = M_PI - phi;
+
                 xEnd = xStart + collagenFibreLength * cos(theta);
             }
             if (yEnd < 0.0) // Falls below the mesh
@@ -247,7 +250,7 @@ private:
                             + (papillaryDermisHeight - reticularDermisHeight) * RandomNumberGenerator::Instance()->ranf();
 
             // We want papillary fibres to be criss-crossed.
-            double theta = (0.2 + 0.1 * RandomNumberGenerator::Instance()->ranf())* M_PI + 
+            double theta = (0.225 + 0.05 * RandomNumberGenerator::Instance()->ranf())* M_PI + 
                             0.5 * M_PI + std::round(RandomNumberGenerator::Instance()->ranf());
 
             double xEnd = xStart + collagenFibreLength * cos(theta);
@@ -261,9 +264,10 @@ private:
             }
             if (yEnd > papillaryDermisHeight) // Falls above the epidermis
             {
-                if (xEnd > 0.0) // Q1
-                {
-                    theta = 2.0*M_PI - theta;
+                if (theta < 0.5*M_PI) // Q1
+                {   
+                    double phi = theta;
+                    theta = 2.0*M_PI - phi;
                 }
                 else
                 {
@@ -358,7 +362,16 @@ private:
                 double x = (double)j * reticular_horizontal_spacing + reticular_horizontal_spacing * RandomNumberGenerator::Instance()->ranf();
                 double y = 0.5 + (double)i * reticular_vertical_spacing + reticular_vertical_spacing * RandomNumberGenerator::Instance()->ranf();
 
-                Node<2>* p_node(new Node<2>(node_index, false, x, y));  // Define the node
+                if ( (x == 0.0)||(x == mesh_width) )
+                {
+                    is_boundary = true;
+                }
+                else
+                {
+                    is_boundary = false;
+                }  
+
+                Node<2>* p_node(new Node<2>(node_index, is_boundary, x, y));  // Define the node
 
                 rMesh.AddNode(p_node); // Add the node
                 node_index += 1;
@@ -395,7 +408,7 @@ private:
 
         // Papillary dermis contains more fibroblasts
         double papillary_horizontal_spacing = mesh_width/( (double)papillaryFibroblastsAcross); 
-        double papillary_vertical_spacing = (papillaryDermisHeight - reticularDermisHeight)/( (double)papillaryFibroblastsUp);
+        double papillary_vertical_spacing = (papillaryDermisHeight - reticularDermisHeight - 0.5)/( (double)papillaryFibroblastsUp);
         for (unsigned i = 0; i < papillaryFibroblastsUp; i++)
         {
             for (unsigned j = 0; j < papillaryFibroblastsAcross; j++)
@@ -403,7 +416,16 @@ private:
                 double x = (double)j * papillary_horizontal_spacing + papillary_horizontal_spacing * RandomNumberGenerator::Instance()->ranf();
                 double y = reticularDermisHeight + (double)i * papillary_vertical_spacing + papillary_vertical_spacing * RandomNumberGenerator::Instance()->ranf();
 
-                Node<2>* p_node(new Node<2>(node_index, false, x, y));  // Define the node
+                if ( (x == 0.0)||(x == mesh_width) )
+                {
+                    is_boundary = true;
+                }
+                else
+                {
+                    is_boundary = false;
+                } 
+
+                Node<2>* p_node(new Node<2>(node_index, is_boundary, x, y));  // Define the node
                 
                 rMesh.AddNode(p_node); // Add the node
                 node_index += 1;
@@ -714,7 +736,7 @@ public:
     void TestEpidermis()
     {
         //Set the number of cells across and down for the array
-        unsigned cells_across = 5;
+        unsigned cells_across = 12;
         unsigned epidermal_cell_layers = 3;
         
         // Set the number of reticular and papillary dermis layers
@@ -730,28 +752,39 @@ public:
         double papillary_dermis_height = reticular_dermis_height + (double)papillary_dermis_layers * 0.5 * sqrt(3.0); // Next three rows will be PD
 
         // Some numbers so that we can add additional collagen fibres and fibroblasts
-        unsigned papillary_fibroblasts_across = 2;
-        unsigned papillary_fibroblasts_up = 3;
-        unsigned reticular_fibroblasts_across  = 4;
-        unsigned reticular_fibroblasts_up = 5;
+        unsigned papillary_fibroblasts_across = 4;
+        unsigned papillary_fibroblasts_up = 2;
+        unsigned reticular_fibroblasts_across  = 3;
+        unsigned reticular_fibroblasts_up = 3;
 
-        unsigned num_reticular_fibres = 2 * reticular_fibroblasts_across * reticular_fibroblasts_up;
-        unsigned num_papillary_fibres = 2 * papillary_fibroblasts_across * papillary_fibroblasts_up;
+        unsigned num_reticular_fibres = 24 * reticular_fibroblasts_across * reticular_fibroblasts_up;
+        unsigned num_papillary_fibres = 20 * papillary_fibroblasts_across * papillary_fibroblasts_up;
 
         // Set some parameters for node-based cell populations
         double radius_of_interaction = 1.5; // Radius of interaction to determine neighbourhoods
         double division_separation = 0.1; // Initial resting length upon division
 
         // Mechanical parameters
-        double spring_stiffness = 30.0; // Spring stiffness
-        // double bm_stiffness = 5.0; // Basement membrane attachment strength
-        // double target_curvature = 0.0; // Target curvature
-        double cell_ecm_stiffness_factor = 0.0;
+        double spring_stiffness = 15.0; // Spring stiffness
+        double bm_stiffness = 10.0; // Basement membrane attachment strength
+        double target_curvature = 0.0; // Target curvature
+        double reorientation_strength = 2.5;
+        bool apply_cell_to_ecm_force = false;
+        bool apply_force_on_marked_springs = false;
+
+        // Set the stiffness multiplication factors
+        std::map<unsigned, double> stiffness_multiplication_factors;
+
+        stiffness_multiplication_factors[0] = 1.0; // Stem cells 
+        stiffness_multiplication_factors[1] = 1.0; // TA cells 
+        stiffness_multiplication_factors[2] = 1.0; // Differentiated cells 
+        stiffness_multiplication_factors[3] = 1.0; // Fibroblasts cells 
+        stiffness_multiplication_factors[5] = 0.0; // Collagen cells 
 
         // Shape scale of fibroblasts and collagen fibres
         double fibroblast_scale = 0.5;
-        double collagen_radius = 0.25;
-        double collagen_fibre_length = 2.0;
+        double collagen_radius = 0.5;
+        double collagen_fibre_length = 1.0;
 
         std::vector<CellPtr> cells; // Vector of cells
         std::map<std::pair<unsigned, unsigned>, std::vector<unsigned> > fibres_to_mark; // How we will track cross-links
@@ -786,7 +819,7 @@ public:
                                 fibroblast_scale); // Generate the initial tissue
 
         Cylindrical2dNodesOnlyMesh* p_cylindrical_mesh = new Cylindrical2dNodesOnlyMesh(1.0*cells_across);
-		p_cylindrical_mesh->ConstructNodesWithoutMesh(*p_generating_mesh, 1.0*cells_across); //Construct mesh
+		p_cylindrical_mesh->ConstructNodesWithoutMesh(*p_generating_mesh, 2.0); //Construct mesh
 
         // Let's now determine all the fibre intersections (and their crosslinks)
         std::vector<c_vector<unsigned, 5> > intersecting_fibres;
@@ -852,7 +885,7 @@ public:
 
         // Set output directory
         std::string output_directory = M_OUTPUT_DIRECTORY + "/SteadyState";
-        simulator.SetOutputDirectory(M_OUTPUT_DIRECTORY);
+        simulator.SetOutputDirectory(output_directory);
 
         simulator.SetDt(M_DT);
         simulator.SetSamplingTimestepMultiple(M_SS_SAMPLING_TIMESTEP); // Set the sampling frequency
@@ -860,16 +893,19 @@ public:
 
         // Add linear spring force (modified to have three different spring stiffnesses, depending on the type of pair)
         MAKE_PTR(GeneralisedLinearSpringForceWithVariableInteractionDistance<2>, p_spring_force);
-        p_spring_force->SetCellCellSpringStiffness(spring_stiffness);
-        p_spring_force->SetCellEcmStiffnessMultiplicationFactor(cell_ecm_stiffness_factor);
+        p_spring_force->SetSpringStiffness(spring_stiffness);
+        p_spring_force->SetStiffnessMultiplicationFactors(stiffness_multiplication_factors);
+        p_spring_force->ApplyCellToEcmForce(apply_cell_to_ecm_force);
+        p_spring_force->ApplyForceOnMarkedSprings(apply_force_on_marked_springs);
         p_spring_force->SetCutOffLength(radius_of_interaction);
         simulator.AddForce(p_spring_force);
 
         // // Add basement membrane force
-        // MAKE_PTR(EpidermalBasementMembraneForce, p_bm_force);
-        // p_bm_force->SetBasementMembraneParameter(bm_stiffness);
-        // p_bm_force->SetTargetCurvature(target_curvature);
-        // simulator.AddForce(p_bm_force);
+        // MAKE_PTR(DistanceBasedEpidermalBasementMembraneForce, p_bm_force);
+        MAKE_PTR(EpidermalBasementMembraneForce, p_bm_force);
+        p_bm_force->SetBasementMembraneParameter(bm_stiffness);
+        p_bm_force->SetTargetCurvature(target_curvature);
+        simulator.AddForce(p_bm_force);
 
         // Define a fixed-regions boundary condition so that cells can't move past y = 0
         c_vector<double, 2> point, normal;
@@ -882,22 +918,30 @@ public:
         MAKE_PTR_ARGS(FixedRegionPlaneBoundaryCondition<2>, p_bc_bottom, (&cell_population, point, normal));
         simulator.AddCellPopulationBoundaryCondition(p_bc_bottom);
 
-        // // // // Create a modifier to track which cells are attached to the basement membrane.
-        // // // MAKE_PTR(VolumeTrackingModifier<2>, p_volume_tracking_modifier);
-		// // // simulator.AddSimulationModifier(p_volume_tracking_modifier);
+        // Create a modifier to track which cells are attached to the basement membrane.
+        MAKE_PTR(VolumeTrackingModifier<2>, p_volume_tracking_modifier);
+		simulator.AddSimulationModifier(p_volume_tracking_modifier);
 
         // // // // // Create a modifier to track which cells are attached to the basement membrane.
-        // // // MAKE_PTR(BasementMembraneAttachmentTrackingModifier<2>, p_bm_attachment_tracking_modifier);
-        // // // p_bm_attachment_tracking_modifier->SetNeighbourhoodRadius(radius_of_interaction);
-		// // // simulator.AddSimulationModifier(p_bm_attachment_tracking_modifier);
+        MAKE_PTR(BasementMembraneAttachmentTrackingModifier<2>, p_bm_attachment_tracking_modifier);
+        p_bm_attachment_tracking_modifier->SetNeighbourhoodRadius(radius_of_interaction);
+		simulator.AddSimulationModifier(p_bm_attachment_tracking_modifier);
 
-        // // // // Add a cell killer to remove differentiated cells that are too far from the basement membrane.
-        // // // MAKE_PTR_ARGS(SloughingCellKiller<2>, p_sloughing_killer, (&cell_population, max_height + 0.5));
-        // // // simulator.AddCellKiller(p_sloughing_killer);
+        double max_height = 0.5 * sqrt(3.0) * (double)cells_up;
 
+        // Add a cell killer to remove differentiated cells that are too far from the basement membrane.
+        MAKE_PTR_ARGS(SloughingCellKiller<2>, p_sloughing_killer, (&cell_population, max_height + 1.0));
+        simulator.AddCellKiller(p_sloughing_killer);
+
+        // Modifier to track the collagen fibres
         MAKE_PTR(CollagenFibreTrackingModifier<2>, p_collagen_fibre_tracking_modifier);
         simulator.AddSimulationModifier(p_collagen_fibre_tracking_modifier);
-        
+
+        // Modifier to align the cell polarities with their velocities
+        MAKE_PTR(PolarityTrackingModifier<2>, p_polarity_tracking_modifier);
+        p_polarity_tracking_modifier->SetReorientationStrength(reorientation_strength);
+        simulator.AddSimulationModifier(p_polarity_tracking_modifier);
+
         simulator.Solve(); // Run the simulation.
 
         // // Save simulation in steady state

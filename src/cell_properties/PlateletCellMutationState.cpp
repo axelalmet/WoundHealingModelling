@@ -36,7 +36,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PlateletCellMutationState.hpp"
 
 PlateletCellMutationState::PlateletCellMutationState()
-    : AbstractCellMutationState(8)
+    : AbstractCellMutationState(7)
 {}
 
 #include "SerializationExportWrapperForCpp.hpp"

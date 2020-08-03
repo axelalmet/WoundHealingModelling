@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<VTKFile type="UnstructuredGrid" version="0.1" byte_order="LittleEndian" header_type="UInt32" compressor="vtkZLibDataCompressor">
+  <UnstructuredGrid>
+    <Piece NumberOfPoints="161"                  NumberOfCells="0"                   >
+      <PointData>
+        <DataArray type="Float64" Name="Cell migration direction" NumberOfComponents="3" format="appended" RangeMin="1"                    RangeMax="1"                    offset="0"                   />
+        <DataArray type="Float64" Name="Cell types" format="appended" RangeMin="2"                    RangeMax="5"                    offset="1316"                />
+        <DataArray type="Float64" Name="Process rank" format="appended" RangeMin="0"                    RangeMax="0"                    offset="1380"                />
+        <DataArray type="Float64" Name="attachment" format="appended" RangeMin="-1"                   RangeMax="0"                    offset="1428"                />
+        <DataArray type="Float64" Name="direction" format="appended" RangeMin="0"                    RangeMax="6.2536516069"         offset="1484"                />
+        <DataArray type="Float64" Name="scale" format="appended" RangeMin="0.5"                  RangeMax="1"                    offset="2116"                />
+        <DataArray type="Float64" Name="volume" format="appended" RangeMin="0.7853981634"         RangeMax="0.7853981634"         offset="2176"                />
+      </PointData>
+      <CellData>
+      </CellData>
+      <Points>
+        <DataArray type="Float64" Name="Vertex positions" NumberOfComponents="3" format="appended" RangeMin="0"                    RangeMax="14.314686655"         offset="2236"                />
+      </Points>
+      <Cells>
+        <DataArray type="Int64" Name="connectivity" format="appended" RangeMin=""                     RangeMax=""                     offset="3188"                />
+        <DataArray type="Int64" Name="offsets" format="appended" RangeMin=""                     RangeMax=""                     offset="3204"                />
+        <DataArray type="UInt8" Name="types" format="appended" RangeMin=""                     RangeMax=""                     offset="3220"                />
+      </Cells>
+    </Piece>
+  </UnstructuredGrid>
+  <AppendedData encoding="base64">
+   _AQAAAACAAAAYDwAAyQMAAA==eJzt1/tPk1cYB3DBdkqKQGBGgaClYqCkjU5BmDMeJeuQVsDbVhnZssmiY1wEuYkoDph24AUnMChKx5gIszMOC4jBchAL2s1SywqjQEspb2/08qJ1sIUxtmTbeZP9C3vPb+/nfPPknJP3h+dRNjRh7I4Z2DVIcX3cOAWX/bN+VRpuxGqngNv6peMNF2eQl7i/mqDzw0Cb0DfXNmNBzlg4K1hINgCBhg2+iiTyBVGeOa1qE9z5W151YLoJeb7GxFPZzHBM3r9r724j+NdDNps3zKmHICflcODbNU7kSSzT8iOLDiC6njB78uAI8rpLYVxLWB/07v7MyriNI0+//8v5gjs4fEMQpfrI/BD50IK66L33R8Gzm1xf55cOdB6TruzabojD5ugA/xrvXpQPT9mLZblbIaU71r9ibhq5H/NN5aNCPaj8eVVVf6YN1blBVdB6JXo4kim9LOLZUJ7edOX884BpKOZ7u7rEVpTPTvZ57UyzEX6eWPQy/gszytM+3dHjGnWCxOEqNwFVhfICOufwGB8DeH1qZ7nEgvLjw9sjVtuM4NlluaxpnxnlT3sWhDRW4nDJ0r3PTO9H+QvagR4KXQ3CxX6LWR84Uf4qdSI17gEOg262Pc1M70UetlJ4gNk6DvvZxaL6cTvyteywtKDTj6EutjMfz8WRnxg6uoY2aoPGXPdAUcUk8tdl5cOs9Tj8kHN/IvSJArnXFBbqkIhBc43n3JKLqOP7Coe3jWUFWnuFh+wh8f4Ry/OuVv51r8WTA9wcBnEvyx+BUpl9FCQ7qmVRhQ7kVefMdRJKB6yVZ0v4GFG/d8uL65z2H0BCS5qblEf8P9Ve6j6PYCOQfpd47dBK4p3n35qN2QMn4L2AjpI1tXbkVsfzwlsTBqCQb9I0aKzI/16z//kmnXTSSSeddNJJJ/3/6l1j3soDWy0wYHB+UopjaH/yYC4/JtMJOaEqofrHn5C3JW2MecqcAedYU3tU6QbUx24pu/XIMwMH+YpVBV2MJ8jP+se36Ep1QEERxoUEE/3qt2NMUUVrNlgWhJXal4h+mJbTSSvz1ULcWltKLSXy+nc0SVkcI0z14XYwLMR8UZ/ytTDyXQPs0X5D124j5r7wx9S8jN9xwGj0mX+5Q4R88Eh1jvCUDbazo8Ldj+pR/c3b45m1IyYIxR7fb/iEmBPz+HjTdIgWzmfURR46Q8wdEeVBLazbA4CnjD6eVkycv6+ofUXwPT3E9t9ZuBhHzGV3HxQrTjlN0BXNOnZ3P1Ffzl231qsEB9Rd4hfxJwaQ/wnI81SUAQAAAACAAAAIBQAAHAAAAA==eJxjYAADB4ZRGg8tMkqP0qM0zWiOAacBnvExOQ==AQAAAACAAAAIBQAAEgAAAA==eJxjYBgFo2AUjIKRDQAFCAABAQAAAACAAAAIBQAAFwAAAA==eJxjYBgFhMGH/aP0KD1KD18aACNy0nQ=AQAAAACAAAAIBQAAxwEAAA==eJw7vXvuh81neB1q1HK7/pqLOihVrFjOOEHUwdd7wRFjb1EHixlaG/+F8zu8OCG/1TSI2SG+87FhyMu/9g55z8rtzl2zX1B58j9/5m/7PabSRyczcTjk/mqZUJUp4iC8vkA9RIHD4VFLnXL4PmaHGMG64wHMog5hrxb/nvmVwaFYp7ss2EvA4SSLw/GWJiaHidWX5gTySTh4ar+Ik7V4Y6/1Z5mCwj1RB1vuoB9x59gdrpRqT+BWFHE4bXfSvEaTy+GcvgvbM35BB97H0/s6ZYQcUpbsv5DhyOtQdv2e1jMmbofDQn3urwWEHUSL1x538n5qL9za88AVaM7kE+db8nd/su/YsS8/sFXIIer6/5PyR7/ay7n1Sr7Tf22vFJd8h8ObwcFNWeEjl8Q7e4ZRMApGAc1AyivhyuBcZofE3U+WfZjL5hCm83jPxrViDo65x+7ujpdwsD1j5tSi99G+SfLAomd3hRxcDYRUNoUxOLzLVt5z4SG/wyoW0XquDAEHQRkD+73Mkg5sJyOLRK6wOHgdnqbuByy3vk56LRHxVcBhf6tC0J1+YYeZX8P61y8TcFB/cvzwIT9+B76MNV8qcyUcAKdNsbE=AQAAAACAAAAIBQAAGwAAAA==eJxjYACBD/YMo/QoPUqP0gNCPxhwGgCV2r2AAQAAAACAAAAIBQAAGgAAAA==eJyT0HUJ+a340l5ilB6lR+lReoTSAPut99E=AQAAAACAAAAYDwAAtwIAAA==eJx11k9IFGEcxvEpl1xylG13dtnd1nV2dnY3ItNbRdS8WEFBJUiU5SExCOnUzYigzUOQQoXE9ucgXcLIEsWwS4nR30ugEKGgsYcCUaQ5RCxq1kGHXqf5/o6fl/cy78PzG0VZnSdHm2cvj1QLZd3Ylrcrwtv94AFwDTwKngDXwQ1wEzwLXrT0/iHjUUF3eQncJ7xdBQ+CR8Dj4EnwFHgaPAOeA1eUubpdE2qT4XLb8nZFeLsfPACugUfBE+A6uAFugmfBaWwLDuC+HzwAroFHwRPg/7/36hjgJngWvLjWM/Ou71EC9wlvV8GD4BHwOHgSPAWeBs+A58Cdfl5yudPPbnf62e1+8AC4Bh4FT4Dr4Aa4CZ4FL1r5PQ07pz/6xHovgfuEt6vgQfAIeBw8CZ4CT4NnwHPgTn4qXO7kx+1OftzuBw+Aa+BR8AS4Dm6Am+BZ8OLantri8hK4T3i7Ch4Ej4DHwZPgKfA0eAY8B64oq7ly7xPb8nZFeLsfPACugUfBE+A6uAFugmfBi1b4wLHufsu9V0vgPuHtKngQPAIeB0+Cp8DT4BnwHLjTP1td7vSP253+cbsfPACugUfBE+A6uAFugmc9fOztkUKZeF9bWHp9cE7aa/adu7Eacb/qhL17clny8WeHiobo/dAyfWnbL8n1xytNm8TEzLv2ziH5/7G+J9QfFw+udA6/jJRLfrFyZiAl2jR7/+hAmeT5c4t1P63yq2PjF6rkHrjdd70mJmJ7U019N+T+1LvqZ3OiffR7S2s4JPnDH2cqv1ml3wvn9y3LPnj49JeQOPm5NR5+I/vzkWv3qoWmd9cuNsre1Vb70xDbN3wtmK+CkttnF/N/rFs3Q5s3TkUkn2z89EIVHcODK8fzMcl7n1Ys6KJjRa2c7AlLvqM5XJ4TDVPp3vlT/3L7Fzdpa8k=AAAAAACAAAAAAAAAAAAAAACAAAAAAAAAAAAAAACAAAAAAAAA
+  </AppendedData>
+</VTKFile>
+
+<!-- Created by Chaste version 2019.1.c4f5695 (with uncommitted modifications) on Sat, 04 Jul 2020 21:42:13 +0000.  Chaste was built on Mon, 02 Mar 2020 07:58:05 +0000 by machine (uname) 'Linux' using settings: Debug.  Checked-out project versions: AxelA=58358c550748fedf6088863782fdd77870262cc6; FibroblastAndEcmCellMigrationModel=4ef5b4794b2a799d69d23b89f60dfee60b548de2; HairFollicleModelling=df2e70910d635b61a954d5b922e1ec8f2b4f0193; MorphoCellBasedComparison=23b735d947861d59cb87258b8e8c8309e51be0be; WoundHealingModelling=80a3a2fee5dd271fdd89811c48948668ee7a0da8.
+-->

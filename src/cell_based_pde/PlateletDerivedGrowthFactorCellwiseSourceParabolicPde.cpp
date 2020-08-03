@@ -35,7 +35,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "PlateletDerivedGrowthFactorCellwiseSourceParabolicPde.hpp"
 #include "NodeBasedCellPopulation.hpp"
-#include "PlateletCellProliferativeType.hpp"
+#include "BloodCellProliferativeType.hpp"
 #include "Debug.hpp"
 
 template<unsigned DIM>
@@ -86,7 +86,7 @@ double PlateletDerivedGrowthFactorCellwiseSourceParabolicPde<DIM>::ComputeSource
         CellPtr p_cell = mrCellPopulation.GetCellUsingLocationIndex(node_index); // Get the cell
         boost::shared_ptr<AbstractCellProperty> p_cell_type = p_cell->GetCellProliferativeType(); // Get the mutation state
 
-        if (p_cell_type->template IsType<PlateletCellProliferativeType>())
+        if (p_cell_type->template IsType<BloodCellProliferativeType>())
         {
             source_coefficient = mProductionCoefficient - mDegradationCoefficient*u;
         }

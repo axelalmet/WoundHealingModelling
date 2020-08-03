@@ -39,7 +39,8 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "TransitCellProliferativeType.hpp"
 #include "DifferentiatedCellProliferativeType.hpp"
 #include "FibroblastCellProliferativeType.hpp"
-#include "PlateletCellProliferativeType.hpp"
+#include "BloodCellProliferativeType.hpp"
+#include "ExtracellularMatrixCellProliferativeType.hpp"
 #include "Debug.hpp"
 
 GrowthFactorBasedContactInhibitionCellCycleModel::GrowthFactorBasedContactInhibitionCellCycleModel()
@@ -86,11 +87,14 @@ void GrowthFactorBasedContactInhibitionCellCycleModel::UpdateCellCyclePhase()
     // Get cell volume
     double cell_volume = mpCell->GetCellData()->GetItem("volume");
 
-    // Get the growth factor level and threshold
-    double growth_factor_level = mpCell->GetCellData()->GetItem("morphogen");
+    // // Get the growth factor level and threshold
+    // double growth_factor_level = mpCell->GetCellData()->GetItem("morphogen");
 
-    // Get the threshold to determine proliferation
-    double growth_factor_threshold = GetGrowthFactorThreshold();
+    // // Get the threshold to determine proliferation
+    // double growth_factor_threshold = GetGrowthFactorThreshold();
+
+    // Get the activated status of the fibroblast
+    double activated_status = mpCell->GetCellData()->GetItem("activated");
 
     // Get the attachment to BM
     double attachment = mpCell->GetCellData()->GetItem("attachment");
@@ -103,7 +107,7 @@ void GrowthFactorBasedContactInhibitionCellCycleModel::UpdateCellCyclePhase()
 
         // Pause proliferation if the cell is either sufficiently stressed or is not exposed to a sufficiently
         // high morphogen concentration
-        if ( (cell_volume < quiescent_volume)||(growth_factor_level < growth_factor_threshold)||(attachment > 0.0) )
+        if ( (cell_volume < quiescent_volume)||(activated_status == 0.0)||(attachment > 0.0) )
         {
             // Update the duration of the current period of contact inhibition.
             mCurrentQuiescentDuration = SimulationTime::Instance()->GetTime() - mCurrentQuiescentOnsetTime;
@@ -135,7 +139,8 @@ void GrowthFactorBasedContactInhibitionCellCycleModel::UpdateCellCyclePhase()
     // Differentiated cells, platelet cells, or labelled cells (which represent fixed boundary cells)
     // don't proliferate
     if ((mpCell->GetCellProliferativeType()->IsType<DifferentiatedCellProliferativeType>())
-        ||(mpCell->GetCellProliferativeType()->IsType<PlateletCellProliferativeType>())
+        ||(mpCell->GetCellProliferativeType()->IsType<BloodCellProliferativeType>())
+        ||(mpCell->GetCellProliferativeType()->IsType<ExtracellularMatrixCellProliferativeType>())
         ||(mpCell->HasCellProperty<CellLabel>()) )
     {
         mCurrentCellCyclePhase = G_ZERO_PHASE;
@@ -176,7 +181,7 @@ void GrowthFactorBasedContactInhibitionCellCycleModel::SetG1Duration()
     {
         mG1Duration = GetStemCellG1Duration();
     }
-    else if (mpCell->GetCellProliferativeType()->IsType<PlateletCellProliferativeType>())
+    else if (mpCell->GetCellProliferativeType()->IsType<BloodCellProliferativeType>())
     {
         mG1Duration = DBL_MAX;
     }

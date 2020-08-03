@@ -1,7 +1,7 @@
 #include "DistanceBasedEpidermalBasementMembraneForce.hpp"
 #include "NodeBasedCellPopulation.hpp"
 #include "StemCellProliferativeType.hpp"
-#include "FibroblastCellProliferativeType.hpp"
+#include "ExtracellularMatrixCellProliferativeType.hpp"
 #include "AbstractCellProperty.hpp"
 #include "Debug.hpp"
 #include "Exception.hpp"
@@ -101,10 +101,10 @@ std::vector<unsigned> DistanceBasedEpidermalBasementMembraneForce::GetEpidermalI
 /*
  * Method to get the neighbouring nodes that are epidermal
  */
-std::vector<unsigned> DistanceBasedEpidermalBasementMembraneForce::GetNeighbouringFibroblastIndices(AbstractCellPopulation<2>& rCellPopulation, unsigned epidermalIndex)
+std::vector<unsigned> DistanceBasedEpidermalBasementMembraneForce::GetNeighbouringCollagenIndices(AbstractCellPopulation<2>& rCellPopulation, unsigned epidermalIndex)
 {
 	// Create a set of neighbouring node indices
-	std::vector<unsigned> neighbouring_fibroblast_indices;
+	std::vector<unsigned> neighbouring_Collagen_indices;
 
 	if (dynamic_cast<NodeBasedCellPopulation<2>*>(&rCellPopulation))
 	{
@@ -129,46 +129,46 @@ std::vector<unsigned> DistanceBasedEpidermalBasementMembraneForce::GetNeighbouri
 			boost::shared_ptr<AbstractCellProperty> p_type = cell_iter->GetCellProliferativeType();
 
 			//if the cell is not differentiated and thus an Epidermal cell, we add it to the vector
-			if(p_type->IsType<FibroblastCellProliferativeType>())
+			if(p_type->IsType<ExtracellularMatrixCellProliferativeType>())
 			{
-				neighbouring_fibroblast_indices.push_back(*elem_iter);
+				neighbouring_Collagen_indices.push_back(*elem_iter);
 			}
 
 		}
 	}
 
-	return neighbouring_fibroblast_indices;
+	return neighbouring_Collagen_indices;
 }
 
 
 // c_vector<double, 2> DistanceBasedEpidermalBasementMembraneForce::CalculateForceDirection(AbstractCellPopulation<2>& rCellPopulation, 
-//                                                                     std::vector<unsigned> fibroblastIndices,
+//                                                                     std::vector<unsigned> CollagenIndices,
 //                                                                     unsigned epidermalIndex)
 // {
 // 	// Get the location of the epidermal index
 // 	c_vector<double, 2> epidermal_location = rCellPopulation.GetNode(epidermalIndex)->rGetLocation();
 
-// 	// Get the number of fibroblast indices
-// 	unsigned num_fibroblast_indices = fibroblastIndices.size(); 
+// 	// Get the number of Collagen indices
+// 	unsigned num_Collagen_indices = CollagenIndices.size(); 
 
 // 	// Initialise the force direction vector
 // 	c_vector<double, 2> force_direction;
 
-// 	for (unsigned i = 0; i < num_fibroblast_indices; i++)
+// 	for (unsigned i = 0; i < num_Collagen_indices; i++)
 // 	{
-// 		unsigned fibroblast_index = fibroblastIndices[i];
-// 		c_vector<double, 2> fibroblast_location = rCellPopulation.GetNode(fibroblast_index)->rGetLocation();
+// 		unsigned Collagen_index = CollagenIndices[i];
+// 		c_vector<double, 2> Collagen_location = rCellPopulation.GetNode(Collagen_index)->rGetLocation();
 
-// 		// Get the vector between the fibroblast and the epidermal cell
-// 		c_vector<double, 2> epidermal_to_fibroblast = rCellPopulation.rGetMesh().GetVectorFromAtoB(epidermal_location, fibroblast_location);
+// 		// Get the vector between the Collagen and the epidermal cell
+// 		c_vector<double, 2> epidermal_to_Collagen = rCellPopulation.rGetMesh().GetVectorFromAtoB(epidermal_location, Collagen_location);
 
-// 		force_direction += epidermal_to_fibroblast / num_fibroblast_indices; 
+// 		force_direction += epidermal_to_Collagen / num_Collagen_indices; 
 // 	}
 
 // 	force_direction /= norm_2(force_direction);
 
-// 	// If there are more than 2 fibroblast neighbours, it's likely the epidermal cell is too far into the dermis
-// 	if (num_fibroblast_indices > 2)
+// 	// If there are more than 2 Collagen neighbours, it's likely the epidermal cell is too far into the dermis
+// 	if (num_Collagen_indices > 2)
 // 	{
 // 		force_direction *= -1.0;
 // 	}
@@ -195,31 +195,31 @@ c_vector<double, 2> DistanceBasedEpidermalBasementMembraneForce::CalculateForceD
 	// Get the epidermal node radius
 	double epidermal_radius = rCellPopulation.GetNode(nodeIndex)->GetRadius();
 
-	// Get the fibroblast-to-centre vector
-	std::vector<unsigned> closest_fibroblast_indices = GetNeighbouringFibroblastIndices(rCellPopulation, nodeIndex);
+	// Get the Collagen-to-centre vector
+	std::vector<unsigned> closest_Collagen_indices = GetNeighbouringCollagenIndices(rCellPopulation, nodeIndex);
 
-	 // If there's no fibroblast neighbours, the cell has detached from the membrane.
-	for (unsigned i = 0; i < closest_fibroblast_indices.size(); i++)
+	 // If there's no Collagen neighbours, the cell has detached from the membrane.
+	for (unsigned i = 0; i < closest_Collagen_indices.size(); i++)
 	{
-		unsigned fibroblast_index = closest_fibroblast_indices[i];
-		c_vector<double, 2> fibroblast_location = rCellPopulation.GetNode(fibroblast_index)->rGetLocation();
-		// Get the fibroblast node radius too
-		double fibroblast_radius = rCellPopulation.GetNode(fibroblast_index)->GetRadius();
+		unsigned Collagen_index = closest_Collagen_indices[i];
+		c_vector<double, 2> Collagen_location = rCellPopulation.GetNode(Collagen_index)->rGetLocation();
+		// Get the Collagen node radius too
+		double Collagen_radius = rCellPopulation.GetNode(Collagen_index)->GetRadius();
 
-		// Get the vector from the epidermal cell to the fibroblast
-		c_vector<double, 2> epidermal_to_fibroblast = rCellPopulation.rGetMesh().GetVectorFromAtoB(epidermal_location, fibroblast_location);
-		double distance_to_bm = norm_2(epidermal_to_fibroblast);
+		// Get the vector from the epidermal cell to the Collagen
+		c_vector<double, 2> epidermal_to_Collagen = rCellPopulation.rGetMesh().GetVectorFromAtoB(epidermal_location, Collagen_location);
+		double distance_to_bm = norm_2(epidermal_to_Collagen);
 
 		// Only add a non-zero force if the overlap is positive, i.e. it's not too close.
-		if (distance_to_bm > epidermal_radius + fibroblast_radius)
+		if (distance_to_bm > epidermal_radius + Collagen_radius)
 		{
-			c_vector<double, 2> force_direction = epidermal_to_fibroblast / distance_to_bm;
+			c_vector<double, 2> force_direction = epidermal_to_Collagen / distance_to_bm;
 
 			force_due_to_basement_membrane += basement_membrane_parameter/(distance_to_bm + 0.01) * force_direction;
 		}
 		else
 		{
-			c_vector<double, 2> force_direction = epidermal_to_fibroblast / distance_to_bm;
+			c_vector<double, 2> force_direction = epidermal_to_Collagen / distance_to_bm;
 
 			force_due_to_basement_membrane += -1.0 * basement_membrane_parameter/(distance_to_bm + 0.01) * force_direction;
 		}

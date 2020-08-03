@@ -24,8 +24,8 @@ private:
     //Cut off radius for NodeBasedCellPopulations
     double mCutOffRadius;
 
-    // Growth factor threshold in order to induce anoikis
-    double mGrowthFactorThreshold;
+    // Mean death time for platelets when subject to apoptosis
+    double mMeanDeathTime;
 
     // Threshold volume under which to induce apoptosis
     double mVolumeThreshold;
@@ -43,7 +43,7 @@ private:
         archive & boost::serialization::base_object<AbstractCellKiller<2> >(*this);
         archive & mCellsRemovedByFibroblasts;
         archive & mCutOffRadius;
-        archive & mGrowthFactorThreshold;
+        archive & mMeanDeathTime;
         archive & mVolumeThreshold;
         archive & mOutputDirectory;
     }
@@ -62,14 +62,14 @@ public:
     std::string GetOutputDirectory();
 
     /*
-     * @return mGrowthFactorThreshold for cell killing
+     * @return mDeathTime
      */
-    double GetGrowthFactorThreshold();
+    double GetMeanDeathTime();
 
     /*
-     * Method to set the growth factor threshold that determines platelet cell degradation
+     * Method to set the mean death time for platelets when subject to apoptosis
      */
-    void SetGrowthFactorThreshold(double growthFactorThreshold);
+    void SetMeanDeathTime(double meanDeathTime);
 
         /*
      * @return mVolumeThreshold for cell killing

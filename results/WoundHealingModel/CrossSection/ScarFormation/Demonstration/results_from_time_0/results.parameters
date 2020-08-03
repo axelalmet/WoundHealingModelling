@@ -9,7 +9,7 @@
 	</OffLatticeSimulation-2-2>
 
 	<NodeBasedCellPopulation-2>
-		<MechanicsCutOffLength>20</MechanicsCutOffLength>
+		<MechanicsCutOffLength>2</MechanicsCutOffLength>
 		<UseVariableRadii>0</UseVariableRadii>
 		<MeinekeDivisionSeparation>0.1</MeinekeDivisionSeparation>
 		<CentreBasedDivisionRule>
@@ -52,12 +52,8 @@
 	</CellKillers>
 
 	<SimulationModifiers>
-		<VolumeTrackingModifier-2>
-		</VolumeTrackingModifier-2>
-		<CollagenAlignmentTrackingModifier-2>
-		</CollagenAlignmentTrackingModifier-2>
-		<BasementMembraneAttachmentTrackingModifier-2>
-		</BasementMembraneAttachmentTrackingModifier-2>
+		<ModifiedParabolicBoxDomainPdeModifier-2>
+		</ModifiedParabolicBoxDomainPdeModifier-2>
 	</SimulationModifiers>
 
 	<Forces>

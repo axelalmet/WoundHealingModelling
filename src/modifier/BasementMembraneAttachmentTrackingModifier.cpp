@@ -35,7 +35,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BasementMembraneAttachmentTrackingModifier.hpp"
 #include "DifferentiatedCellProliferativeType.hpp"
-#include "CollagenCellProliferativeType.hpp"
+#include "ExtracellularMatrixCellProliferativeType.hpp"
 #include "StemCellProliferativeType.hpp"
 #include "NodeBasedCellPopulation.hpp"
 
@@ -106,7 +106,7 @@ void BasementMembraneAttachmentTrackingModifier<DIM>::UpdateCellData(AbstractCel
         // Get the set of neighbouring location indices within a neighbourhood radius
         std::set<unsigned> neighbour_indices = p_cell_population->GetNodesWithinNeighbourhoodRadius(node_index, neighbourhood_radius);
         
-        if (!p_cell_type->template IsType<CollagenCellProliferativeType>())
+        if (!p_cell_type->template IsType<ExtracellularMatrixCellProliferativeType>())
         {          
             // Initialise number of fibroblast neighbours
             unsigned num_collagen_neighbours = 0;
@@ -134,7 +134,7 @@ void BasementMembraneAttachmentTrackingModifier<DIM>::UpdateCellData(AbstractCel
                     boost::shared_ptr<AbstractCellProperty> p_neighbour_cell_type = p_cell->GetCellProliferativeType();
 
                     // If there are ANY fibroblast neighbours, we immediately know that it's attached to the BM and can stop the iterations.
-                    if (p_neighbour_cell_type->template IsType<CollagenCellProliferativeType>())
+                    if (p_neighbour_cell_type->template IsType<ExtracellularMatrixCellProliferativeType>())
                     {
                         num_collagen_neighbours += 1;
 

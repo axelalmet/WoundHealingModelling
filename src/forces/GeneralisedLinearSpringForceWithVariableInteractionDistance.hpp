@@ -33,10 +33,10 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#ifndef GeneralisedLinearSpringForceWithVariableInteractionDistance_HPP_
-#define GeneralisedLinearSpringForceWithVariableInteractionDistance_HPP_
+#ifndef GENERALISEDLINEARSPRINGFORCEWITHVARIABLEINTERACTIONDISTANCE_HPP_
+#define GENERALISEDLINEARSPRINGFORCEWITHVARIABLEINTERACTIONDISTANCE_HPP_
 
-#include "AbstractTwoBodyInteractionForce.hpp"
+#include "GeneralisedLinearSpringForce.hpp"
 
 #include "ChasteSerialization.hpp"
 #include <boost/serialization/base_object.hpp>
@@ -51,40 +51,24 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * not the Lennard-Jones-type potential that's used to calculate forces and torques.
  */
 template<unsigned  ELEMENT_DIM, unsigned SPACE_DIM=ELEMENT_DIM>
-class GeneralisedLinearSpringForceWithVariableInteractionDistance : public AbstractTwoBodyInteractionForce<ELEMENT_DIM, SPACE_DIM>
+class GeneralisedLinearSpringForceWithVariableInteractionDistance : public GeneralisedLinearSpringForce<ELEMENT_DIM, SPACE_DIM>
 {
-    friend class TestForces;
 
 private:
 
     /** Needed for serialization. */
     friend class boost::serialization::access;
-    /**
-     * Archive the object and its member variables.
-     *
-     * @param archive the archive
-     * @param version the current version of this class
-     */
-    template<class Archive>
-    void serialize(Archive & archive, const unsigned int version)
-    {
-        archive & boost::serialization::base_object<AbstractTwoBodyInteractionForce<ELEMENT_DIM, SPACE_DIM> >(*this);
-        archive & mCellCellSpringStiffness;
-        archive & mMeinekeDivisionRestingSpringLength;
-        archive & mMeinekeSpringGrowthDuration;
-        archive & mCellEcmStiffnessMultiplicationFactor;
-    }
 
-protected:
+    friend class TestForces;
 
-    /**
+        /**
      * Spring stiffness.
      *
      * Represented by the parameter mu in the model by Meineke et al (2001) in
      * their off-lattice model of the intestinal crypt
      * (doi:10.1046/j.0960-7722.2001.00216.x).
      */
-    double mCellCellSpringStiffness;
+    double mSpringStiffness;
 
     /**
      * Initial resting spring length after cell division.
@@ -104,10 +88,37 @@ protected:
     double mMeinekeSpringGrowthDuration;
 
     /* 
-     * Parameter that scales the collagen spring stiffness 
-     * as a proxy for buckling.
+     * Vector that determines the stiffness multiplication factors
      */
-    double mCellEcmStiffnessMultiplicationFactor;
+    std::map<unsigned, double> mStiffnessMultiplicationFactors;
+
+    /* 
+     * Whether or not we apply cell forces onto the surrounding ECM 
+     */
+    bool mApplyCellToEcmForce;
+
+    /*
+     * Whether ECM-ECM forces are only considered along marked springs (typically yes)
+     */
+    bool mApplyForceOnMarkedSprings;
+
+    // /**
+    //  * Archive the object and its member variables.
+    //  *
+    //  * @param archive the archive
+    //  * @param version the current version of this class
+    //  */
+    // template<class Archive>
+    // void serialize(Archive & archive, const unsigned int version)
+    // {
+    //     archive & boost::serialization::base_object<AbstractTwoBodyInteractionForce<ELEMENT_DIM, SPACE_DIM> >(*this);
+    //     archive & mSpringStiffness;
+    //     archive & mMeinekeDivisionRestingSpringLength;
+    //     archive & mMeinekeSpringGrowthDuration;
+    //     archive & mStiffnessMultiplicationFactors;
+    //     archive & mApplyCellToEcmForce;
+    //     archive & mApplyForceOnMarkedSprings;
+    // }
 
 public:
 
@@ -127,17 +138,12 @@ public:
      *
      * This method may be overridden in subclasses.
      *
-     * @param nodeAGlobalIndex index of one neighbouring node
-     * @param nodeBGlobalIndex index of the other neighbouring node
-     * @param rCellPopulation the cell population
-     * @param isCloserThanRestLength whether the neighbouring nodes lie closer than the rest length of their connecting spring
+     * @param nodeAColour the unsigned variable that corresponds to cell type
+     * @param nodeBColour the unsigned variable that correspond sto cell type
      *
      * @return the multiplication factor.
      */
-    virtual double VariableSpringConstantMultiplicationFactor(unsigned nodeAGlobalIndex,
-                                                              unsigned nodeBGlobalIndex,
-                                                              AbstractCellPopulation<ELEMENT_DIM,SPACE_DIM>& rCellPopulation,
-                                                              bool isCloserThanRestLength);
+    double GetSpringConstantMultiplicationFactor(unsigned nodeAColour, unsigned nodeBColour);
 
     /**
      * Overridden CalculateForceBetweenNodes() method.
@@ -172,15 +178,30 @@ public:
                             c_vector<double, SPACE_DIM> unitDifference,
                             AbstractCellPopulation<ELEMENT_DIM,SPACE_DIM>& rCellPopulation);
 
+    /* 
+     * This method determines whether or not a spanning ECM (fibrin or collagen)
+     * will lintersect with the cell within a reasonable range (determined by cut-off length),
+     * which will lthen determine whether or not we apply the cell-matrix force.
+     * 
+     * @param CellPtr pCell, the non-ECM cell
+     * @param cellLocation, position of the cell
+     * @param CellPtr pMatrixCell, the ECM cell
+     * @param matrixCellLocation, the ECM node location
+     * 
+     * @return Whether or not the fibre intersects with the cell
+     */
+    bool DoesCellIntersectWithFibre(CellPtr pCell, c_vector<double, SPACE_DIM> cellLocation,
+                                    CellPtr pMatrixCell, c_vector<double, SPACE_DIM> matrixCellLocation);
+
     /**
      * @return mMeinekeDivisionRestingSpringLength
      */
     double GetMeinekeDivisionRestingSpringLength();
 
     /**
-     * @return mCellCellSpringStiffness
+     * @return mSpringStiffness
      */
-    double GetCellCellSpringStiffness();
+    double GetSpringStiffness();
 
     /**
      * @return mMeinekeSpringGrowthDuration
@@ -188,16 +209,11 @@ public:
     double GetMeinekeSpringGrowthDuration();
 
     /**
-     * @return mCellEcmStiffnessMultiplicationFactor
-     */
-    double GetCellEcmStiffnessMultiplicationFactor();
-
-    /**
      * Set mCellCellSpringStiffness.
      *
      * @param springStiffness the new value of mCellCellSpringStiffness
      */
-    void SetCellCellSpringStiffness(double springStiffness);
+    void SetSpringStiffness(double springStiffness);
 
     /**
      * Set mMeinekeDivisionRestingSpringLength.
@@ -214,18 +230,30 @@ public:
     void SetMeinekeSpringGrowthDuration(double springGrowthDuration);
 
     /**
-     * Set mCellEcmStiffnessMultiplicationFactor
+     * Set mStiffnessMultiplicationFactors
      * 
-     * @param CellEcmStiffnessMultiplicationFactor the new value of mCellEcmStiffnessMultiplicationFactor
+     * @param stiffnessMultiplicationFactors the new value of mEpidermalEcmStiffnessMultiplicationFactor
      */
-    void SetCellEcmStiffnessMultiplicationFactor(double CellEcmStiffnessMultiplicationFactor);
+    void SetStiffnessMultiplicationFactors(std::map<unsigned, double> stiffnessMulltiplicationFactors);
 
     /**
-     * Overridden OutputForceParameters() method.
-     *
-     * @param rParamsFile the file stream to which the parameters are output
+     * Set mApplyCellToEcmForce
+     * 
+     * @param applyCellToEcmForce the new value of mApplyCellToEcmForce
      */
-    virtual void OutputForceParameters(out_stream& rParamsFile);
+    void ApplyCellToEcmForce(bool applyCellToEcmForce);
+
+    /*
+     * Set mApplyForceOnMarkedSprings
+     */
+    void ApplyForceOnMarkedSprings(bool applyForceOnMarkedSprings);
+
+    /* 
+     * Overridden AddForceContribution method
+     * 
+     * @param rCellPopulation the cell population
+     */
+    void AddForceContribution(AbstractCellPopulation<ELEMENT_DIM,SPACE_DIM>& rCellPopulation);
 };
 
 #include "SerializationExportWrapper.hpp"
