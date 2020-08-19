@@ -48,8 +48,8 @@
 
 static const std::string M_OUTPUT_DIRECTORY = "WoundHealingModel/CrossSection/ScarFormationWithoutEpidermis";
 static const double M_DT = 0.005;
-static const double M_END_TIME = 40.0;
-static const double M_SAMPLING_TIMESTEP = 0.05*M_END_TIME/M_DT;
+static const double M_END_TIME = 10.0;
+static const double M_SAMPLING_TIMESTEP = 0.1*M_END_TIME/M_DT;
 
 /*
 * A test model to study the various components that we think should be incorporated
@@ -437,7 +437,7 @@ public:
     void TestScarFormation()
     {
         //Set the number of cells across and down for the array
-        unsigned cells_across = 10;
+        unsigned cells_across = 20;
         
         // Set the number of reticular and papillary dermis layers
         unsigned reticular_dermis_layers = 5;
@@ -483,8 +483,8 @@ public:
         double collagen_production_rate = 1.0;
         double collagen_degradation_rate = 0.5;
 
-        double mean_activation_lifetime = 1.0; // Mean fibroblast lifetime when no longer exposed to morphogen
-        double mean_platelet_death_time = 2.5; // Mean death time for platelets
+        double mean_activation_lifetime = 10.0; // Mean fibroblast lifetime when no longer exposed to morphogen
+        double mean_platelet_death_time = 5.0; // Mean death time for platelets
 
         // Note that the probability of fibre deposition essentially follows a Binomial distribution (you deposit or you don't), 
         // so we can backtrack from the expected number of fibres we want to deposit over [0, T] to work out the probability.

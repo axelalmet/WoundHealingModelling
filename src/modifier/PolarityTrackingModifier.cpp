@@ -322,50 +322,50 @@ void PolarityTrackingModifier<DIM>::UpdateCellData(AbstractCellPopulation<DIM,DI
                         }
                     }
 
-                    // Determine if we should deposit an ECM fibre
-                    double probability_of_deposition = RandomNumberGenerator::Instance()->ranf();
+                    // // Determine if we should deposit an ECM fibre
+                    // double probability_of_deposition = RandomNumberGenerator::Instance()->ranf();
 
-                    if (probability_of_deposition <= mFibreDepositionProbability)
-                    {
-                        // Create the SRN model and cell cycle model
-                        FibroblastStateDependentCollagenSrnModel* p_srn_model = new FibroblastStateDependentCollagenSrnModel(); //Fibroblast-state-dependent collagen SRN model
-                        p_srn_model->SetOdeParameters(mCollagenProductionRate, mCollagenDegradationRate);
+                    // if (probability_of_deposition <= mFibreDepositionProbability)
+                    // {
+                    //     // Create the SRN model and cell cycle model
+                    //     FibroblastStateDependentCollagenSrnModel* p_srn_model = new FibroblastStateDependentCollagenSrnModel(); //Fibroblast-state-dependent collagen SRN model
+                    //     p_srn_model->SetOdeParameters(mCollagenProductionRate, mCollagenDegradationRate);
 
-                        NoCellCycleModel* p_cycle_model = new NoCellCycleModel(); // Place-holder cell cycle model
-                        p_cycle_model->SetDimension(2);
+                    //     NoCellCycleModel* p_cycle_model = new NoCellCycleModel(); // Place-holder cell cycle model
+                    //     p_cycle_model->SetDimension(2);
 
-                        // Let's copy the cell data from the fibroblast cell to this cell
-                        CellPropertyCollection p_new_fibre_collection;
+                    //     // Let's copy the cell data from the fibroblast cell to this cell
+                    //     CellPropertyCollection p_new_fibre_collection;
 
-                        // Create a new cell data object using the copy constructor and add this to the daughter cell
-                        MAKE_PTR_ARGS(CellData, p_new_fibre_cell_data, (*cell_data));
-                        p_new_fibre_collection.AddProperty(p_new_fibre_cell_data);
+                    //     // Create a new cell data object using the copy constructor and add this to the daughter cell
+                    //     MAKE_PTR_ARGS(CellData, p_new_fibre_cell_data, (*cell_data));
+                    //     p_new_fibre_collection.AddProperty(p_new_fibre_cell_data);
 
-                        // Copy all cell Vec data (note we create a new object not just copying the pointer)
-                        if (cell_iter->rGetCellPropertyCollection().template HasPropertyType<CellVecData>())
-                        {
-                            // Get the existing copy of the cell data and remove it from the daughter cell
-                            boost::shared_ptr<CellVecData> cell_vec_data = cell_iter->GetCellVecData();
+                    //     // Copy all cell Vec data (note we create a new object not just copying the pointer)
+                    //     if (cell_iter->rGetCellPropertyCollection().template HasPropertyType<CellVecData>())
+                    //     {
+                    //         // Get the existing copy of the cell data and remove it from the daughter cell
+                    //         boost::shared_ptr<CellVecData> cell_vec_data = cell_iter->GetCellVecData();
 
-                            // Create a new cell data object using the copy constructor and add this to the daughter cell
-                            MAKE_PTR_ARGS(CellVecData, p_new_fibre_cell_vec_data, (*cell_vec_data));
-                            p_new_fibre_collection.AddProperty(p_new_fibre_cell_vec_data);
-                        }
+                    //         // Create a new cell data object using the copy constructor and add this to the daughter cell
+                    //         MAKE_PTR_ARGS(CellVecData, p_new_fibre_cell_vec_data, (*cell_vec_data));
+                    //         p_new_fibre_collection.AddProperty(p_new_fibre_cell_vec_data);
+                    //     }
 
-                        CellPtr p_new_fibre_cell(new Cell(p_collagen_state, p_cycle_model, p_srn_model, false, p_new_fibre_collection));
-                        p_new_fibre_cell->InitialiseSrnModel();
-                        p_new_fibre_cell->SetCellProliferativeType(p_ecm_type);
-                        p_new_fibre_cell->GetCellData()->SetItem("scale", 1.0);
-                        p_new_fibre_cell->GetCellData()->SetItem("activated", 1.0);
-                        p_new_fibre_cell->GetCellData()->SetItem("activation time", 0.0);
+                    //     CellPtr p_new_fibre_cell(new Cell(p_collagen_state, p_cycle_model, p_srn_model, false, p_new_fibre_collection));
+                    //     p_new_fibre_cell->InitialiseSrnModel();
+                    //     p_new_fibre_cell->SetCellProliferativeType(p_ecm_type);
+                    //     p_new_fibre_cell->GetCellData()->SetItem("scale", 1.0);
+                    //     p_new_fibre_cell->GetCellData()->SetItem("activated", 1.0);
+                    //     p_new_fibre_cell->GetCellData()->SetItem("activation time", 0.0);
 
-                        // rCellPopulation.AddCell(p_new_fibre_cell, *cell_iter);
-                        // unsigned node_index = rCellPopulation.GetNumAllCells();
-                        // unsigned node_index = rCellPopulation.GetNumNodes();
-                        // unsigned node_index = rCellPopulation.GetNumAliveCells();
-                        rCellPopulation.AddCell(p_new_fibre_cell, *cell_iter); 
-                        rCellPopulation.Update();
-                    }
+                    //     // rCellPopulation.AddCell(p_new_fibre_cell, *cell_iter);
+                    //     // unsigned node_index = rCellPopulation.GetNumAllCells();
+                    //     // unsigned node_index = rCellPopulation.GetNumNodes();
+                    //     // unsigned node_index = rCellPopulation.GetNumAliveCells();
+                    //     rCellPopulation.AddCell(p_new_fibre_cell, *cell_iter); 
+                    //     rCellPopulation.Update();
+                    // }
 
                     // If there's a non-zero activation time, it means that the fibroblast has been primed to deactivate
                     if (activation_time > 0.0)
@@ -417,7 +417,7 @@ void PolarityTrackingModifier<DIM>::UpdateCellData(AbstractCellPopulation<DIM,DI
                 if (current_time > activation_time)
                 {
                     cell_iter->Kill();
-                    rCellPopulation.Update();
+                    // rCellPopulation.Update();
                 }
             }
 

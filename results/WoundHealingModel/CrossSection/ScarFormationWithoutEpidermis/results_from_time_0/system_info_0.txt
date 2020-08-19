@@ -1,8 +1,8 @@
 Process 0 of 1.
 uname sysname  = Linux
 uname nodename = axel-VirtualBox
-uname release  = 4.15.0-106-generic
-uname version  = #107-Ubuntu SMP Thu Jun 4 11:27:52 UTC 2020
+uname release  = 4.15.0-112-generic
+uname version  = #113-Ubuntu SMP Thu Jul 9 23:41:39 UTC 2020
 uname machine  = x86_64
 
 Information on number and type of processors:
@@ -12,4 +12,4 @@ Information on processor caches, in the same order as above:
 cache size	: 6144 KB
 
 Information on system memory:
-MemTotal:        4039408 kB
+MemTotal:        4039392 kB

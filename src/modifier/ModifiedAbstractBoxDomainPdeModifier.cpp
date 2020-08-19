@@ -220,6 +220,7 @@ void ModifiedAbstractBoxDomainPdeModifier<DIM>::InitialiseCellPdeElementMap(Abst
 template<unsigned DIM>
 void ModifiedAbstractBoxDomainPdeModifier<DIM>::UpdateCellPdeElementMap(AbstractCellPopulation<DIM,DIM>& rCellPopulation)
 {
+
     // Find the element of mpCoarsePdeMesh that contains each cell and populate mCellPdeElementMap
     for (typename AbstractCellPopulation<DIM>::Iterator cell_iter = rCellPopulation.Begin();
          cell_iter != rCellPopulation.End();

@@ -105,8 +105,10 @@ void WoundBasedChemotacticForce<DIM>::AddForceContribution(AbstractCellPopulatio
             // Get the node index
             unsigned current_index = rCellPopulation.GetLocationIndexUsingCell(*cell_iter);
 
-            // if (CanCellMigrateAlongEcmFibres(current_index, rCellPopulation))
-            // {
+            Node<DIM>* p_node = rCellPopulation.GetNode(current_index);
+
+            if (!p_node->IsParticle())
+            {
                 // Get the location of the node
                 c_vector<double, DIM> current_location = rCellPopulation.GetNode(current_index)->rGetLocation();
 
@@ -127,20 +129,24 @@ void WoundBasedChemotacticForce<DIM>::AddForceContribution(AbstractCellPopulatio
                         elem_iter != neighbouring_indices.end();
                         ++elem_iter)
                 {
-                    // Get the cell according to the index
-                    CellPtr neighbour_cell_iter = rCellPopulation.GetCellUsingLocationIndex(*elem_iter);
 
-                    // Get the neighbouring concentration
-                    double neighbour_morphogen_concentration = neighbour_cell_iter->GetCellData()->GetItem("morphogen");
-
-                    // Get the neighbour's location
-                    c_vector<double, DIM> neighbour_location = rCellPopulation.GetNode(*elem_iter)->rGetLocation();
-
-                    double grad = (neighbour_morphogen_concentration - current_morphogen_concentration)/norm_2(neighbour_location - current_location);
-
-                    if (grad > morphogen_max_grad)
+                    if (!rCellPopulation.GetNode(*elem_iter)->IsParticle())
                     {
-                        morphogen_max_grad = grad;
+                        // Get the cell according to the index
+                        CellPtr neighbour_cell_iter = rCellPopulation.GetCellUsingLocationIndex(*elem_iter);
+
+                        // Get the neighbouring concentration
+                        double neighbour_morphogen_concentration = neighbour_cell_iter->GetCellData()->GetItem("morphogen");
+
+                        // Get the neighbour's location
+                        c_vector<double, DIM> neighbour_location = rCellPopulation.GetNode(*elem_iter)->rGetLocation();
+
+                        double grad = (neighbour_morphogen_concentration - current_morphogen_concentration)/norm_2(neighbour_location - current_location);
+
+                        if (grad > morphogen_max_grad)
+                        {
+                            morphogen_max_grad = grad;
+                        }
                     }
                 }
 
@@ -152,20 +158,24 @@ void WoundBasedChemotacticForce<DIM>::AddForceContribution(AbstractCellPopulatio
                         elem_iter != neighbouring_indices.end();
                         ++elem_iter)
                 {
-                    // Get the cell according to the index
-                    CellPtr neighbour_cell_iter = rCellPopulation.GetCellUsingLocationIndex(*elem_iter);
 
-                    // Get the neighbouring concentration
-                    double neighbour_morphogen_concentration = neighbour_cell_iter->GetCellData()->GetItem("morphogen");
-
-                    // Get the neighbour's location
-                    c_vector<double, DIM> neighbour_location = rCellPopulation.GetNode(*elem_iter)->rGetLocation();
-
-                    double grad = (neighbour_morphogen_concentration - current_morphogen_concentration)/norm_2(neighbour_location - current_location);
-
-                    if (grad == morphogen_max_grad)
+                    if (!rCellPopulation.GetNode(*elem_iter)->IsParticle())
                     {
-                        maximal_gradient_indices.push_back(*elem_iter);
+                        // Get the cell according to the index
+                        CellPtr neighbour_cell_iter = rCellPopulation.GetCellUsingLocationIndex(*elem_iter);
+
+                        // Get the neighbouring concentration
+                        double neighbour_morphogen_concentration = neighbour_cell_iter->GetCellData()->GetItem("morphogen");
+
+                        // Get the neighbour's location
+                        c_vector<double, DIM> neighbour_location = rCellPopulation.GetNode(*elem_iter)->rGetLocation();
+
+                        double grad = (neighbour_morphogen_concentration - current_morphogen_concentration)/norm_2(neighbour_location - current_location);
+
+                        if (grad == morphogen_max_grad)
+                        {
+                            maximal_gradient_indices.push_back(*elem_iter);
+                        }
                     }
                 }
 
@@ -207,7 +217,7 @@ void WoundBasedChemotacticForce<DIM>::AddForceContribution(AbstractCellPopulatio
                     }
                     // else Fc=0
                 }
-            // }
+            }
         }
     }
 }

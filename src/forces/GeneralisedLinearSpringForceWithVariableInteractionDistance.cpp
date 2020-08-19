@@ -240,18 +240,6 @@ void GeneralisedLinearSpringForceWithVariableInteractionDistance<ELEMENT_DIM,SPA
 
         unsigned node_a_index = pair.first->GetIndex();
         unsigned node_b_index = pair.second->GetIndex();
-        
-        // Get the cell types
-        CellPtr p_cell_A = rCellPopulation.GetCellUsingLocationIndex(node_a_index);
-        CellPtr p_cell_B = rCellPopulation.GetCellUsingLocationIndex(node_b_index);
-
-        // Get the cell types
-        boost::shared_ptr<AbstractCellProliferativeType> p_cell_type_A = p_cell_A->GetCellProliferativeType();
-        boost::shared_ptr<AbstractCellProliferativeType> p_cell_type_B = p_cell_B->GetCellProliferativeType();
-
-        // Get the colours associated with cell types
-        unsigned node_a_colour = p_cell_type_A->GetColour();
-        unsigned node_b_colour = p_cell_type_B->GetColour();
 
         // Get the node locations
         const c_vector<double, SPACE_DIM>& r_node_a_location = pair.first->rGetLocation();
@@ -273,9 +261,23 @@ void GeneralisedLinearSpringForceWithVariableInteractionDistance<ELEMENT_DIM,SPA
         // Calculate the distance between the two nodes
         double distance_between_nodes = norm_2(unit_difference);
 
-        // Really only do anything if we're at non-zero and non-NAN distance
-        if ( (distance_between_nodes > 0)&&(!std::isnan(distance_between_nodes)) )
+        // Really only do anything if we're at non-zero and non-NAN distance AND neither are particles!
+        if ( (distance_between_nodes > 0)&&(!std::isnan(distance_between_nodes))
+            &&(!pair.first->IsParticle())&&(!pair.second->IsParticle()) )
         {
+
+            // Get the cell types
+            CellPtr p_cell_A = rCellPopulation.GetCellUsingLocationIndex(node_a_index);
+            CellPtr p_cell_B = rCellPopulation.GetCellUsingLocationIndex(node_b_index);
+
+            // Get the cell types
+            boost::shared_ptr<AbstractCellProliferativeType> p_cell_type_A = p_cell_A->GetCellProliferativeType();
+            boost::shared_ptr<AbstractCellProliferativeType> p_cell_type_B = p_cell_B->GetCellProliferativeType();
+
+            // Get the colours associated with cell types
+            unsigned node_a_colour = p_cell_type_A->GetColour();
+            unsigned node_b_colour = p_cell_type_B->GetColour();
+
             unit_difference /= distance_between_nodes; // Normalilse the unit difference
 
             /*

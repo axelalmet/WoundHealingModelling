@@ -3,8 +3,8 @@
 		<VersionString>2019.1.c4f5695</VersionString> <!-- build specific -->
 		<IsWorkingCopyModified>1</IsWorkingCopyModified>
 		<BuildInformation>Debug</BuildInformation>
-		<BuildTime>Sun, 02 Aug 2020 18:14:22 +0000</BuildTime>
-		<CurrentTime>Mon, 03 Aug 2020 18:34:12 +0000</CurrentTime>
+		<BuildTime>Sun, 16 Aug 2020 22:10:04 +0000</BuildTime>
+		<CurrentTime>Tue, 18 Aug 2020 22:42:13 +0000</CurrentTime>
 		<BuilderUnameInfo>Linux</BuilderUnameInfo>
 		<Projects>
 			<Project>
@@ -29,7 +29,7 @@
 			</Project>
 			<Project>
 				<Name>WoundHealingModelling</Name>
-				<Version>80a3a2fee5dd271fdd89811c48948668ee7a0da8</Version>
+				<Version>f4b5090cd68f2bb3a7eebbc1d11696cf03d4987a</Version>
 				<Modified>True</Modified>
 			</Project>
 		</Projects>

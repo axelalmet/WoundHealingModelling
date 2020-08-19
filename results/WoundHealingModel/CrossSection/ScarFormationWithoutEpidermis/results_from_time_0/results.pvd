@@ -2,6 +2,15 @@
 <VTKFile type="Collection" version="0.1" byte_order="LittleEndian" compressor="vtkZLibDataCompressor">
     <Collection>
         <DataSet timestep="0" group="" part="0" file="results_0.vtu"/>
-        <DataSet timestep="4000" group="" part="0" file="results_4000.vtu"/>
+        <DataSet timestep="200" group="" part="0" file="results_200.vtu"/>
+        <DataSet timestep="400" group="" part="0" file="results_400.vtu"/>
+        <DataSet timestep="600" group="" part="0" file="results_600.vtu"/>
+        <DataSet timestep="800" group="" part="0" file="results_800.vtu"/>
+        <DataSet timestep="1000" group="" part="0" file="results_1000.vtu"/>
+        <DataSet timestep="1200" group="" part="0" file="results_1200.vtu"/>
+        <DataSet timestep="1400" group="" part="0" file="results_1400.vtu"/>
+        <DataSet timestep="1600" group="" part="0" file="results_1600.vtu"/>
+        <DataSet timestep="1800" group="" part="0" file="results_1800.vtu"/>
+        <DataSet timestep="2000" group="" part="0" file="results_2000.vtu"/>
     </Collection>
 </VTKFile>

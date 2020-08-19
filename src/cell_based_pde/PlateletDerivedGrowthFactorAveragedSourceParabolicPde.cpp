@@ -38,6 +38,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BloodCellProliferativeType.hpp"
 #include "ExtracellularMatrixCellProliferativeType.hpp"
 #include "PlateletCellMutationState.hpp"
+#include "NodeBasedCellPopulationWithParticles.hpp"
 #include "Debug.hpp"
 
 template<unsigned DIM>
@@ -70,35 +71,74 @@ void PlateletDerivedGrowthFactorAveragedSourceParabolicPde<DIM>::SetupSourceTerm
         mCellDensityOnCoarseElements[elem_index] = 0.0;
     }
 
-    // Loop over cells, find which coarse element it is in, and add 1 to mSourceTermOnCoarseElements[elem_index]
-    for (typename AbstractCellPopulation<DIM>::Iterator cell_iter = mrCellPopulation.Begin();
-         cell_iter != mrCellPopulation.End();
-         ++cell_iter)
+    // For node-based cell populations with particles, we need to iterate over the nodes, to properly account for sources/sinks
+    if (dynamic_cast<NodeBasedCellPopulationWithParticles<DIM>*>(&mrCellPopulation))
     {
-        unsigned elem_index = 0;
-        const ChastePoint<DIM>& r_position_of_cell = mrCellPopulation.GetLocationOfCellCentre(*cell_iter);
 
-        if (pCellPdeElementMap != nullptr)
+        for (typename AbstractMesh<DIM,DIM>::NodeIterator node_iter = mrCellPopulation.rGetMesh().GetNodeIteratorBegin();
+             node_iter != mrCellPopulation.rGetMesh().GetNodeIteratorEnd();
+             ++node_iter)
         {
-            elem_index = (*pCellPdeElementMap)[*cell_iter];
-        }
-        else
-        {
-            elem_index = rCoarseMesh.GetContainingElementIndex(r_position_of_cell);
-        }
+            const ChastePoint<DIM>& r_position_of_node = node_iter->rGetLocation();
 
-        // Update element map if cell has moved
-        bool cell_is_apoptotic = cell_iter->template HasCellProperty<ApoptoticCellProperty>();
+            unsigned elem_index = rCoarseMesh.GetContainingElementIndex(r_position_of_node);
 
-        
-        if (!cell_is_apoptotic)
-        {            
-            boost::shared_ptr<AbstractCellProliferativeType> p_cell_type = cell_iter->GetCellProliferativeType();
-
-            // Only consider platelet or fibrin cells
-            if (p_cell_type->IsType<BloodCellProliferativeType>())
+            // If the node is a real cell, we check the cell type and then add 1.0 if it's a blood cell
+            if (!node_iter->IsParticle())
             {
-                mCellDensityOnCoarseElements[elem_index] += 1.0;
+                unsigned node_index = node_iter->GetIndex(); // Get the node index to get the cell.
+
+                CellPtr p_cell = mrCellPopulation.GetCellUsingLocationIndex(node_index);
+
+                // Update element map if cell has moved
+                bool cell_is_apoptotic = p_cell->template HasCellProperty<ApoptoticCellProperty>();
+
+                if (!cell_is_apoptotic)
+                {            
+                    boost::shared_ptr<AbstractCellProliferativeType> p_cell_type = p_cell->GetCellProliferativeType();
+
+                    // Only consider platelet or fibrin cells
+                    if (p_cell_type->IsType<BloodCellProliferativeType>())
+                    {
+                        mCellDensityOnCoarseElements[elem_index] += 1.0;
+                    }
+                }
+
+            }
+        }
+
+    }
+    else // Do it the standard way, i.e. iterate via cells
+    {
+        // Loop over cells, find which coarse element it is in, and add 1 to mSourceTermOnCoarseElements[elem_index]
+        for (typename AbstractCellPopulation<DIM>::Iterator cell_iter = mrCellPopulation.Begin();
+            cell_iter != mrCellPopulation.End();
+            ++cell_iter)
+        {
+            unsigned elem_index = 0;
+            const ChastePoint<DIM>& r_position_of_cell = mrCellPopulation.GetLocationOfCellCentre(*cell_iter);
+
+            if (pCellPdeElementMap != nullptr)
+            {
+                elem_index = (*pCellPdeElementMap)[*cell_iter];
+            }
+            else
+            {
+                elem_index = rCoarseMesh.GetContainingElementIndex(r_position_of_cell);
+            }
+
+            // Update element map if cell has moved
+            bool cell_is_apoptotic = cell_iter->template HasCellProperty<ApoptoticCellProperty>();
+
+            if (!cell_is_apoptotic)
+            {            
+                boost::shared_ptr<AbstractCellProliferativeType> p_cell_type = cell_iter->GetCellProliferativeType();
+
+                // Only consider platelet or fibrin cells
+                if (p_cell_type->IsType<BloodCellProliferativeType>())
+                {
+                    mCellDensityOnCoarseElements[elem_index] += 1.0;
+                }
             }
         }
     }

@@ -2,8 +2,8 @@
 
 	<OffLatticeSimulation-2-2>
 		<Dt>0.005</Dt>
-		<EndTime>1</EndTime>
-		<SamplingTimestepMultiple>200</SamplingTimestepMultiple>
+		<EndTime>50</EndTime>
+		<SamplingTimestepMultiple>500</SamplingTimestepMultiple>
 		<OutputDivisionLocations>0</OutputDivisionLocations>
 		<OutputCellVelocities>0</OutputCellVelocities>
 	</OffLatticeSimulation-2-2>
@@ -22,13 +22,23 @@
 	</NodeBasedCellPopulationWithParticles-2>
 
 	<CellCycleModels>
+		<GrowthFactorBasedContactInhibitionCellCycleModel>
+			<QuiescentVolumeFraction>0.8</QuiescentVolumeFraction>
+			<EquilibriumVolume>0.785398</EquilibriumVolume>
+			<GrowthFactorThreshold>0.8</GrowthFactorThresholde>
+			<StemCellG1Duration>14</StemCellG1Duration>
+			<TransitCellG1Duration>2</TransitCellG1Duration>
+			<SDuration>5</SDuration>
+			<G2Duration>4</G2Duration>
+			<MDuration>1</MDuration>
+		</GrowthFactorBasedContactInhibitionCellCycleModel>
 		<NoCellCycleModel>
 		</NoCellCycleModel>
 	</CellCycleModels>
 
 	<SrnModels>
-		<FibroblastStateDependentCollagenSrnModel>
-		</FibroblastStateDependentCollagenSrnModel>
+		<NullSrnModel>
+		</NullSrnModel>
 	</SrnModels>
 
 	<CellKillers>
@@ -37,15 +47,23 @@
 	<SimulationModifiers>
 		<ModifiedVolumeTrackingModifier-2>
 		</ModifiedVolumeTrackingModifier-2>
+		<PolarityAndEcmParticleTrackingModifier-2>
+		</PolarityAndEcmParticleTrackingModifier-2>
 		<ModifiedParabolicBoxDomainPdeModifier-2>
 		</ModifiedParabolicBoxDomainPdeModifier-2>
 	</SimulationModifiers>
 
 	<Forces>
-		<WoundBasedChemotacticForce-2>
-			<ChemotacticStrength>2</ChemotacticStrength> 
-			<NeighbourhoodRadius>1.5</NeighbourhoodRadius> 
-		</WoundBasedChemotacticForce-2>
+		<GeneralisedLinearSpringForceWithVariableInteractionDistance-2-2>
+			<MeinekeSpringStiffness>30</MeinekeSpringStiffness>
+			<MeinekeDivisionRestingSpringLength>0.5</MeinekeDivisionRestingSpringLength>
+			<MeinekeSpringGrowthDuration>1</MeinekeSpringGrowthDuration>
+			<UseCutOffLength>1</UseCutOffLength>
+			<CutOffLength>1.5</CutOffLength>
+		</GeneralisedLinearSpringForceWithVariableInteractionDistance-2-2>
+		<PdeBasedChemotacticForce-2>
+			<ChemotacticStrength>1.5</ChemotacticStrength> 
+		</PdeBasedChemotacticForce-2>
 	</Forces>
 
 	<CellPopulationBoundaryConditions>

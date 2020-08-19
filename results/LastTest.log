@@ -1,10 +1,10 @@
-Start testing: Aug 03 11:34 PDT
+Start testing: Aug 18 15:42 PDT
 ----------------------------------------------------------
 495/502 Testing: TestScarFormationWithEcmAsParticles
 495/502 Test: TestScarFormationWithEcmAsParticles
 Command: "/home/axel/BuildChaste/projects/WoundHealingModelling/test/TestScarFormationWithEcmAsParticles"
 Directory: /media/sf_SimulationPackages/Chaste/
-"TestScarFormationWithEcmAsParticles" start time: Aug 03 11:34 PDT
+"TestScarFormationWithEcmAsParticles" start time: Aug 18 15:42 PDT
 Output:
 ----------------------------------------------------------
 Running 1 test
@@ -16,14 +16,14 @@ Entering TestScarFormation
 Passed
 OK!
 <end of output>
-Test time =   9.16 sec
+Test time = 1430.17 sec
 ----------------------------------------------------------
 Test Passed.
-"TestScarFormationWithEcmAsParticles" end time: Aug 03 11:34 PDT
-"TestScarFormationWithEcmAsParticles" time elapsed: 00:00:09
+"TestScarFormationWithEcmAsParticles" end time: Aug 18 16:06 PDT
+"TestScarFormationWithEcmAsParticles" time elapsed: 00:23:50
 ----------------------------------------------------------
 
-End testing: Aug 03 11:34 PDT
+End testing: Aug 18 16:06 PDT
 
-Continuous_project_WoundHealingModelling =   9.16 sec*proc
+Continuous_project_WoundHealingModelling = 1430.17 sec*proc
 
